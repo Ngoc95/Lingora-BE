@@ -6,6 +6,7 @@ import bcrypt from 'bcrypt'
 import { signAccessToken, signRefreshToken } from '~/utils/jwt'
 import { BadRequestError } from '~/core/error.response'
 import { unGetData } from '~/utils'
+import { RoleName } from '~/enums/role.enum'
 
 export class AuthService {
     private db = DatabaseService.getInstance()
@@ -18,7 +19,7 @@ export class AuthService {
 
         const hashedPassword = await bcrypt.hash(data.password, 10)
 
-        const userRole = await roleRepo.findOne({ where: { name: 'USER' } })
+        const userRole = await roleRepo.findOne({ where: { name: RoleName.USER } })
         if (!userRole) throw new BadRequestError({ message: 'Default role User not found' })
 
         const newUser = userRepo.create({
