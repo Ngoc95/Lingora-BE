@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authController } from '~/controllers/auth.controller'
-import { accessTokenValidation, loginValidation, logoutValidation, refreshTokenValidation, registerValidation } from '~/middlewares/auth.middleware';
+import { accessTokenValidation, loginValidation, logoutValidation, refreshTokenValidation, registerValidation } from '~/middlewares/auth.middlewares';
 import { wrapRequestHandler } from '~/utils/handler';
 
 const authRouter = Router();

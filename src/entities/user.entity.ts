@@ -40,6 +40,9 @@ export class User extends BaseEntity {
     @JoinTable()
     roles!: Role[];
 
+    @Column('varchar', { default: 'N/A' })
+    avatar?: string
+
     @Column({ default: UserStatus.INACTIVE, type: 'varchar' })
     status?: UserStatus
 

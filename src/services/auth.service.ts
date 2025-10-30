@@ -19,8 +19,8 @@ export class AuthService {
 
         const hashedPassword = await bcrypt.hash(data.password, 10)
 
-        const userRole = await roleRepo.findOne({ where: { name: RoleName.USER } })
-        if (!userRole) throw new BadRequestError({ message: 'Default role User not found' })
+        const userRole = await roleRepo.findOne({ where: { name: RoleName.LEARNER } })
+        if (!userRole) throw new BadRequestError({ message: 'Default role Learner not found' })
 
         const newUser = userRepo.create({
             username: data.username,

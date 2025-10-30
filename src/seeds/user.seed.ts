@@ -17,9 +17,9 @@ export async function seedUsers() {
 
     // lấy role từ DB
     const adminRole = await Role.findOne({ where: { name: RoleName.ADMIN } })
-    const userRole = await Role.findOne({ where: { name: RoleName.USER } })
+    const learnerRole = await Role.findOne({ where: { name: RoleName.LEARNER } })
 
-    if (!adminRole || !userRole) {
+    if (!adminRole || !learnerRole) {
         console.error('❌ Roles not found. Please seed roles first.')
         return
     }
@@ -33,11 +33,11 @@ export async function seedUsers() {
         proficiency: ProficiencyLevel.ADVANCED
     })
 
-    const user = User.create({
+    const learner = User.create({
         email: 'User001@gmail.com',
         username: 'User001',
         password: await hash('User123', 10),
-        roles: [userRole],
+        roles: [learnerRole],
         status: UserStatus.ACTIVE,
         proficiency: ProficiencyLevel.INTERMEDIATE
     })
@@ -46,12 +46,12 @@ export async function seedUsers() {
         email: 'ngoc001@gmail.com',
         username: 'Ngoc001',
         password: await hash('Ngoc123', 10),
-        roles: [adminRole, userRole],
+        roles: [adminRole, learnerRole],
         status: UserStatus.ACTIVE,
         proficiency: ProficiencyLevel.BEGINNER
     })
 
-    const users: User[] = [admin, user, allRolesUser]
+    const users: User[] = [admin, learner, allRolesUser]
 
     // --- 30 user random ---
     for (let i = 1; i <= 30; i++) {
@@ -62,8 +62,8 @@ export async function seedUsers() {
 
         const random = Math.random()
 
-        let roles = [userRole]
-        if (random > 0.9) roles = [adminRole, userRole] // 10%
+        let roles = [learnerRole]
+        if (random > 0.9) roles = [adminRole, learnerRole] // 10%
         else if (random > 0.7) roles = [adminRole] // 20%
         // còn lại 70% là user
 

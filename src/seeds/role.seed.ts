@@ -14,7 +14,7 @@ export async function seedRole() {
 
     const roles = [
         { name: RoleName.ADMIN },
-        { name: RoleName.USER }
+        { name: RoleName.LEARNER }
     ]
 
     const roleEntities = roleRepository.create(roles)
