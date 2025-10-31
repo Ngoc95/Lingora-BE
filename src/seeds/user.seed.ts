@@ -25,7 +25,7 @@ export async function seedUsers() {
     }
 
     const admin = User.create({
-        email: 'Admin001@gmail.com',
+        email: 'admin001@gmail.com',
         username: 'Admin001',
         password: await hash('Admin123', 10), // hash mật khẩu
         roles: [adminRole],
@@ -34,7 +34,7 @@ export async function seedUsers() {
     })
 
     const learner = User.create({
-        email: 'User001@gmail.com',
+        email: 'user001@gmail.com',
         username: 'User001',
         password: await hash('User123', 10),
         roles: [learnerRole],

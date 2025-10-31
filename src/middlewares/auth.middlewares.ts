@@ -12,8 +12,9 @@ import { RefreshToken } from "~/entities/token.entity";
 import { Permission, Query } from "accesscontrol";
 import { Request, Response, NextFunction } from 'express';
 import ac from "~/permissions/accessControl";
-import { checkRolesExistence } from "~/utils/validators";
-import { isPassword, isUsername } from "./common.middlewares";
+import { checkDuplicateUser, checkRolesExistence } from "~/utils/validators";
+import { isEmail, isPassword, isRequired, isUsername } from "./common.middlewares";
+import validator from "validator";
 
 async function checkUserExistence(userId: number) {
     const userRepository = await DatabaseService.getInstance().getRepository(User)
@@ -28,8 +29,15 @@ async function checkUserExistence(userId: number) {
 
 async function validateUserCredentials(identifier: string, password: string) {
     const userRepository = await DatabaseService.getInstance().getRepository(User)
+    
+    // Nếu identifier là email → normalize email
+    let normalizedIdentifier = identifier
+    if (validator.isEmail(identifier)) {
+        normalizedIdentifier = validator.normalizeEmail(identifier) || identifier
+    }
+
     const user = await userRepository.findOne({
-        where: [{ email: identifier }, { username: identifier }],
+        where: [{ email: normalizedIdentifier }, { username: identifier }],
         relations: ['roles']
     })
 
@@ -44,11 +52,8 @@ async function validateUserCredentials(identifier: string, password: string) {
 export const registerValidation = validate(
     checkSchema({
         email: {
-            notEmpty: true,
-            matches: {
-                options: Regex.EMAIL,
-                errorMessage: 'Invalid email format'
-            },
+            ...isRequired('email'),
+            ...isEmail,
             custom: {
                 options: async (value: string, { req }) => {
                     await checkDuplicateUser(value, req.body.username)
@@ -60,11 +65,10 @@ export const registerValidation = validate(
             }
         },
         username: {
-            notEmpty: true,
+            ...isRequired('username'),
             ...isUsername
         },
         password: {
-            notEmpty: true,
             ...isPassword
         }
     })
@@ -220,8 +224,4 @@ export const checkPermission = (action: keyof Query, resource: string) => {
 
         return next()
     }
-}
-
-function checkDuplicateUser(value: string, username: any) {
-    throw new Error("Function not implemented.");
 }

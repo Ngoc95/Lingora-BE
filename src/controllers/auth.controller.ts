@@ -19,7 +19,7 @@ class AuthController {
     res.cookie('refreshToken', result.refreshToken, cookieOpts);
 
     return new CREATED({
-      message: "Đăng ký tài khoản thành công",
+      message: "Register successfully",
       metaData: {
         user: result.user,
         accessToken: result.accessToken
@@ -34,7 +34,7 @@ class AuthController {
     res.cookie('refreshToken', result.refreshToken, cookieOpts);
 
     return new SuccessResponse({
-      message: "Đăng nhập thành công",
+      message: "Login successfully",
       metaData: {
         user: result.user,
         accessToken: result.accessToken
@@ -50,7 +50,7 @@ class AuthController {
     res.cookie('refreshToken', result.refreshToken, cookieOpts);
 
     return new SuccessResponse({
-      message: 'Làm mới token thành công',
+      message: 'Refresh token successfully',
       metaData: { accessToken: result.accessToken }
     }).send(res);
   };
@@ -77,7 +77,7 @@ class AuthController {
     const result = await authService.me(user.id)
 
     return new SuccessResponse({
-      message: "Lấy thông tin user thành công",
+      message: "Get profile successfully",
       metaData: result
     }).send(res)
   }

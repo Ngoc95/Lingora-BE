@@ -93,10 +93,9 @@ export class AuthService {
         })
         if (!user) throw new BadRequestError({ message: 'User not found' })
 
-        const { password, roles, ...rest } = user
+        const { password, ...rest } = user
         return {
             ...rest,
-            roles: roles.map((r) => r.name)
         }
     }
 }

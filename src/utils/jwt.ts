@@ -1,6 +1,11 @@
+import bcrypt from 'bcrypt';
 import jwt, { SignOptions } from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 import { env } from '~/config/env';
+
+export const hashData = (data: string) => {
+    return bcrypt.hashSync(data, 10)
+}
 
 export const signToken = (payload: object, secretKey: string, options?: SignOptions) => {
     return new Promise<string>((resolve, reject) => {

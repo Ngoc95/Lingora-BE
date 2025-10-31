@@ -8,13 +8,11 @@ export const createUserValidation = validate(
     checkSchema(
         {
             username: {
-                trim: true,
                 ...isRequired('username'),
                 ...isUsername,
             },
 
             email: {
-                trim: true,
                 ...isRequired('email'),
                 ...isEmail,
             },

@@ -43,7 +43,11 @@ export class User extends BaseEntity {
     @Column('varchar', { default: 'N/A' })
     avatar?: string
 
-    @Column({ default: UserStatus.INACTIVE, type: 'varchar' })
+    @Column({
+        type: 'enum',
+        enum: UserStatus,
+        default: UserStatus.INACTIVE
+    })
     status?: UserStatus
 
     @Column({
@@ -58,4 +62,6 @@ export class User extends BaseEntity {
 
     @CreateDateColumn()
     created_at!: Date;
+
+    static allowSortList = ['id', 'username', 'email', 'createdAt'];
 }
