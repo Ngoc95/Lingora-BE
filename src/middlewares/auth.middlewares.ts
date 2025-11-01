@@ -1,56 +1,32 @@
 import jwt from "jsonwebtoken";
 import bcrypt from 'bcrypt';
 import { Regex } from "~/constants/regex";
-import { validate } from "./validation.middleware";
+import { validate } from "./validation.middlewares";
 import { checkSchema } from "express-validator";
 import { DatabaseService } from "~/services/database.service";
-import { Role } from "~/entities/role.entity";
 import { AuthRequestError, BadRequestError, ForbiddenRequestError } from "~/core/error.response";
 import { User } from "~/entities/user.entity";
 import { verifyToken } from "~/utils/jwt";
 import { env } from "~/config/env";
 import { RefreshToken } from "~/entities/token.entity";
-import { In } from "typeorm";
-
-async function checkUserExistence(userId: number) {
-    const userRepository = await DatabaseService.getInstance().getRepository(User)
-    const user = await userRepository.findOne({
-        where: { id: userId }
-    })
-    if (!user) {
-        throw new AuthRequestError('Invalid user')
-    }
-    return user
-}
-
-export async function checkRolesExistence(roleIds: number[]) {
-    const roleRepository = await DatabaseService.getInstance().getRepository(Role)
-
-    const roles = await roleRepository.find({
-        where: { id: In(roleIds) }
-    })
-
-    if (roles.length !== roleIds.length) {
-        throw new BadRequestError({ message: "One or more roles not found" })
-    }
-
-    return roles
-}
-
-async function checkDuplicateUser(email: string, username: string) {
-    const userRepository = await DatabaseService.getInstance().getRepository(User)
-    const existingUser = await userRepository.findOne({
-        where: [{ email }, { username }]
-    })
-    if (existingUser) {
-        throw new BadRequestError({ message: 'User already exists' })
-    }
-}
+import { Permission, Query } from "accesscontrol";
+import { Request, Response, NextFunction } from 'express';
+import ac from "~/permissions/accessControl";
+import { checkDuplicateUser, checkRolesExistence, checkUserExistence } from "~/utils/validators";
+import { isEmail, isPassword, isRequired, isUsername } from "./common.middlewares";
+import validator from "validator";
 
 async function validateUserCredentials(identifier: string, password: string) {
     const userRepository = await DatabaseService.getInstance().getRepository(User)
+    
+    // Nếu identifier là email → normalize email
+    let normalizedIdentifier = identifier
+    if (validator.isEmail(identifier)) {
+        normalizedIdentifier = validator.normalizeEmail(identifier) || identifier
+    }
+
     const user = await userRepository.findOne({
-        where: [{ email: identifier }, { username: identifier }],
+        where: [{ email: normalizedIdentifier }, { username: identifier }],
         relations: ['roles']
     })
 
@@ -65,11 +41,8 @@ async function validateUserCredentials(identifier: string, password: string) {
 export const registerValidation = validate(
     checkSchema({
         email: {
-            notEmpty: true,
-            matches: {
-                options: Regex.EMAIL,
-                errorMessage: 'Invalid email format'
-            },
+            ...isRequired('email'),
+            ...isEmail,
             custom: {
                 options: async (value: string, { req }) => {
                     await checkDuplicateUser(value, req.body.username)
@@ -81,21 +54,11 @@ export const registerValidation = validate(
             }
         },
         username: {
-            notEmpty: true,
-            isLength: {
-                options: {
-                    min: 5,
-                    max: 20
-                },
-                errorMessage: 'Username must be between 5 and 20 characters long'
-            }
+            ...isRequired('username'),
+            ...isUsername
         },
         password: {
-            notEmpty: true,
-            matches: {
-                options: Regex.PASSWORD,
-                errorMessage: 'Password must be at least 6 characters long and contain at least 1 uppercase letter!'
-            }
+            ...isPassword
         }
     })
 )
@@ -221,18 +184,33 @@ export const accessTokenValidation = validate(
     )
 )
 
-// export const checkPermission = (action: keyof Query, resource: string) => {
-//   return async (req: Request, res: Response, next: NextFunction) => {
-//     const role = req.user?.role
-//     if (!role) {
-//       throw new AuthRequestError('Unauthorized!')
-//     }
-//     const permission = ac.can(role.name)[action](resource) as Permission
+/**
+ * Middleware kiểm tra quyền của user dựa vào danh sách role.
+ * Nếu user có ít nhất 1 role được phép thực hiện action trên resource → cho phép truy cập.
+ */
+export const checkPermission = (action: keyof Query, resource: string) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+        const userRoles = req.user?.roles
 
-//     if (!permission.granted) {
-//       throw new ForbiddenRequestError('Forbidden!')
-//     }
+        if (!userRoles || userRoles.length === 0) {
+            throw new AuthRequestError('Unauthorized! User has no roles assigned.')
+        }
 
-//     return next()
-//   }
-// }
+        // Duyệt qua tất cả roles của user để kiểm tra quyền
+        let isGranted = false
+
+        for (const role of userRoles) {
+            const permission = ac.can(role.name)[action](resource) as Permission
+            if (permission.granted) {
+                isGranted = true
+                break
+            }
+        }
+
+        if (!isGranted) {
+            throw new ForbiddenRequestError('Forbidden! You do not have sufficient permissions.')
+        }
+
+        return next()
+    }
+}

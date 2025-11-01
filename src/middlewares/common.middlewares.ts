@@ -63,6 +63,7 @@ export const isRequired = (fieldName: string) => ({
 })
 
 export const isEmail = {
+    trim: true,
     isEmail: {
         errorMessage: 'Invalid email format'
     },
@@ -70,6 +71,7 @@ export const isEmail = {
 }
 
 export const isPassword = {
+    notEmpty: true,
     isStrongPassword: {
         options: {
             minLength: 6,
@@ -78,11 +80,12 @@ export const isPassword = {
             minSymbols: 0,
             minUppercase: 1
         },
-        errorMessage: 'Password must be at least 6 characters, 1 upper case'
+        errorMessage: 'Password must be at least 6 characters long and contain at least 1 uppercase letter!'
     }
 }
 
 export const isUsername = {
+    trim: true,
     isLength: {
         options: { min: 6 },
         errorMessage: 'Username must be at least 6 characters'

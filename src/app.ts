@@ -4,7 +4,7 @@ import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import router from "~/routes";
 import { errorHandler, notFoundHandler } from "~/utils/handler";
-import { morganMiddleware } from "./middlewares/morgan.middleware";
+import { morganMiddleware } from "./middlewares/morgan.middlewares";
 
 const app = express();
 

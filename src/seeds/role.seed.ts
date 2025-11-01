@@ -1,4 +1,5 @@
 import { Role } from "~/entities/role.entity"
+import { RoleName } from "~/enums/role.enum"
 import { DatabaseService } from "~/services/database.service"
 
 export async function seedRole() {
@@ -10,10 +11,10 @@ export async function seedRole() {
     }
 
     console.log('🌱 Creating roles...')
-    
+
     const roles = [
-        { name: 'ADMIN' },
-        { name: 'USER' },
+        { name: RoleName.ADMIN },
+        { name: RoleName.LEARNER }
     ]
 
     const roleEntities = roleRepository.create(roles)

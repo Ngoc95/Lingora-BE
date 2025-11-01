@@ -1,0 +1,8 @@
+export enum Resource {
+  USER = 'USER',
+  CATEGORY = 'CATEGORY',
+  TOPIC = 'TOPIC',
+  WORD = 'WORD',
+  STUDY_SET = 'STUDY_SET',
+  PROFILE = 'PROFILE'
+}
