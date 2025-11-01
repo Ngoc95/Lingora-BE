@@ -4,6 +4,20 @@ import { Role } from "~/entities/role.entity"
 import { User } from "~/entities/user.entity"
 import { DatabaseService } from "~/services/database.service"
 
+export async function checkUserExistence(userId: number) {
+    const userRepository = await DatabaseService.getInstance().getRepository(User)
+    const user = await userRepository.findOne({
+        where: { id: userId }
+    })
+    if (!user) {
+        throw new BadRequestError({ message: 'Invalid user' })
+    }
+    if (user.deletedAt) {
+        throw new BadRequestError({ message: 'User already deleted' })
+    }
+    return user
+}
+
 export async function checkRolesExistence(roleIds: number[]) {
     if (!Array.isArray(roleIds) || roleIds.length === 0) {
         throw new BadRequestError({ message: 'rolesId cannot be empty!' })

@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import { CreateUserBodyReq } from "~/dtos/req/user/createUserBody.req";
 import { DatabaseService } from "./database.service";
 import { User } from "~/entities/user.entity";
-import { checkDuplicateUser, checkRolesExistence } from "~/utils/validators";
+import { checkDuplicateUser, checkRolesExistence, checkUserExistence } from "~/utils/validators";
 import { unGetData } from "~/utils";
 import { hashData } from "~/utils/jwt";
 import { UserQueryReq } from "~/dtos/req/user/userQuery.req";
@@ -11,6 +11,7 @@ import validator from "validator";
 import { UpdateUserBodyReq } from "~/dtos/req/user/updateUserBody.req";
 import { Role } from "~/entities/role.entity";
 import { BadRequestError } from "~/core/error.response";
+import { UserStatus } from '~/enums/userStatus.enum';
 
 export class UserService {
     private db = DatabaseService.getInstance()
@@ -68,6 +69,10 @@ export class UserService {
         } else {
             finalWhere = applyFilters({});
         }
+
+        // nếu ko có sort thì sort mặc định theo id
+        if (!sort) 
+            sort = { id: 'ASC' as const } 
 
         const [users, total] = await User.findAndCount({
             skip,
@@ -142,6 +147,33 @@ export class UserService {
         await userRepo.save(user)
 
         return unGetData({ fields: ['password'], object: user })
+    }
+
+    restoreUserById = async (id: number) => {
+        const userRepo = await this.db.getRepository(User)
+
+        // lấy luôn bản ghi đã xóa
+        const user = await userRepo.findOne({
+            where: { id },
+            withDeleted: true
+        })
+
+        if (!user) throw new BadRequestError({ message: 'User not found' })
+        if (!user.deletedAt) throw new BadRequestError({ message: 'User is not deleted' })
+
+        user.status = UserStatus.ACTIVE
+        await userRepo.save(user)
+
+        return await userRepo.restore(id)
+    }
+
+    deleteUserById = async (id: number) => {
+        const userRepo = await this.db.getRepository(User)
+        const user = await checkUserExistence(id)
+
+        user.status = UserStatus.DELETED
+        await userRepo.save(user)
+        return await userRepo.softDelete(id)
     }
 }
 export const userService = new UserService()

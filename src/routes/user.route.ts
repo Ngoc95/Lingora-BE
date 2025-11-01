@@ -57,6 +57,7 @@ userRouter.get(
   wrapRequestHandler(userController.getAllUsers)
 )
 
+// GET
 /**
  * @description : Get user by id
  * @method : GET
@@ -91,5 +92,23 @@ userRouter.patch(
   wrapRequestHandler(userController.updateUser)
 )
 
+//PATCH
+/**
+ * @description : Restore user from deleted
+ * @method : PATCH
+ * @path : /:id/restore
+ * @header : Authorization
+ * @params: id
+ */
+userRouter.patch('/restore/:id', checkIdParamMiddleware, wrapRequestHandler(userController.restoreUser))
+
+//DELETE
+/**
+ * @description : Delete user by id
+ * @method : DELETE
+ * @path : /:id
+ * @header : Authorization
+ */
+userRouter.delete('/:id', checkIdParamMiddleware, wrapRequestHandler(userController.deleteUser))
 
 export default userRouter;

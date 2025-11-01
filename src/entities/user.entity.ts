@@ -6,7 +6,8 @@ import {
     ManyToMany,
     JoinTable,
     BaseEntity,
-    OneToMany
+    OneToMany,
+    DeleteDateColumn
 } from "typeorm";
 import { Role } from "./role.entity";
 import { RefreshToken } from "./token.entity";
@@ -62,6 +63,9 @@ export class User extends BaseEntity {
 
     @CreateDateColumn()
     created_at!: Date;
+
+    @DeleteDateColumn()
+    deletedAt?: Date
 
     static allowSortList = ['id', 'username', 'email', 'createdAt'];
 }

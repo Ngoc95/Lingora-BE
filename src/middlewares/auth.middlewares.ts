@@ -12,20 +12,9 @@ import { RefreshToken } from "~/entities/token.entity";
 import { Permission, Query } from "accesscontrol";
 import { Request, Response, NextFunction } from 'express';
 import ac from "~/permissions/accessControl";
-import { checkDuplicateUser, checkRolesExistence } from "~/utils/validators";
+import { checkDuplicateUser, checkRolesExistence, checkUserExistence } from "~/utils/validators";
 import { isEmail, isPassword, isRequired, isUsername } from "./common.middlewares";
 import validator from "validator";
-
-async function checkUserExistence(userId: number) {
-    const userRepository = await DatabaseService.getInstance().getRepository(User)
-    const user = await userRepository.findOne({
-        where: { id: userId }
-    })
-    if (!user) {
-        throw new AuthRequestError('Invalid user')
-    }
-    return user
-}
 
 async function validateUserCredentials(identifier: string, password: string) {
     const userRepository = await DatabaseService.getInstance().getRepository(User)

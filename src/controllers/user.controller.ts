@@ -36,5 +36,21 @@ class UserController {
             metaData: await userService.updateUserById(id, req.body)
         }).send(res)
     }
+
+    restoreUser = async (req: Request, res: Response) => {
+        const id = parseInt(req.params.id as string)
+        return new SuccessResponse({
+            message: 'Restore user successfully',
+            metaData: await userService.restoreUserById(id)
+        }).send(res)
+    }
+
+    deleteUser = async (req: Request, res: Response) => {
+        const id = parseInt(req.params?.id)
+        return new SuccessResponse({
+            message: 'Delete user successfully',
+            metaData: await userService.deleteUserById(id)
+        }).send(res)
+    }
 }
 export const userController = new UserController()
