@@ -6,6 +6,7 @@ declare module 'express' {
     user?: User
     decodedAuthorization?: Int
     decodedRefreshToken?: Int
+    parseQueryBoolean?: Record<string, boolean>
     parseQueryPagination?: { page?: number; limit?: number }
     sortParsed?: Record<string, 'ASC' | 'DESC'>
     filterParsed?: Record<string, any>

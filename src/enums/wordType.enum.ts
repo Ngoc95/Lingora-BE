@@ -1,0 +1,15 @@
+export enum WordType {
+  NOUN = 'noun',
+  VERB = 'verb',
+  ADJECTIVE = 'adjective',
+  ADVERB = 'adverb',
+  PHRASE = 'phrase',
+  PREPOSITION = 'preposition',
+  CONJUNCTION = 'conjunction',
+  INTERJECTION = 'interjection',
+  PRONOUN = 'pronoun',
+  DETERMINER = 'determiner',
+  ARTICLE = 'article',
+  NUMERAL = 'numeral',
+  UNKNOWN = 'unknown',
+}

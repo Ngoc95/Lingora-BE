@@ -3,6 +3,7 @@ import { BadRequestError } from "~/core/error.response"
 import { ProficiencyLevel } from "~/enums/proficiency.enum"
 import { checkSchema } from "express-validator"
 import { validate } from "../validation.middlewares"
+import { checkDuplicateUser, checkRolesExistence } from "~/utils/validators"
 
 export const createUserValidation = validate(
     checkSchema(
@@ -15,6 +16,15 @@ export const createUserValidation = validate(
             email: {
                 ...isRequired('email'),
                 ...isEmail,
+                custom: {
+                    options: async (value: string, { req }) => {
+                        await checkDuplicateUser(value, req.body.username)
+                        if (req.body.roleIds && Array.isArray(req.body.roleIds)) {
+                            await checkRolesExistence(req.body.roleIds)
+                        }
+                        return true
+                    }
+                }
             },
 
             password: {

@@ -12,6 +12,7 @@ import { UpdateUserBodyReq } from "~/dtos/req/user/updateUserBody.req";
 import { Role } from "~/entities/role.entity";
 import { BadRequestError } from "~/core/error.response";
 import { UserStatus } from '~/enums/userStatus.enum';
+import { UserWordProgress } from '~/entities/userWordProgress.entity';
 
 export class UserService {
     private db = DatabaseService.getInstance()
@@ -71,8 +72,8 @@ export class UserService {
         }
 
         // nếu ko có sort thì sort mặc định theo id
-        if (!sort) 
-            sort = { id: 'ASC' as const } 
+        if (!sort)
+            sort = { id: 'ASC' as const }
 
         const [users, total] = await User.findAndCount({
             skip,
@@ -105,8 +106,9 @@ export class UserService {
             },
             relations: ['roles']
         })
+        if (!user) throw new BadRequestError({ message: 'User not found' })
 
-        return unGetData({ fields: ['password'], object: user ?? {} })
+        return unGetData({ fields: ['password'], object: user })
     }
 
     updateUserById = async (
@@ -150,30 +152,44 @@ export class UserService {
     }
 
     restoreUserById = async (id: number) => {
-        const userRepo = await this.db.getRepository(User)
+        const db = DatabaseService.getInstance()
+        return db.dataSource.transaction(async (manager) => {
+            const userRepo = manager.getRepository(User)
 
-        // lấy luôn bản ghi đã xóa
-        const user = await userRepo.findOne({
-            where: { id },
-            withDeleted: true
+            // lấy luôn bản ghi đã xóa
+            const user = await userRepo.findOne({
+                where: { id },
+                withDeleted: true
+            })
+
+            if (!user) throw new BadRequestError({ message: 'User not found' })
+            if (!user.deletedAt) throw new BadRequestError({ message: 'User is not deleted' })
+
+            // cập nhật lại status trước khi restore
+            user.status = UserStatus.ACTIVE
+            await userRepo.save(user)
+
+            return await userRepo.restore(id)
         })
-
-        if (!user) throw new BadRequestError({ message: 'User not found' })
-        if (!user.deletedAt) throw new BadRequestError({ message: 'User is not deleted' })
-
-        user.status = UserStatus.ACTIVE
-        await userRepo.save(user)
-
-        return await userRepo.restore(id)
     }
 
     deleteUserById = async (id: number) => {
-        const userRepo = await this.db.getRepository(User)
-        const user = await checkUserExistence(id)
+        const db = DatabaseService.getInstance()
+        return db.dataSource.transaction(async (manager) => { //dùng transaction để rollback nếu lỗi
+            const userRepo = manager.getRepository(User)
+            const progressRepo = manager.getRepository(UserWordProgress)
 
-        user.status = UserStatus.DELETED
-        await userRepo.save(user)
-        return await userRepo.softDelete(id)
+            const user = await userRepo.findOne({ where: { id } })
+            if (!user) throw new BadRequestError({ message: 'User not found' })
+
+                // cập nhật lại status
+            user.status = UserStatus.DELETED
+            await userRepo.save(user)
+
+            // xóa trong các repo liên quan
+            await progressRepo.delete({ user: { id: id } })
+            return await userRepo.delete({ id: id })
+        })
     }
 }
 export const userService = new UserService()
