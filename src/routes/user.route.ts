@@ -17,7 +17,7 @@ userRouter.use(accessTokenValidation)
 /**
  * @description : Create a new user
  * @method : POST
- * @path : /
+ * @path : 
  * @header : Authorization
  * @body : {
  *  username: string
@@ -29,7 +29,7 @@ userRouter.use(accessTokenValidation)
  * }
  */
 userRouter.post(
-  '/',
+  '',
   wrapRequestHandler(checkPermission('createAny', Resource.USER)),
   createUserValidation,
   wrapRequestHandler(userController.createUser)
@@ -39,19 +39,19 @@ userRouter.post(
 /**
  * @description : Get all users
  * @method : GET
- * @path : /
+ * @path : 
  * @header : Authorization
  * @query : {limit: number, page:number, search:string, proficiency:ProficiencyLevel, status:UserStatus, sort: string}
- * sort like id | -id
+ * search?: string (search for username, email)
+ * sort like +id | -id
  * sort field must be in ['id', 'username', 'email', 'createdAt']
  * filter field must be in [
- *    search?: string (search for username, email)
  *    proficiency?: ProficiencyLevel (BEGINNER, INTERMEDIATE, ADVANCED)
  *    status?: UserStatus (ACTIVE, INACTIVE, BANNED, DELETED)
  * ]
  */
 userRouter.get(
-  '/',
+  '',
   checkQueryMiddleware(),
   wrapRequestHandler(parseSort({ allowSortList: User.allowSortList })),
   wrapRequestHandler(userController.getAllUsers)
@@ -109,6 +109,11 @@ userRouter.patch('/restore/:id', checkIdParamMiddleware, wrapRequestHandler(user
  * @path : /:id
  * @header : Authorization
  */
-userRouter.delete('/:id', checkIdParamMiddleware, wrapRequestHandler(userController.deleteUser))
+userRouter.delete(
+  '/:id',
+  wrapRequestHandler(checkPermission('deleteAny', Resource.USER)),
+  checkIdParamMiddleware,
+  wrapRequestHandler(userController.deleteUser)
+)
 
 export default userRouter;

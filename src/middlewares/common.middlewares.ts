@@ -13,12 +13,14 @@ export const checkIdParamMiddleware = (req: Request<ParamsDictionary, any, any>,
 export const checkQueryMiddleware = ({
     requiredFields,
     numbericFields = ['limit', 'page'],
+    booleanFields,
     defaultLimit = 20,
     defaultPage = 1,
     maxLimit = 50
 }: {
     requiredFields?: string[]
     numbericFields?: string[]
+    booleanFields?: string[]
     defaultLimit?: number
     defaultPage?: number
     maxLimit?: number
@@ -41,6 +43,23 @@ export const checkQueryMiddleware = ({
                 }
             })
         }
+
+        // parse boolean fields
+        if (booleanFields) {
+            req.parseQueryBoolean = {}
+
+            booleanFields.forEach((field) => {
+                const val = req.query[field]
+
+                if (val === 'true') req.parseQueryBoolean![field] = true
+                else if (val === 'false') req.parseQueryBoolean![field] = false
+                else if (val !== undefined)
+                    throw new BadRequestError({
+                        message: `${field} must be 'true' or 'false'`
+                    })
+            })
+        }
+
         //parse limit, page
         req.parseQueryPagination = {
             limit: toNumberWithDefaultValue(req.query.limit, defaultLimit),

@@ -1,0 +1,7 @@
+export enum WordStatus {
+  NEW = 'NEW',
+  LEARNING = 'LEARNING',
+  REVIEWING = 'REVIEWING',
+  MASTERED = 'MASTERED',
+  FORGOTTEN = 'FORGOTTEN'
+}

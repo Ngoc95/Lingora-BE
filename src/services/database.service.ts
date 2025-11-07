@@ -1,30 +1,52 @@
-import { AppDataSource } from '~/config/data-source'
-import { Repository, ObjectLiteral } from 'typeorm'
+import { Repository, ObjectLiteral, DataSource } from 'typeorm'
 import { seedInitialData } from '~/seeds/seed'
+import { env } from '~/config/env';
 
 export class DatabaseService {
-  private static instance: DatabaseService = new DatabaseService()
+  private static instance: DatabaseService
+  public appDataSource: DataSource
 
-  private constructor() {}
+  private constructor() {
+    this.appDataSource = new DataSource({
+      type: 'postgres',
+      host: env.DB_HOST,
+      port: Number(env.DB_PORT) || 5432,
+      username: env.DB_USER,
+      password: env.DB_PASS,
+      database: env.DB_NAME,
+      entities: [__dirname + '/../entities/**/*.{ts,js}'],
+      synchronize: false,
+      logging: false,
+    })
+  }
 
+  // Lấy instance singleton
   static getInstance(): DatabaseService {
-    return this.instance
+    if (!DatabaseService.instance) {
+      DatabaseService.instance = new DatabaseService()
+    }
+    return DatabaseService.instance
+  }
+
+  // Cho phép service khác truy cập trực tiếp DataSource khi cần transaction
+  get dataSource() {
+    return this.appDataSource
   }
 
   async connect() {
-    if (!AppDataSource.isInitialized) {
-      await AppDataSource.initialize()
+    if (!this.appDataSource.isInitialized) {
+      await this.appDataSource.initialize()
       console.log('✅ PostgreSQL connected')
     }
   }
 
-  async getRepository<T extends ObjectLiteral>(entity: { new (): T }): Promise<Repository<T>> {
-    if (!AppDataSource.isInitialized) await this.connect()
-    return AppDataSource.getRepository(entity)
+  async getRepository<T extends ObjectLiteral>(entity: { new(): T }): Promise<Repository<T>> {
+    if (!this.appDataSource.isInitialized) await this.connect()
+    return this.appDataSource.getRepository(entity)
   }
 
   async syncDB() {
-    await AppDataSource.synchronize()
+    await this.appDataSource.synchronize()
     console.log('🔄 Database synchronized')
     await seedInitialData()
   }

@@ -4,5 +4,6 @@ export enum Resource {
   TOPIC = 'TOPIC',
   WORD = 'WORD',
   STUDY_SET = 'STUDY_SET',
-  PROFILE = 'PROFILE'
+  PROFILE = 'PROFILE',
+  USER_PROGRESS = 'USER_PROGRESS',
 }
