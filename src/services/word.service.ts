@@ -4,12 +4,9 @@ import { DatabaseService } from "./database.service"
 import { Topic } from "~/entities/topic.entity"
 import { BadRequestError } from "~/core/error.response"
 import { GetAllWordsQueryReq } from "~/dtos/req/word/getAllWordsQuery.req"
-import { FindOptionsWhere, IsNull, Like, Not } from "typeorm"
+import { FindOptionsWhere, IsNull, ILike, Not } from "typeorm"
 import validator from "validator"
-import { User } from "~/entities/user.entity"
 import { UpdateWordBodyReq } from "~/dtos/req/word/updateWordBody.req"
-import { unGetData } from "~/utils"
-import { UserStatus } from "~/enums/userStatus.enum"
 
 class WordService {
     private db = DatabaseService.getInstance()
@@ -27,7 +24,11 @@ class WordService {
         const newWord = wordRepo.create({ word, meaning, phonetic, cefrLevel, type, example, exampleTranslation, audioUrl, imageUrl, topic: existingTopic })
         await wordRepo.save(newWord)
 
-        return newWord
+        const { topic, ...rest } = newWord
+        return {
+            ...rest,
+            topicId: topic ? topic.id : null,
+        }
     }
 
     getAllWords = async ({ page = 1, limit = 20, search, cefrLevel, type, hasTopic, sort }: GetAllWordsQueryReq) => {
@@ -41,9 +42,9 @@ class WordService {
         if (search) {
             const normalized = validator.trim(search).toLowerCase()
             where = [
-                { word: Like(`%${normalized}%`) },
-                { meaning: Like(`%${normalized}%`) },
-                { example: Like(`%${normalized}%`) },
+                { word: ILike(`%${normalized}%`) },
+                { meaning: ILike(`%${normalized}%`) },
+                { example: ILike(`%${normalized}%`) },
             ]
         }
 
@@ -96,7 +97,11 @@ class WordService {
         })
         if (!word) throw new BadRequestError({ message: 'Word not found' })
 
-        return word
+        const { topic, ...rest } = word
+        return {
+            ...rest,
+            topicId: topic ? topic.id : null,
+        }
     }
 
     updateWordById = async (
@@ -130,11 +135,19 @@ class WordService {
             if (!topic) throw new BadRequestError({ message: 'Topic not found' })
             updatedWord.topic = topic
         }
+        else if (topicId === null) {
+            // Nếu topicId là null thì bỏ liên kết với topic
+            updatedWord.topic = null
+        }
 
         // Lưu thay đổi
         await wordRepo.save(updatedWord)
-
-        return unGetData({ fields: ['topic.createdAt', 'topic.description', 'topic.name'], object: updatedWord })
+        
+        const { topic, ...rest } = updatedWord
+        return {
+            ...rest,
+            topicId: topic ? topic.id : null,
+        }
     }
 
     deleteWordById = async (id: number) => {

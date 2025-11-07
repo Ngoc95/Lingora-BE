@@ -17,6 +17,9 @@ ac.grant(RoleName.LEARNER)
   .updateOwn(Resource.STUDY_SET)
   .deleteOwn(Resource.STUDY_SET)
   .createOwn(Resource.STUDY_SET)
+  .readOwn(Resource.USER_PROGRESS)
+  .createOwn(Resource.USER_PROGRESS)
+  .updateOwn(Resource.USER_PROGRESS)
 
 // ========================
 // TEACHER (Giáo viên)

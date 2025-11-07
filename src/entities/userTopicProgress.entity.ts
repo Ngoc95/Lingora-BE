@@ -1,9 +1,10 @@
 import { BaseEntity, Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm";
 import { User } from "./user.entity";
 import { Topic } from "./topic.entity";
+import { ProficiencyLevel } from "~/enums/proficiency.enum";
 
 @Entity()
-@Unique(['topic', 'user'])
+@Unique(['topic', 'user', 'proficiency'])
 export class UserTopicProgress extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number
@@ -13,6 +14,13 @@ export class UserTopicProgress extends BaseEntity {
 
     @ManyToOne(() => Topic, topic => topic.users, { onDelete: 'CASCADE' })
     topic: Topic;
+
+    @Column({
+        type: 'enum',
+        enum: ProficiencyLevel,
+        default: ProficiencyLevel.BEGINNER
+    })
+    proficiency: ProficiencyLevel
 
     @Column({ type: 'boolean', default: false })
     completed!: boolean

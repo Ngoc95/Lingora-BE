@@ -3,11 +3,13 @@ import { BadRequestError } from '~/core/error.response'
 import { validate } from '../validation.middlewares'
 import { DatabaseService } from '~/services/database.service'
 import { Word } from '~/entities/word.entity'
+import { isRequired } from '../common.middlewares'
 
 export const createWordProgressValidation = validate(
     checkSchema({
         wordIds: {
             in: ['body'],
+            ...isRequired('wordIds'),
             isArray: {
                 errorMessage: 'wordIds must be an array of integers',
             },

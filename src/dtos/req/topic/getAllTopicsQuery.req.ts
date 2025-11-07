@@ -6,6 +6,7 @@ export interface GetAllTopicsQueryReq {
     limit?: number
     //filter
     search?: string
+    hasCategory?: boolean
     // sort
     sort?: FindOptionsOrder<Topic>
 }

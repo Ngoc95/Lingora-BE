@@ -16,6 +16,7 @@ class TopicController {
             metaData: await topicService.getAllTopics({
                 ...req.query,
                 ...req.parseQueryPagination,
+                ...req.parseQueryBoolean,
                 sort: req.sortParsed
             })
         }).send(res)

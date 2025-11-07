@@ -46,7 +46,7 @@ const metadataPath = path.join(cacheDir, 'cache_metadata.json')
 // =======================================================================
 export async function saveCachedWordsToDB() {
   console.log('💾 Saving cached words into database...')
-  
+
   if (!fs.existsSync(cachePath)) {
     throw new Error('❌ Cache file not found. Run caching phase first!')
   }
@@ -81,7 +81,7 @@ export async function saveCachedWordsToDB() {
   // Kiểm tra từ nào đã tồn tại trong DB
   const existingWords = await wordRepo.find({ select: ['word'] })
   const existingWordSet = new Set(existingWords.map(w => w.word.toLowerCase()))
-  
+
   const newWords = validWords.filter(w => !existingWordSet.has(w.headword.toLowerCase()))
   const skippedWords = validWords.length - newWords.length
 
@@ -100,7 +100,7 @@ export async function saveCachedWordsToDB() {
   const batch: DeepPartial<Word>[] = []
   for (const wordData of newWords) {
     // Tìm topic theo topicId, nếu không có thì random
-    const topic = wordData.topicId 
+    const topic = wordData.topicId
       ? topics.find(t => t.id === wordData.topicId) || topics[Math.floor(Math.random() * topics.length)]
       : topics[Math.floor(Math.random() * topics.length)]
 
@@ -127,7 +127,7 @@ export async function saveCachedWordsToDB() {
     const entities = wordRepo.create(chunk)
     await wordRepo.save(entities)
     saved += chunk.length
-    
+
     if (saved % 500 === 0 || saved === batch.length) {
       console.log(`💾 Saved ${saved}/${batch.length} words...`)
     }

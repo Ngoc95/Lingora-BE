@@ -44,10 +44,15 @@ topicRouter.post(
  * search for [name, description]
  * sort like -id,+name
  * sort field must be in ['id', 'name']
+ * filter field must be in [
+ *    hasCategory?: boolean (true: only topics with category, false: only topics without category)
+ * ]
  */
 topicRouter.get(
     '',
-    checkQueryMiddleware(),
+    checkQueryMiddleware({
+        booleanFields: ['hasCategory']
+    }),
     wrapRequestHandler(parseSort({ allowSortList: Topic.allowSortList })),
     wrapRequestHandler(topicController.getAllTopics)
 )

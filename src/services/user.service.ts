@@ -6,7 +6,7 @@ import { checkDuplicateUser, checkRolesExistence, checkUserExistence } from "~/u
 import { unGetData } from "~/utils";
 import { hashData } from "~/utils/jwt";
 import { UserQueryReq } from "~/dtos/req/user/userQuery.req";
-import { FindOptionsWhere, Like } from "typeorm";
+import { FindOptionsWhere, ILike } from "typeorm";
 import validator from "validator";
 import { UpdateUserBodyReq } from "~/dtos/req/user/updateUserBody.req";
 import { Role } from "~/entities/role.entity";
@@ -51,8 +51,8 @@ export class UserService {
                 .toLowerCase();             // đưa về chữ thường
 
             where = [
-                { username: Like(`%${normalizedSearch}%`) },
-                { email: Like(`%${normalizedSearch}%`) },
+                { username: ILike(`%${normalizedSearch}%`) },
+                { email: ILike(`%${normalizedSearch}%`) },
             ];
         }
 

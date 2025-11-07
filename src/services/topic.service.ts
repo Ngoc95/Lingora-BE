@@ -8,7 +8,7 @@ import { UpdateTopicBodyReq } from "~/dtos/req/topic/updateTopicBody.req"
 import { GetAllTopicsQueryReq } from "~/dtos/req/topic/getAllTopicsQuery.req"
 import { GetTopicQueryReq } from "~/dtos/req/topic/getTopicQuery.req"
 import { Word } from "~/entities/word.entity"
-import { FindOptionsWhere, Like } from "typeorm"
+import { Brackets, FindOptionsWhere, ILike } from "typeorm"
 
 class TopicService {
     private db = DatabaseService.getInstance()
@@ -29,44 +29,52 @@ class TopicService {
         return topic
     }
 
-    getAllTopics = async ({ page = 1, limit = 20, search, sort }: GetAllTopicsQueryReq) => {
+    getAllTopics = async ({
+        page = 1,
+        limit = 20,
+        search,
+        hasCategory,
+        sort,
+    }: GetAllTopicsQueryReq) => {
         const topicRepo = await this.db.getRepository(Topic)
         const skip = (page - 1) * limit
 
-        // === Xây where điều kiện tìm kiếm ===
         const qb = topicRepo
             .createQueryBuilder('topic')
             .leftJoin('topic.words', 'word')
             .loadRelationCountAndMap('topic.totalWords', 'topic.words') // Đếm số word
             .skip(skip)
             .take(limit)
-            .select([
-                'topic.id',
-                'topic.name',
-                'topic.description',
-            ])
+            .select(['topic.id', 'topic.name', 'topic.description'])
 
-        // ==== Search ====
-        if (search) {
-            const normalized = validator.trim(search).toLowerCase()
-            qb.where('LOWER(topic.name) LIKE :search OR LOWER(topic.description) LIKE :search', {
-                search: `%${normalized}%`,
-            })
+        // === Filter hasCategory ===
+        if (hasCategory !== undefined) {
+            qb.andWhere(hasCategory ? 'topic.categoryId IS NOT NULL' : 'topic.categoryId IS NULL')
         }
 
-        // ==== Sort ====
+        // === Search ===
+        if (search) {
+            const normalized = validator.trim(search).toLowerCase()
+            qb.andWhere(
+                new Brackets((qb) => {
+                    qb.where('LOWER(topic.name) ILIKE :search', { search: `%${normalized}%` })
+                        .orWhere('LOWER(topic.description) ILIKE :search', { search: `%${normalized}%` })
+                })
+            )
+        }
+
+        // === Sort ===
         if (sort && Object.keys(sort).length > 0) {
-            for (const [field, direction] of Object.entries(sort)) { // nếu có sort thì sort lần lượt theo field
-                qb.addOrderBy(`topic.${field}`, direction)
+            for (const [field, direction] of Object.entries(sort)) {
+                qb.addOrderBy(`topic.${field}`, direction as 'ASC' | 'DESC')
             }
         } else {
-            qb.orderBy('topic.id', 'ASC') // mặc định
+            qb.orderBy('topic.id', 'ASC')
         }
 
         // === Truy vấn ===
         const [topics, total] = await qb.getManyAndCount()
 
-        // === Trả kết quả ===
         return {
             currentPage: page,
             totalPages: Math.ceil(total / limit),
@@ -107,8 +115,8 @@ class TopicService {
         if (search) {
             const normalized = validator.trim(search).toLowerCase()
             where = [
-                { topic: { id }, word: Like(`%${normalized}%`) },
-                { topic: { id }, meaning: Like(`%${normalized}%`) },
+                { topic: { id }, word: ILike(`%${normalized}%`) },
+                { topic: { id }, meaning: ILike(`%${normalized}%`) },
             ]
         }
 

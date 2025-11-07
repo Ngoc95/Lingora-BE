@@ -7,7 +7,8 @@ import { GetAllCategoriesQueryReq } from "~/dtos/req/category/getAllCategoriesQu
 import validator from "validator"
 import { GetCategoryQueryReq } from "~/dtos/req/category/getCategoryQuery.req"
 import { Topic } from "~/entities/topic.entity"
-import { FindOptionsWhere, Like } from "typeorm"
+import { FindOptionsWhere, ILike } from "typeorm"
+import { Word } from "~/entities/word.entity"
 
 class CategoryService {
     private db = DatabaseService.getInstance()
@@ -43,7 +44,7 @@ class CategoryService {
 
         if (search) {
             const normalized = validator.trim(search).toLowerCase()
-            qb.where('LOWER(category.name) LIKE :search OR LOWER(category.description) LIKE :search', {
+            qb.where('LOWER(category.name) ILIKE :search OR LOWER(category.description) ILIKE :search', {
                 search: `%${normalized}%`,
             })
         }
@@ -68,9 +69,10 @@ class CategoryService {
 
         const categoryRepo = await this.db.getRepository(Category)
         const topicRepo = await this.db.getRepository(Topic)
+        const wordRepo = await this.db.getRepository(Word)
 
         // === Kiểm tra category có tồn tại không ===
-        const category = await categoryRepo.findOne({where: { id } })
+        const category = await categoryRepo.findOne({ where: { id } })
         if (!category) throw new BadRequestError({ message: 'Category not found' })
 
         // === Tạo điều kiện where ===
@@ -84,21 +86,29 @@ class CategoryService {
         if (search) {
             const normalized = validator.trim(search).toLowerCase()
             where = [
-                { category: { id }, name: Like(`%${normalized}%`) },
-                { category: { id }, description: Like(`%${normalized}%`) },
+                { category: { id }, name: ILike(`%${normalized}%`) },
+                { category: { id }, description: ILike(`%${normalized}%`) },
             ]
         }
 
         // Sort mặc định
         if (!sort) sort = { id: 'ASC' as const }
 
-        // === Query từ vựng ===
+        // === Query topic ===
         const [topics, totalTopics] = await topicRepo.findAndCount({
             skip,
             take: limit,
             where: where,
             order: sort,
         })
+
+        // === Lấy totalWords cho từng topic ===
+        const topicsWithCount = await Promise.all(
+            topics.map(async (topic) => {
+                const totalWords = await wordRepo.count({ where: { topic: { id: topic.id } } })
+                return { ...topic, totalWords }
+            })
+        )
 
         // === Trả kết quả ===
         return {
@@ -108,7 +118,7 @@ class CategoryService {
             totalTopics,
             currentPage: page,
             totalPages: Math.ceil(totalTopics / limit),
-            topics,
+            topics: topicsWithCount,
         }
     }
 

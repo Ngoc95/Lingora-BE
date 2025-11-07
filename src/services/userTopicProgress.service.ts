@@ -3,90 +3,192 @@ import { DatabaseService } from "./database.service"
 import { UserWordProgress } from "~/entities/userWordProgress.entity"
 import { getCefrByLevel } from "~/utils/mappers/cefrLevel.mapper"
 import { BadRequestError } from "~/core/error.response"
-import { In } from "typeorm"
+import { FindOptionsWhere, ILike, In, Not } from "typeorm"
 import { Topic } from "~/entities/topic.entity"
 import { UserTopicProgress } from "~/entities/userTopicProgress.entity"
 import { categoryProgressService } from "./userCategoryProgress.service"
 import { User } from "~/entities/user.entity"
+import validator from "validator"
 
 class TopicProgressService {
     private db = DatabaseService.getInstance()
 
-    // Lấy tiến độ học của user trong 1 topic theo level hiện tại
-    async getTopicProgress(user: User, topicId: number) {
-        const dataSource = this.db.dataSource
-        const wordRepo = dataSource.getRepository(Word)
-        const progressRepo = dataSource.getRepository(UserWordProgress)
+    async getTopicProgressById(
+        user: User,
+        topicId: number,
+        { page = 1, limit = 20, search, hasLearned }: { page?: number; limit?: number; search?: string; hasLearned?: boolean }
+    ) {
+        const ds = this.db.dataSource
+        const skip = (page - 1) * limit
 
-        // 1️⃣ Lấy danh sách word trong topic theo level user
-        if (!user.proficiency) {
-            throw new BadRequestError({ message: 'User has no proficiency level set' })
-        }
-        const cefrLevels = getCefrByLevel(user.proficiency) // vd: BEGINNER -> ['A1','A2']
+        const topicRepo = ds.getRepository(Topic)
+        const wordRepo = ds.getRepository(Word)
+        const progressRepo = ds.getRepository(UserWordProgress)
 
-        const words = await wordRepo.find({
+        // === 1️⃣ Kiểm tra topic tồn tại ===
+        const topic = await topicRepo.findOne({ where: { id: topicId } })
+        if (!topic) throw new BadRequestError({ message: 'Topic not found' })
+
+        // === 2️⃣ Lấy CEFR range theo proficiency ===
+        const cefrLevels = getCefrByLevel(user.proficiency)
+
+        // === 3️⃣ Đếm tổng và tiến độ (toàn bộ, không filter/search) ===
+        const totalWordsAll = await wordRepo.count({
             where: { topic: { id: topicId }, cefrLevel: In(cefrLevels) },
-            relations: ['topic'],
+        })
+
+        const learnedCountAll = await progressRepo
+            .createQueryBuilder('uwp')
+            .innerJoin('uwp.word', 'word')
+            .where('uwp.userId = :userId', { userId: user.id })
+            .andWhere('word.topicId = :topicId', { topicId })
+            .andWhere('word.cefrLevel IN (:...cefrLevels)', { cefrLevels })
+            .getCount()
+
+        const progressPercent =
+            totalWordsAll > 0 ? Number(((learnedCountAll / totalWordsAll) * 100).toFixed(2)) : 0
+        const completed = progressPercent >= 100
+
+        // === 4️⃣ Nếu có filter theo hasLearned thì lấy danh sách wordId đã học ===
+        let learnedIds: number[] = []
+        if (hasLearned !== undefined) {
+            const learnedWordIds = await progressRepo
+                .createQueryBuilder('uwp')
+                .innerJoin('uwp.word', 'word')
+                .where('uwp.userId = :userId', { userId: user.id })
+                .andWhere('word.topicId = :topicId', { topicId })
+                .andWhere('word.cefrLevel IN (:...cefrLevels)', { cefrLevels })
+                .select('word.id')
+                .getRawMany()
+
+            learnedIds = learnedWordIds.map((x) => x.word_id)
+        }
+
+        // === 5️⃣ Tạo điều kiện where (filter + search) ===
+        let where: FindOptionsWhere<Word>[] | FindOptionsWhere<Word> = [
+            { topic: { id: topicId }, cefrLevel: In(cefrLevels) },
+        ]
+
+        if (search) {
+            const normalized = validator.trim(search).toLowerCase()
+            where = [
+                { topic: { id: topicId }, cefrLevel: In(cefrLevels), word: ILike(`%${normalized}%`) },
+                { topic: { id: topicId }, cefrLevel: In(cefrLevels), meaning: ILike(`%${normalized}%`) },
+            ]
+        }
+
+        // === 6️⃣ Áp dụng hasLearned filter ===
+        const filterByProgress = (cond: FindOptionsWhere<Word>) => {
+            if (hasLearned === true && learnedIds.length > 0) cond.id = In(learnedIds)
+            if (hasLearned === false && learnedIds.length > 0) cond.id = Not(In(learnedIds))
+            return cond
+        }
+
+        const finalWhere = Array.isArray(where) ? where.map(filterByProgress) : filterByProgress(where)
+
+        // === 7️⃣ Query danh sách từ ===
+        const [words, totalWordsFiltered] = await wordRepo.findAndCount({
+            skip,
+            take: limit,
+            where: finalWhere,
             order: { id: 'ASC' },
         })
 
-        if (words.length === 0) throw new BadRequestError({ message: 'No words found for this topic & level' })
+        if (!words.length) {
+            return {
+                topicId,
+                totalWordsAll,
+                learnedCountAll,
+                completed,
+                progressPercent,
+                currentPage: page,
+                totalPages: Math.ceil(totalWordsFiltered / limit),
+                totalWordsFiltered,
+                words: [],
+            }
+        }
 
-        // 2️⃣ Lấy progress của user cho các word này
-        const wordIds = words.map(w => w.id)
+        // === 8️⃣ Lấy progress của user cho các từ này ===
+        const wordIds = words.map((w) => w.id)
         const progresses = await progressRepo.find({
             where: { user: { id: user.id }, word: { id: In(wordIds) } },
             relations: ['word'],
         })
 
-        // 3️⃣ Đếm số từ đã học
-        const learnedCount = progresses.length
-        const totalWords = words.length
+        const progressMap = new Map(progresses.map((p) => [p.word.id, p]))
 
-        // 4️⃣ Xác định từ tiếp theo chưa học
-        const learnedWordIds = new Set(progresses.map(p => p.word.id))
-        const nextWord = words.find(w => !learnedWordIds.has(w.id)) // lấy từ chưa học đầu tiên trong list topic
+        // === 9️⃣ Merge dữ liệu ===
+        const mergedWords = words.map((w) => {
+            const wp = progressMap.get(w.id)
+            return {
+                id: w.id,
+                word: w.word,
+                meaning: w.meaning,
+                cefrLevel: w.cefrLevel,
+                type: w.type,
+                progress: wp
+                    ? {
+                        id: wp.id,
+                        status: wp.status,
+                        srsLevel: wp.srsLevel,
+                        learnedAt: wp.learnedAt,
+                        nextReviewDay: wp.nextReviewDay,
+                    }
+                    : null,
+            }
+        })
 
+        // === 🔟 Trả kết quả ===
         return {
             topicId,
-            level: user.proficiency,
-            totalWords,
-            learnedCount,
-            completed: learnedCount >= totalWords,
-            progressPercent: (learnedCount / totalWords) * 100,
-            nextWord: nextWord ? { id: nextWord.id, word: nextWord.word } : null,
+            totalWordsAll,
+            learnedCountAll,
+            completed,
+            progressPercent,
+            currentPage: page,
+            totalPages: Math.ceil(totalWordsFiltered / limit),
+            totalWordsFiltered,
+            words: mergedWords,
         }
     }
 
-    async updateProgressForUser(userId: number, topicId: number) {
+    async createAndUpdateTopicProgress(user: User, topicId: number) {
         const topicRepo = await this.db.getRepository(Topic)
         const progressRepo = await this.db.getRepository(UserWordProgress)
         const topicProgressRepo = await this.db.getRepository(UserTopicProgress)
 
+        const cefrLevels = getCefrByLevel(user.proficiency)
         const topic = await topicRepo.findOne({
             where: { id: topicId },
             relations: ['words', 'category']
         })
         if (!topic) throw new BadRequestError({ message: 'Topic not found' })
 
+        const wordsInLevel = topic.words?.filter(w => cefrLevels.includes(w.cefrLevel)) ?? []
+        const totalWords = wordsInLevel.length
+        if (totalWords === 0) throw new BadRequestError({ message: 'No words found for this level' })
+
+        const wordIds = wordsInLevel.map(w => w.id)
         const userProgresses = await progressRepo.find({
-            where: { user: { id: userId }, word: { topic: { id: topicId } } }
+            where: { user: { id: user.id }, word: { id: In(wordIds) } }
         })
 
-        // lọc tổng từ trong topic theo level user hiện tại
-        const totalWords = topic.words?.length ?? 0
         const learnedCount = userProgresses.length
-        const percent = totalWords > 0 ? (learnedCount / totalWords) * 100 : 0
+        const percent = (learnedCount / totalWords) * 100
 
-
-        // cập nhật topic progress
         let topicProgress = await topicProgressRepo.findOne({
-            where: { user: { id: userId }, topic: { id: topicId } }
+            where: {
+                user: { id: user.id },
+                topic: { id: topicId },
+                proficiency: user.proficiency
+            }
         })
+
         if (!topicProgress) {
             topicProgress = topicProgressRepo.create({
-                user: { id: userId } as any,
+                user: { id: user.id } as any,
                 topic: { id: topicId } as any,
+                proficiency: user.proficiency,
                 completed: percent >= 100
             })
         } else {
@@ -95,12 +197,12 @@ class TopicProgressService {
 
         await topicProgressRepo.save(topicProgress)
 
-        // cập nhật luôn category progress liên quan
+        // update CategoryProgress
         if (topic.category) {
-            await categoryProgressService.updateProgressForUser(userId, topic.category.id)
+            await categoryProgressService.createAndUpdateCategoryProgress(user, topic.category.id)
         }
+        return topicProgress
     }
-
 }
 
 export const topicProgressService = new TopicProgressService()

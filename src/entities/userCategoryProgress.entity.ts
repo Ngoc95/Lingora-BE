@@ -1,9 +1,10 @@
 import { BaseEntity, Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm";
 import { Category } from "./category.entity";
 import { User } from "./user.entity";
+import { ProficiencyLevel } from "~/enums/proficiency.enum";
 
 @Entity()
-@Unique(['category', 'user'])
+@Unique(['user', 'category', 'proficiency'])
 export class UserCategoryProgress extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number
@@ -13,6 +14,13 @@ export class UserCategoryProgress extends BaseEntity {
 
     @ManyToOne(() => Category, category => category.users, { onDelete: 'CASCADE' })
     category: Category;
+
+    @Column({
+        type: 'enum',
+        enum: ProficiencyLevel,
+        default: ProficiencyLevel.BEGINNER
+    })
+    proficiency: ProficiencyLevel
 
     @Column({ type: 'float', default: 0 })
     progressPercent!: number

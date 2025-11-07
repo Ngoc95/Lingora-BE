@@ -7,7 +7,6 @@ export const getCategoryProgressValidation = validate(
   checkSchema(
     {
       id: {
-        in: ['params'],
         isInt: {
           errorMessage: 'Category ID must be an integer',
         },
