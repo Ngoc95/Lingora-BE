@@ -9,10 +9,10 @@ import wordRouter from "./word.route";
 const router = Router();
 
 router.use("/auth", authRouter);
-router.use("/user", userRouter);
-router.use("/category", categoryRouter);
-router.use("/topic", topicRouter);
-router.use("/word", wordRouter);
+router.use("/users", userRouter);
+router.use("/categories", categoryRouter);
+router.use("/topics", topicRouter);
+router.use("/words", wordRouter);
 router.use("/progress", userProgressRouter);
 
 export default router;

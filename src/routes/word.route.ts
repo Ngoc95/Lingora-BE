@@ -17,7 +17,7 @@ wordRouter.use(accessTokenValidation)
 /**
  * @description : Create a new word
  * @method : POST
- * @path : /
+ * @path : 
  * @header : Authorization
  * @body : {
  *  word: string
@@ -33,7 +33,7 @@ wordRouter.use(accessTokenValidation)
  * }
  */
 wordRouter.post(
-    '/',
+    '',
     wrapRequestHandler(checkPermission('createAny', Resource.WORD)),
     createWordValidation,
     wrapRequestHandler(wordController.createWord)

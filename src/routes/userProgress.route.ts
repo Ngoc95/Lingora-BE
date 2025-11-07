@@ -8,7 +8,6 @@ import { wrapRequestHandler } from "~/utils/handler"
 import { getCategoryProgressValidation } from "~/middlewares/userProgress/getCategoryProgress.middlewares";
 import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from "~/middlewares/common.middlewares";
 import { Topic } from "~/entities/topic.entity";
-import { Word } from "~/entities/word.entity";
 import { getWordsForStudyValidation } from "~/middlewares/userProgress/getWordsForStudy.middlewares";
 
 const userProgressRouter = Router()

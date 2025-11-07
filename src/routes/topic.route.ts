@@ -19,7 +19,7 @@ topicRouter.use(accessTokenValidation)
 /**
  * @description : Create a new topic
  * @method : POST
- * @path : /
+ * @path : 
  * @header : Authorization
  * @body : {
  *  name: string
@@ -28,7 +28,7 @@ topicRouter.use(accessTokenValidation)
  * }
  */
 topicRouter.post(
-    '/',
+    '',
     wrapRequestHandler(checkPermission('createAny', Resource.TOPIC)),
     createTopicValidation,
     wrapRequestHandler(topicController.createTopic)
