@@ -33,7 +33,7 @@ export class UserService {
             password: hashData(password),
             avatar: avatar || 'N/A',
             roles: foundRoles,
-            proficiency,
+            proficiency: proficiency ?? null,
         })
 
         return unGetData({ fields: ['password'], object: await userRepo.save(newUser) })
@@ -129,7 +129,7 @@ export class UserService {
         if (username) user.username = username
         if (email) user.email = email
         if (avatar) user.avatar = avatar
-        if (proficiency) user.proficiency = proficiency
+        if (proficiency !== undefined) user.proficiency = proficiency
         if (status) user.status = status
 
         // Nếu có đổi mật khẩu

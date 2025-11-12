@@ -51,7 +51,11 @@ export const createUserValidation = validate(
             },
 
             proficiency: {
-                ...isRequired('proficiency'),
+                optional: {
+                    options: {
+                        nullable: true
+                    }
+                },
                 isIn: {
                     options: [Object.values(ProficiencyLevel)],
                     errorMessage: `Proficiency must be one of: ${Object.values(ProficiencyLevel).join(', ')}`

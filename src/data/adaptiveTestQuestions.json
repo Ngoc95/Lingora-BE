@@ -1,0 +1,99 @@
+[
+  {
+    "id": 1,
+    "skill": "Vocabulary",
+    "text": "Choose the synonym of \"happy\".",
+    "options": ["joyful", "angry", "afraid", "tired"],
+    "answer": "joyful",
+    "difficulty": 1
+  },
+  {
+    "id": 2,
+    "skill": "Grammar",
+    "text": "I ___ to school every day.",
+    "options": ["go", "goes", "am going", "going"],
+    "answer": "go",
+    "difficulty": 1
+  },
+  {
+    "id": 3,
+    "skill": "Reading",
+    "text": "What is the main idea of the sentence: \"The library opens at 8 AM\"?",
+    "options": [
+      "The library closes at 8 AM",
+      "The library opens in the morning",
+      "The library is closed all day",
+      "The library opens at night"
+    ],
+    "answer": "The library opens in the morning",
+    "difficulty": 1
+  },
+  {
+    "id": 4,
+    "skill": "Grammar",
+    "text": "She ___ in the park right now.",
+    "options": ["runs", "run", "is running", "running"],
+    "answer": "is running",
+    "difficulty": 1
+  },
+  {
+    "id": 5,
+    "skill": "Vocabulary",
+    "text": "Choose the best word to complete the sentence: \"He was promoted because of his exceptional ___.\"",
+    "options": ["commitment", "committed", "commit", "committing"],
+    "answer": "commitment",
+    "difficulty": 2
+  },
+  {
+    "id": 6,
+    "skill": "Grammar",
+    "text": "If I ___ you, I would study harder.",
+    "options": ["am", "was", "were", "be"],
+    "answer": "were",
+    "difficulty": 2
+  },
+  {
+    "id": 7,
+    "skill": "Reading",
+    "text": "According to the passage, why did the company delay the launch?",
+    "passage": "TechCorp announced yesterday that it would postpone the launch of its new smartphone model, originally scheduled for next month. The decision came after extensive internal discussions and feedback from focus groups. Company executives stated that while the product was technically ready, they felt additional market research was necessary to better understand consumer preferences and ensure the product would meet expectations in the competitive market.",
+    "options": [
+      "They had financial problems",
+      "They needed more market research",
+      "They wanted to hire more staff",
+      "They received legal advice to stop"
+    ],
+    "answer": "They needed more market research",
+    "difficulty": 2
+  },
+  {
+    "id": 8,
+    "skill": "Vocabulary",
+    "text": "Choose the best word to complete the sentence: \"The scientist's findings were praised for their ___ to solve climate issues.\"",
+    "options": ["potential", "impede", "resistance", "ambiguity"],
+    "answer": "potential",
+    "difficulty": 3
+  },
+  {
+    "id": 9,
+    "skill": "Grammar",
+    "text": "She speaks English as if she ___ abroad for years.",
+    "options": ["lives", "has lived", "had lived", "lived"],
+    "answer": "had lived",
+    "difficulty": 3
+  },
+  {
+    "id": 10,
+    "skill": "Reading",
+    "text": "What can be inferred from the statement: \"Despite the challenges, the team met the deadline without compromising quality\"?",
+    "options": [
+      "The team missed the deadline",
+      "The project quality decreased",
+      "The team delivered on time and maintained quality",
+      "The team refused to continue the project"
+    ],
+    "answer": "The team delivered on time and maintained quality",
+    "difficulty": 3
+  }
+]
+

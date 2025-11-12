@@ -64,7 +64,11 @@ export const updateUserByIdValidation = validate(
     },
 
     proficiency: {
-      optional: true,
+      optional: {
+        options: {
+          nullable: true
+        }
+      },
       isIn: {
         options: [Object.values(ProficiencyLevel)],
         errorMessage: `Proficiency must be one of: ${Object.values(ProficiencyLevel).join(', ')}`
