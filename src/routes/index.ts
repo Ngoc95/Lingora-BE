@@ -5,6 +5,9 @@ import userProgressRouter from "./userProgress.route";
 import categoryRouter from "./category.route";
 import topicRouter from "./topic.route";
 import wordRouter from "./word.route";
+import studySetRouter from "./studySet.route";
+import vnpayReturnRouter from "./vnpayReturn.route";
+import adminStudySetRouter from "./adminStudySet.route";
 
 const router = Router();
 
@@ -14,5 +17,8 @@ router.use("/categories", categoryRouter);
 router.use("/topics", topicRouter);
 router.use("/words", wordRouter);
 router.use("/progress", userProgressRouter);
+router.use("/studysets", studySetRouter);
+router.use("/vnpay", vnpayReturnRouter);
+router.use("/admin/studysets", adminStudySetRouter);
 
 export default router;

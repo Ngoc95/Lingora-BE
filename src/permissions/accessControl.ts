@@ -53,6 +53,9 @@ ac.grant(RoleName.ADMIN)
   .createAny(Resource.WORD)
   .updateAny(Resource.WORD)
   .deleteAny(Resource.WORD)
+  .readAny(Resource.STUDY_SET)
+  .updateAny(Resource.STUDY_SET)
+  .deleteAny(Resource.STUDY_SET)
 
 
 export default ac
