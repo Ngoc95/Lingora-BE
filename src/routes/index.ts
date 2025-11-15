@@ -8,6 +8,7 @@ import wordRouter from "./word.route";
 import studySetRouter from "./studySet.route";
 import vnpayReturnRouter from "./vnpayReturn.route";
 import adminStudySetRouter from "./adminStudySet.route";
+import notificationRouter from "./notification.route";
 
 const router = Router();
 
@@ -20,5 +21,6 @@ router.use("/progress", userProgressRouter);
 router.use("/studysets", studySetRouter);
 router.use("/vnpay", vnpayReturnRouter);
 router.use("/admin/studysets", adminStudySetRouter);
+router.use("/notifications", notificationRouter);
 
 export default router;
