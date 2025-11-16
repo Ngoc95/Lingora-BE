@@ -9,6 +9,8 @@ import { UserTopicProgress } from "~/entities/userTopicProgress.entity"
 import { categoryProgressService } from "./userCategoryProgress.service"
 import { User } from "~/entities/user.entity"
 import validator from "validator"
+import { WordStatus } from "~/enums/wordStatus.enum"
+import { ProficiencyLevel } from "~/enums/proficiency.enum"
 
 class TopicProgressService {
     private db = DatabaseService.getInstance()
@@ -43,6 +45,15 @@ class TopicProgressService {
             .where('uwp.userId = :userId', { userId: user.id })
             .andWhere('word.topicId = :topicId', { topicId })
             .andWhere('word.cefrLevel IN (:...cefrLevels)', { cefrLevels })
+            .getCount()
+
+        const masteredCountAll = await progressRepo
+            .createQueryBuilder('uwp')
+            .innerJoin('uwp.word', 'word')
+            .where('uwp.userId = :userId', { userId: user.id })
+            .andWhere('word.topicId = :topicId', { topicId })
+            .andWhere('word.cefrLevel IN (:...cefrLevels)', { cefrLevels })
+            .andWhere('uwp.status = :status', { status: WordStatus.MASTERED })
             .getCount()
 
         const progressPercent =
@@ -99,6 +110,7 @@ class TopicProgressService {
                 topicId,
                 totalWordsAll,
                 learnedCountAll,
+                masteredCountAll,
                 completed,
                 progressPercent,
                 currentPage: page,
@@ -143,6 +155,7 @@ class TopicProgressService {
             topicId,
             totalWordsAll,
             learnedCountAll,
+            masteredCountAll,
             completed,
             progressPercent,
             currentPage: page,
@@ -180,7 +193,7 @@ class TopicProgressService {
             where: {
                 user: { id: user.id },
                 topic: { id: topicId },
-                proficiency: user.proficiency
+                proficiency: user.proficiency as ProficiencyLevel
             }
         })
 
@@ -188,7 +201,7 @@ class TopicProgressService {
             topicProgress = topicProgressRepo.create({
                 user: { id: user.id } as any,
                 topic: { id: topicId } as any,
-                proficiency: user.proficiency,
+                proficiency: user.proficiency as ProficiencyLevel,
                 completed: percent >= 100
             })
         } else {
