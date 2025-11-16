@@ -1,4 +1,6 @@
-export const getCefrByLevel = (level: string): string[] => {
+export const getCefrByLevel = (level?: string | null): string[] => {
+  if (!level) return []
+
   switch (level.toUpperCase()) {
     case 'BEGINNER':
       return ['A1', 'A2']

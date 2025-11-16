@@ -53,9 +53,10 @@ export class User extends BaseEntity {
     @Column({
         type: 'enum',
         enum: ProficiencyLevel,
-        default: ProficiencyLevel.BEGINNER
+        nullable: true,
+        default: null
     })
-    proficiency!: ProficiencyLevel
+    proficiency!: ProficiencyLevel | null
 
     // foreign key
     @ManyToMany(() => Role, (role) => role.users, { cascade: true })

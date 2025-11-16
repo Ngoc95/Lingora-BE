@@ -158,6 +158,9 @@ export const accessTokenValidation = validate(
                         try {
                             const decodedAuthorization = (await verifyToken(accessToken, env.JWT_ACCESS_SECRET as string)) as { userId: number }
 
+                            // check user tồn tại
+                            await checkUserExistence(decodedAuthorization.userId)
+
                             const foundUser = await User.findOne({
                                 where: {
                                     id: decodedAuthorization.userId

@@ -8,6 +8,6 @@ export interface UpdateUserBodyReq {
   oldPassword?: string,
   avatar?: string,
   roleIds?: number[],
-  proficiency?: ProficiencyLevel,
+  proficiency?: ProficiencyLevel | null,
   status?: UserStatus
 }
