@@ -5,6 +5,8 @@ import cookieParser from "cookie-parser";
 import router from "~/routes";
 import { errorHandler, notFoundHandler } from "~/utils/handler";
 import { morganMiddleware } from "./middlewares/morgan.middlewares";
+// Import event listeners to register them
+import "~/event-listeners";
 
 const app = express();
 

@@ -6,4 +6,7 @@ export enum Resource {
   STUDY_SET = 'STUDY_SET',
   PROFILE = 'PROFILE',
   USER_PROGRESS = 'USER_PROGRESS',
+  POST = 'POST',
+  COMMENT = 'COMMENT',
+  LIKE = 'LIKE',
 }

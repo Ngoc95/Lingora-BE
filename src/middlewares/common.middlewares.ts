@@ -10,6 +10,15 @@ export const checkIdParamMiddleware = (req: Request<ParamsDictionary, any, any>,
     } else next()
 }
 
+export const checkParamMiddleware = (paramName: string) => {
+    return (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
+        if (req.params?.[paramName] && !isValidNumber(req.params[paramName])) {
+            throw new BadRequestError({ message: `${paramName} invalid!` })
+        }
+        next()
+    }
+}
+
 export const checkQueryMiddleware = ({
     requiredFields,
     numbericFields = ['limit', 'page'],
