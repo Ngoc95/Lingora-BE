@@ -219,10 +219,6 @@ class PostService {
         return await post.save()
     }
 
-    checkOwn = (userId: number, post: Post) => {
-        if (post.createdBy.id != userId) throw new BadRequestError({ message: 'User can not edit this post!' })
-    }
-
     updatePost = async (userId: number, postId: number, { title, content, tags, thumbnails, topic, status }: UpdatePostBodyReq) => {
         const foundPost = await Post.findOne({
             where: {
@@ -245,7 +241,7 @@ class PostService {
 
         if (!foundPost) throw new BadRequestError({ message: 'Post not found!' })
 
-        this.checkOwn(userId, foundPost)
+        if(userId !== foundPost.createdBy.id) throw new BadRequestError({ message: 'User can not edit this post!' })
 
         //update post
         if (title) foundPost.title = title
@@ -293,11 +289,20 @@ class PostService {
             },
             relations: ['createdBy']
         })
-        if (foundPost) {
-            if (user.roles?.some(r => r.name === RoleName.ADMIN) || user.id === foundPost.createdBy.id) {
-                await foundPost.softRemove()
-            }
+        if (!foundPost) {
+            throw new BadRequestError({ message: 'Post not found!' })
         }
+
+        const canDelete = user.roles?.some((r) => r.name === RoleName.ADMIN) || user.id === foundPost.createdBy.id
+
+        if (!canDelete) {
+            throw new BadRequestError({ message: 'User can not delete this post!' })
+        }
+
+        foundPost.status = PostStatus.DELETED
+        await foundPost.save()
+        await foundPost.softRemove()
+
         return {}
     }
 
