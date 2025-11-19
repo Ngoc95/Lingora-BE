@@ -208,7 +208,7 @@ class WordProgressService {
         }
     }
 
-    async getWordsForReview(user: User, {page = DEFAULT_PAGE, limit = DEFAULT_LIMIT}: {page?: number; limit?: number}) {
+    async getWordsForReview(user: User, { page = DEFAULT_PAGE, limit = DEFAULT_LIMIT }: { page?: number; limit?: number }) {
         const ds = this.db.dataSource
         const progressRepo = ds.getRepository(UserWordProgress)
 
@@ -238,6 +238,45 @@ class WordProgressService {
                 status: p.status,
                 nextReviewDay: p.nextReviewDay,
             })),
+        }
+    }
+
+    async getWordStatisticsByUser(user: User) {
+        const ds = this.db.dataSource
+        const progressRepo = ds.getRepository(UserWordProgress)
+
+        // === 1️⃣ Lấy toàn bộ progress của user ===
+        const progresses = await progressRepo.find({
+            where: { user: { id: user.id } },
+            select: ['srsLevel'], // chỉ cần srsLevel
+        })
+
+        if (!progresses.length) {
+            return {
+                totalLearnedWord: 0,
+                statistics: [],
+            }
+        }
+
+        // === 2️⃣ Gom nhóm theo srsLevel ===
+        const srsMap = new Map<number, number>()
+        for (const p of progresses) {
+            const count = srsMap.get(p.srsLevel) || 0
+            srsMap.set(p.srsLevel, count + 1)
+        }
+
+        // === 3️⃣ Chuẩn hóa kết quả ===
+        const statistics = Array.from(srsMap.entries())
+            .map(([srsLevel, wordCount]) => ({ srsLevel, wordCount }))
+            .sort((a, b) => a.srsLevel - b.srsLevel)
+
+        // === 4️⃣ Tổng số từ đã học ===
+        const totalLearnedWord = progresses.length
+
+        // === 5️⃣ Trả về ===
+        return {
+            totalLearnedWord,
+            statistics,
         }
     }
 }

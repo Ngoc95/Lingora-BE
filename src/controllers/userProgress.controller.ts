@@ -76,5 +76,14 @@ class UserProgressController {
             })
         }).send(res)
     }
+
+    getWordStatisticsByUser = async (req: Request, res: Response) => {
+        const user = req.user!
+        return new SuccessResponse({
+            message: 'Get word statistics for user successfully',
+            metaData: await wordProgressService.getWordStatisticsByUser(user)
+        }).send(res)
+    }
 }
+
 export const userProgressController = new UserProgressController()

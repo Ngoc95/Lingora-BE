@@ -8,6 +8,10 @@ import wordRouter from "./word.route";
 import studySetRouter from "./studySet.route";
 import vnpayReturnRouter from "./vnpayReturn.route";
 import adminStudySetRouter from "./adminStudySet.route";
+import adaptiveTestRouter from "./adaptiveTest.route";
+import postRouter from "./post.route";
+import commentRouter from "./comment.route";
+import likeRouter from "./like.route";
 
 const router = Router();
 
@@ -20,5 +24,9 @@ router.use("/progress", userProgressRouter);
 router.use("/studysets", studySetRouter);
 router.use("/vnpay", vnpayReturnRouter);
 router.use("/admin/studysets", adminStudySetRouter);
+router.use("/adaptive-test", adaptiveTestRouter);
+router.use("/posts", postRouter);
+router.use("/comments", commentRouter);
+router.use("/likes", likeRouter);
 
 export default router;

@@ -135,4 +135,16 @@ userProgressRouter.get(
   wrapRequestHandler(userProgressController.getWordsForReview)
 )
 
+// GET
+/**
+ * @description : Get word statistics of user
+ * @method : GET
+ * @path : /word-statistics
+ * @header : Authorization
+ */ 
+userProgressRouter.get(
+  '/word-statistics',
+  wrapRequestHandler(userProgressController.getWordStatisticsByUser)
+)
+
 export default userProgressRouter;

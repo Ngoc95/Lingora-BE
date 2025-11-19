@@ -6,5 +6,5 @@ export interface CreateUserBodyReq {
   password: string
   avatar?: string
   roleIds: number[],
-  proficiency: ProficiencyLevel
+  proficiency?: ProficiencyLevel | null
 }

@@ -10,6 +10,7 @@ import { User } from "~/entities/user.entity"
 import { GetAllCategoriesQueryReq } from "~/dtos/req/category/getAllCategoriesQuery.req"
 import validator from "validator"
 import { GetCategoryQueryReq } from "~/dtos/req/category/getCategoryQuery.req"
+import { ProficiencyLevel } from "~/enums/proficiency.enum"
 
 class CategoryProgressService {
     private db = DatabaseService.getInstance()
@@ -244,7 +245,7 @@ class CategoryProgressService {
             where: {
                 user: { id: user.id },
                 category: { id: categoryId },
-                proficiency: user.proficiency
+                proficiency: user.proficiency as ProficiencyLevel
             }
         })
 
@@ -252,7 +253,7 @@ class CategoryProgressService {
             categoryProgress = categoryProgressRepo.create({
                 user: { id: user.id } as any,
                 category: { id: categoryId } as any,
-                proficiency: user.proficiency,
+                proficiency: user.proficiency as ProficiencyLevel,
                 completed: percent >= 100,
                 progressPercent: percent
             })
