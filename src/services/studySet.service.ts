@@ -19,6 +19,8 @@ import { PaymentMethod } from '~/enums/paymentMethod.enum'
 import { EVENTS } from '~/events-handler/constants'
 import eventBus from '~/events-handler/eventBus'
 import { User } from '~/entities/user.entity'
+import { Like } from '~/entities/like.entity'
+import { TargetType } from '~/enums/targetType.enum'
 
 class StudySetService {
     private db = DatabaseService.getInstance()
@@ -113,7 +115,6 @@ class StudySetService {
                 'studySet.visibility',
                 'studySet.price',
                 'studySet.status',
-                'studySet.likeCount',
                 'studySet.createdAt',
                 'owner.id',
                 'owner.username',
@@ -168,17 +169,27 @@ class StudySetService {
             purchasedSetIds = new Set(purchasedRecords.map((r) => r.studySet.id))
         }
 
-        // Add isPurchased flag
-        const studySetsWithPurchaseStatus = studySets.map((ss) => ({
-            ...ss,
-            isPurchased: purchasedSetIds.has(ss.id),
-        }))
+        // Calculate likeCount and isAlreadyLike for each study set
+        const studySetsWithLikeInfo = await Promise.all(
+            studySets.map(async (ss) => {
+                const [likeCount, isAlreadyLike] = await Promise.all([
+                    this.findNumberLikeByStudySetId(ss.id),
+                    this.isAlreadyLikeStudySet(ss.id, userId)
+                ])
+                return {
+                    ...ss,
+                    likeCount,
+                    isAlreadyLike,
+                    isPurchased: purchasedSetIds.has(ss.id),
+                }
+            })
+        )
 
         return {
             currentPage: query.page!,
             totalPages: Math.ceil(total / query.limit!),
             total,
-            studySets: studySetsWithPurchaseStatus,
+            studySets: studySetsWithLikeInfo,
         }
     }
 
@@ -198,7 +209,6 @@ class StudySetService {
                 'studySet.visibility',
                 'studySet.price',
                 'studySet.status',
-                'studySet.likeCount',
                 'studySet.createdAt',
                 'owner.id',
                 'owner.username',
@@ -244,11 +254,26 @@ class StudySetService {
 
         const [studySets, total] = await qb.getManyAndCount()
 
+        // Calculate likeCount and isAlreadyLike for each study set
+        const studySetsWithLikeInfo = await Promise.all(
+            studySets.map(async (ss) => {
+                const [likeCount, isAlreadyLike] = await Promise.all([
+                    this.findNumberLikeByStudySetId(ss.id),
+                    this.isAlreadyLikeStudySet(ss.id, ownerId)
+                ])
+                return {
+                    ...ss,
+                    likeCount,
+                    isAlreadyLike,
+                }
+            })
+        )
+
         return {
             currentPage: query.page!,
             totalPages: Math.ceil(total / query.limit!),
             total,
-            studySets,
+            studySets: studySetsWithLikeInfo,
         }
     }
 
@@ -290,6 +315,12 @@ class StudySetService {
             throw new BadRequestError({ message: 'You do not have access to this study set' })
         }
 
+        // Calculate likeCount and isAlreadyLike
+        const [likeCount, isAlreadyLike] = await Promise.all([
+            this.findNumberLikeByStudySetId(studySetId),
+            userId ? this.isAlreadyLikeStudySet(studySetId, userId) : Promise.resolve(false)
+        ])
+
         // Exclude password từ owner
         if (studySet.owner) {
             const { password, ...ownerWithoutPassword } = studySet.owner as any
@@ -297,12 +328,16 @@ class StudySetService {
                 ...studySet,
                 owner: ownerWithoutPassword,
                 isPurchased,
+                likeCount,
+                isAlreadyLike,
             }
         }
 
         return {
             ...studySet,
             isPurchased,
+            likeCount,
+            isAlreadyLike,
         }
     }
 
@@ -519,6 +554,27 @@ class StudySetService {
             amount: studySet.price,
             transactionId: transaction.id,
         }
+    }
+
+    findNumberLikeByStudySetId = async (id: number) => {
+        return Like.countBy({
+            targetId: id,
+            targetType: TargetType.STUDY_SET
+        })
+    }
+
+    isAlreadyLikeStudySet = async (studySetId: number, userId: number) => {
+        return Like.exists({
+            where: {
+                createdBy: {
+                    id: userId
+                },
+                targetId: studySetId,
+                targetType: TargetType.STUDY_SET
+            },
+            relations: ['createdBy'],
+            withDeleted: false
+        })
     }
 }
 

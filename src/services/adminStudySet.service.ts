@@ -29,7 +29,6 @@ class AdminStudySetService {
                 'studySet.visibility',
                 'studySet.price',
                 'studySet.status',
-                'studySet.likeCount',
                 'studySet.createdAt',
                 'studySet.updatedAt',
                 'owner.id',

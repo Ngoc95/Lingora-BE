@@ -52,7 +52,7 @@ studySetRouter.post(
  *   maxPrice?: number
  *   sort?: string (e.g., -createdAt,+title)
  * }
- * sort field must be in ['id', 'title', 'createdAt', 'likeCount', 'price']
+ * sort field must be in ['id', 'title', 'createdAt', 'price']
  */
 studySetRouter.get(
     '',

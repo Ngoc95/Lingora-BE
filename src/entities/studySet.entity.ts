@@ -54,9 +54,6 @@ export class StudySet extends BaseEntity {
     })
     status!: StudySetStatus
 
-    @Column({ type: 'int', default: 0 })
-    likeCount!: number
-
     @OneToMany(() => Flashcard, (flashcard) => flashcard.studySet, {
         cascade: true,
         eager: false,
@@ -81,6 +78,6 @@ export class StudySet extends BaseEntity {
     @UpdateDateColumn()
     updatedAt!: Date
 
-    static allowSortList = ['id', 'title', 'createdAt', 'likeCount', 'price']
+    static allowSortList = ['id', 'title', 'createdAt', 'price']
 }
 
