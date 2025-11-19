@@ -282,13 +282,11 @@ class StudySetService {
         const isPublicAndPublished =
             studySet.visibility === StudySetVisibility.PUBLIC &&
             studySet.status === StudySetStatus.PUBLISHED
-        console.log(isOwner, isPublicAndPublished, isPurchased)
-        const hasAccess = isOwner || (isPublicAndPublished && isPurchased)
-        console.log(hasAccess)
-        if (hasAccess == false) {
+
+        if (!isOwner && !isPublicAndPublished && !isPurchased) {
             throw new BadRequestError({ message: 'You do not have access to this study set' })
         }
-        console.log("sao vẫn qua đây được")
+
         // Exclude password từ owner
         if (studySet.owner) {
             const { password, ...ownerWithoutPassword } = studySet.owner as any

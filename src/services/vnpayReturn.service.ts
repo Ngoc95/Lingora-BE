@@ -2,11 +2,9 @@ import { DatabaseService } from './database.service'
 import { UserStudySet } from '~/entities/userStudySet.entity'
 import { StudySet } from '~/entities/studySet.entity'
 import { Transaction } from '~/entities/transaction.entity'
-import { User } from '~/entities/user.entity'
 import { BadRequestError } from '~/core/error.response'
 import { verifyVNPayReturn } from '~/utils/vnpay'
 import { TransactionStatus } from '~/enums/transactionStatus.enum'
-import { notificationService } from './notification.service'
 
 class VNPayReturnService {
     private db = DatabaseService.getInstance()
@@ -93,7 +91,6 @@ class VNPayReturnService {
         const studySetRepo = await this.db.getRepository(StudySet)
         const studySet = await studySetRepo.findOne({
             where: { id: studySetId },
-            relations: ['owner'],
         })
 
         if (!studySet) {
@@ -128,25 +125,6 @@ class VNPayReturnService {
             purchasePrice: paidAmount,
         })
         await userStudySetRepo.save(userStudySet)
-
-        // Get buyer info for notification
-        const buyer = await (await this.db.getRepository(User)).findOne({
-            where: { id: userId },
-            select: ['id', 'username'],
-        })
-
-        // Send notification to study set owner
-        if (buyer && studySet.owner) {
-            await notificationService.sendStudySetPurchaseNotification({
-                studySetId: studySetId,
-                studySetTitle: studySet.title,
-                ownerId: studySet.owner.id,
-                buyerId: userId,
-                buyerUsername: buyer.username,
-                amount: paidAmount,
-            })
-        }
-
         return {
             success: true,
             message: 'Purchase successful',

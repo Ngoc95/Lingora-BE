@@ -6,8 +6,6 @@ import { FindOptionsWhere, ILike } from 'typeorm'
 import validator from 'validator'
 import { StudySetStatus } from '~/enums/studySetStatus.enum'
 import { StudySetVisibility } from '~/enums/studySetVisibility.enum'
-import { notificationService } from './notification.service'
-import { NotificationType } from '~/enums/notificationType.enum'
 
 class AdminStudySetService {
     private db = DatabaseService.getInstance()
@@ -122,7 +120,6 @@ class AdminStudySetService {
 
         const studySet = await studySetRepo.findOne({
             where: { id: studySetId },
-            relations: ['owner'],
         })
 
         if (!studySet) {
@@ -138,15 +135,6 @@ class AdminStudySetService {
         studySet.status = StudySetStatus.PUBLISHED
         await studySetRepo.save(studySet)
 
-        // Send notification to owner
-        await notificationService.createNotification({
-            userId: studySet.owner.id,
-            relatedId: studySetId,
-            title: 'Study Set đã được duyệt',
-            message: `Study set "${studySet.title}" của bạn đã được duyệt và đã được xuất bản.`,
-            type: NotificationType.STUDY_SET,
-        })
-
         return studySet
     }
 
@@ -158,7 +146,6 @@ class AdminStudySetService {
 
         const studySet = await studySetRepo.findOne({
             where: { id: studySetId },
-            relations: ['owner'],
         })
 
         if (!studySet) {
@@ -173,19 +160,6 @@ class AdminStudySetService {
 
         studySet.status = StudySetStatus.REJECTED
         await studySetRepo.save(studySet)
-
-        // Send notification to owner
-        const rejectionMessage = reason
-            ? `Study set "${studySet.title}" của bạn đã bị từ chối. Lý do: ${reason}`
-            : `Study set "${studySet.title}" của bạn đã bị từ chối.`
-
-        await notificationService.createNotification({
-            userId: studySet.owner.id,
-            relatedId: studySetId,
-            title: 'Study Set bị từ chối',
-            message: rejectionMessage,
-            type: NotificationType.STUDY_SET,
-        })
 
         return {
             ...studySet,

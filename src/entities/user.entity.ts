@@ -20,7 +20,6 @@ import { UserTopicProgress } from "./userTopicProgress.entity";
 import { UserWordProgress } from "./userWordProgress.entity";
 import { StudySet } from "./studySet.entity";
 import { UserStudySet } from "./userStudySet.entity";
-import { Notification } from "./notification.entity";
 
 @Entity()
 export class User extends BaseEntity {
@@ -79,9 +78,6 @@ export class User extends BaseEntity {
 
     @OneToMany(() => UserStudySet, (userStudySet) => userStudySet.user, { cascade: true })
     purchasedStudySets?: UserStudySet[];
-
-    @OneToMany(() => Notification, (notification) => notification.user, { cascade: true })
-    notifications?: Notification[];
 
     @OneToMany(() => RefreshToken, (token) => token.user)
     tokens?: RefreshToken[]
