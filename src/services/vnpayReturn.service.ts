@@ -5,6 +5,9 @@ import { Transaction } from '~/entities/transaction.entity'
 import { BadRequestError } from '~/core/error.response'
 import { verifyVNPayReturn } from '~/utils/vnpay'
 import { TransactionStatus } from '~/enums/transactionStatus.enum'
+import { EVENTS } from '~/events-handler/constants'
+import eventBus from '~/events-handler/eventBus'
+import { User } from '~/entities/user.entity'
 
 class VNPayReturnService {
     private db = DatabaseService.getInstance()
@@ -46,7 +49,7 @@ class VNPayReturnService {
         const transactionRepo = await this.db.getRepository(Transaction)
         const transaction = await transactionRepo.findOne({
             where: { orderId: orderId },
-            relations: ['user', 'studySet'],
+            relations: ['user', 'studySet', 'studySet.owner'],
         })
 
         if (!transaction) {
@@ -125,6 +128,22 @@ class VNPayReturnService {
             purchasePrice: paidAmount,
         })
         await userStudySetRepo.save(userStudySet)
+
+        // Emit purchase event
+        const buyer = transaction.user as User
+        const purchasedStudySet = transaction.studySet as StudySet
+        const ownerId = purchasedStudySet.owner?.id
+
+        if (buyer && ownerId) {
+            eventBus.emit(EVENTS.ORDER, {
+                buyer,
+                studySetId,
+                studySetOwnerId: ownerId,
+                amount: paidAmount,
+                isFree: false
+            })
+        }
+
         return {
             success: true,
             message: 'Purchase successful',

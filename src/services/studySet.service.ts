@@ -16,6 +16,9 @@ import { StudySetStatus } from '~/enums/studySetStatus.enum'
 import { StudySetVisibility } from '~/enums/studySetVisibility.enum'
 import { TransactionStatus } from '~/enums/transactionStatus.enum'
 import { PaymentMethod } from '~/enums/paymentMethod.enum'
+import { EVENTS } from '~/events-handler/constants'
+import eventBus from '~/events-handler/eventBus'
+import { User } from '~/entities/user.entity'
 
 class StudySetService {
     private db = DatabaseService.getInstance()
@@ -466,6 +469,20 @@ class StudySetService {
                 purchasePrice: 0,
             })
             await userStudySetRepo.save(userStudySet)
+
+            // Emit purchase event for free study set
+            const buyer = await User.findOne({ where: { id: userId } })
+            const ownerId = studySet.owner.id
+
+            if (buyer && ownerId && ownerId !== userId) {
+                eventBus.emit(EVENTS.ORDER, {
+                    buyer,
+                    studySetId,
+                    studySetOwnerId: ownerId,
+                    amount: 0,
+                    isFree: true
+                })
+            }
 
             return {
                 paymentUrl: null,
