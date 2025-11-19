@@ -33,11 +33,11 @@ class StudySetService {
         // Tạo study set
         // Status tự động được set dựa trên visibility:
         // - PRIVATE → DRAFT
-        // - PUBLIC → PENDING_APPROVAL (cần admin duyệt)
+        // - PUBLIC → PUBLISHED
         const visibility = data.visibility || StudySetVisibility.PRIVATE
         const initialStatus =
             visibility === StudySetVisibility.PUBLIC
-                ? StudySetStatus.PENDING_APPROVAL
+                ? StudySetStatus.PUBLISHED
                 : StudySetStatus.DRAFT
 
         const studySet = studySetRepo.create({
@@ -372,11 +372,11 @@ class StudySetService {
         // Update visibility và tự động update status nếu cần
         if (data.visibility !== undefined) {
             studySet.visibility = data.visibility
-            // Nếu đổi từ PRIVATE sang PUBLIC → status = PENDING_APPROVAL
-            // Nếu đổi từ PUBLIC sang PRIVATE → status = DRAFT
-            if (data.visibility === StudySetVisibility.PUBLIC && studySet.status !== StudySetStatus.PUBLISHED) {
-                studySet.status = StudySetStatus.PENDING_APPROVAL
-            } else if (data.visibility === StudySetVisibility.PRIVATE && studySet.status === StudySetStatus.PENDING_APPROVAL) {
+            // Nếu đổi sang PUBLIC → status = PUBLISHED
+            // Nếu đổi sang PRIVATE → status = DRAFT
+            if (data.visibility === StudySetVisibility.PUBLIC) {
+                studySet.status = StudySetStatus.PUBLISHED
+            } else if (data.visibility === StudySetVisibility.PRIVATE) {
                 studySet.status = StudySetStatus.DRAFT
             }
         }

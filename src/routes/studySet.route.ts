@@ -27,7 +27,7 @@ studySetRouter.use(accessTokenValidation)
  *   flashcards?: FlashcardInputReq[]
  *   quizzes?: QuizInputReq[]
  * }
- * @note : Status is automatically set: PRIVATE → DRAFT, PUBLIC → PENDING_APPROVAL
+ * @note : Status is automatically set: PRIVATE → DRAFT, PUBLIC → PUBLISHED
  */
 studySetRouter.post(
     '',
