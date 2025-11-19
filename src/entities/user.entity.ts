@@ -18,6 +18,8 @@ import { ProficiencyLevel } from "~/enums/proficiency.enum";
 import { UserCategoryProgress } from "./userCategoryProgress.entity";
 import { UserTopicProgress } from "./userTopicProgress.entity";
 import { UserWordProgress } from "./userWordProgress.entity";
+import { StudySet } from "./studySet.entity";
+import { UserStudySet } from "./userStudySet.entity";
 
 @Entity()
 export class User extends BaseEntity {
@@ -71,6 +73,12 @@ export class User extends BaseEntity {
 
     @OneToMany(() => UserWordProgress, userWordProgress => userWordProgress.user, { cascade: true })
     words: UserWordProgress[];
+
+    @OneToMany(() => StudySet, (studySet) => studySet.owner)
+    studySets?: StudySet[];
+
+    @OneToMany(() => UserStudySet, (userStudySet) => userStudySet.user, { cascade: true })
+    purchasedStudySets?: UserStudySet[];
 
     @OneToMany(() => RefreshToken, (token) => token.user)
     tokens?: RefreshToken[]

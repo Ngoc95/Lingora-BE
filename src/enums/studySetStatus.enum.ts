@@ -1,0 +1,8 @@
+export enum StudySetStatus {
+    DRAFT = 'DRAFT',
+    PENDING_APPROVAL = 'PENDING_APPROVAL',
+    PUBLISHED = 'PUBLISHED',
+    ARCHIVED = 'ARCHIVED',
+    REJECTED = 'REJECTED',
+}
+

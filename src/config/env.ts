@@ -12,5 +12,5 @@ export const env = {
   JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET || 'access_secret',
   JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || 'refresh_secret',
   JWT_ACCESS_EXPIRE_TIME: process.env.JWT_ACCESS_EXPIRE_TIME || '15m',
-  JWT_REFRESH_EXPIRE_TIME: process.env.JWT_REFRESH_EXPIRE_TIME || '7d'
+  JWT_REFRESH_EXPIRE_TIME: process.env.JWT_REFRESH_EXPIRE_TIME || '7d',
 };
