@@ -11,6 +11,7 @@ import adaptiveTestRouter from "./adaptiveTest.route";
 import postRouter from "./post.route";
 import commentRouter from "./comment.route";
 import likeRouter from "./like.route";
+import withdrawalRouter from "./withdrawal.route";
 
 const router = Router();
 
@@ -26,5 +27,6 @@ router.use("/adaptive-test", adaptiveTestRouter);
 router.use("/posts", postRouter);
 router.use("/comments", commentRouter);
 router.use("/likes", likeRouter);
+router.use("/withdrawals", withdrawalRouter);
 
 export default router;

@@ -9,4 +9,5 @@ export enum Resource {
   POST = 'POST',
   COMMENT = 'COMMENT',
   LIKE = 'LIKE',
+  WITHDRAWAL = 'WITHDRAWAL',
 }

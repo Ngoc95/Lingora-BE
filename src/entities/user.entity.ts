@@ -21,6 +21,7 @@ import { UserWordProgress } from "./userWordProgress.entity";
 import { StudySet } from "./studySet.entity";
 import { UserStudySet } from "./userStudySet.entity";
 import { RevenueSplit } from "./revenueSplit.entity";
+import { WithdrawalRequest } from "./withdrawalRequest.entity";
 
 @Entity()
 export class User extends BaseEntity {
@@ -95,6 +96,27 @@ export class User extends BaseEntity {
         default: 0,
     })
     totalEarnings!: number
+
+    // Total amount withdrawn
+    @Column({
+        type: 'numeric',
+        precision: 12,
+        scale: 2,
+        default: 0,
+    })
+    withdrawnAmount!: number
+
+    // Amount pending in withdrawal requests
+    @Column({
+        type: 'numeric',
+        precision: 12,
+        scale: 2,
+        default: 0,
+    })
+    pendingWithdrawal!: number
+
+    @OneToMany(() => WithdrawalRequest, (withdrawalRequest) => withdrawalRequest.user, { cascade: true })
+    withdrawalRequests?: WithdrawalRequest[];
 
     @CreateDateColumn()
     createdAt!: Date;

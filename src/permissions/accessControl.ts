@@ -31,6 +31,8 @@ ac.grant(RoleName.LEARNER)
   .readAny(Resource.LIKE)
   .createOwn(Resource.LIKE)
   .deleteOwn(Resource.LIKE)
+  .createOwn(Resource.WITHDRAWAL)
+  .readOwn(Resource.WITHDRAWAL)
 
 // ========================
 // TEACHER (Giáo viên)
@@ -72,6 +74,9 @@ ac.grant(RoleName.ADMIN)
   .updateAny(Resource.COMMENT)
   .deleteAny(Resource.COMMENT)
   .deleteAny(Resource.LIKE)
+  .readAny(Resource.WITHDRAWAL)
+  .updateAny(Resource.WITHDRAWAL)
+  .deleteAny(Resource.WITHDRAWAL)
 
 
 export default ac
