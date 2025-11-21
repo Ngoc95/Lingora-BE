@@ -20,6 +20,7 @@ import { UserTopicProgress } from "./userTopicProgress.entity";
 import { UserWordProgress } from "./userWordProgress.entity";
 import { StudySet } from "./studySet.entity";
 import { UserStudySet } from "./userStudySet.entity";
+import { RevenueSplit } from "./revenueSplit.entity";
 
 @Entity()
 export class User extends BaseEntity {
@@ -80,8 +81,20 @@ export class User extends BaseEntity {
     @OneToMany(() => UserStudySet, (userStudySet) => userStudySet.user, { cascade: true })
     purchasedStudySets?: UserStudySet[];
 
+    @OneToMany(() => RevenueSplit, (revenueSplit) => revenueSplit.owner, { cascade: true })
+    revenueSplits?: RevenueSplit[];
+
     @OneToMany(() => RefreshToken, (token) => token.user)
     tokens?: RefreshToken[]
+
+    // Total earnings from studyset sales (accumulated)
+    @Column({
+        type: 'numeric',
+        precision: 12,
+        scale: 2,
+        default: 0,
+    })
+    totalEarnings!: number
 
     @CreateDateColumn()
     createdAt!: Date;
