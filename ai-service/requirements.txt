@@ -11,3 +11,6 @@ langchain-core
 langchain-huggingface
 chromadb
 sentence-transformers
+langchain-classic
+tavily-python
+langchain-tavily

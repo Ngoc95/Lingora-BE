@@ -1,25 +1,37 @@
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
-from langchain_google_genai import GoogleGenerativeAI
-from langchain_core.prompts import PromptTemplate
-from langchain_classic.chains import RetrievalQA
-from config.env import settings
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_tavily import TavilySearch
+from langchain_core.tools import tool
+from langchain_classic.agents import create_openai_functions_agent, AgentExecutor # Import trực tiếp từ file gốc
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.globals import set_llm_cache
+from langchain_community.cache import InMemoryCache
+from src.config.env import settings
 import os
-from typing import Optional
-# Cấu hình Embeddings (Phải GIỐNG HỆT lúc nạp dữ liệu)
+
+# --- 1. CẤU HÌNH CƠ BẢN ---
+# Setup Tavily Key
+os.environ["TAVILY_API_KEY"] = settings.TAVILY_API_KEY
+
+set_llm_cache(InMemoryCache())
+
+# Setup Embeddings
 embedding_model = HuggingFaceEmbeddings(
     model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
     model_kwargs={'device': 'cpu'}
 )
 
-# Cấu hình LLM (Gemini)
-# Temperature = 0.3 để câu trả lời chính xác, ít bịa đặt
-llm = GoogleGenerativeAI(
-    model="gemini-2.0-flash",
+# Setup LLM (Gemini)
+llm = ChatGoogleGenerativeAI(
+    model="gemini-2.5-flash", # Hoặc 1.5-flash
     google_api_key=settings.GOOGLE_API_KEY,
-    temperature=0.4
+    temperature=0 # Để Agent ra quyết định chính xác, nên để temp thấp
 )
+
 # --- 2. BỘ NHỚ (MEMORY) ---
+# Vẫn dùng cách lưu dictionary đơn giản của bạn, nhưng tí nữa sẽ convert
 CHAT_HISTORY = {}
 
 def get_chat_history(session_id):
@@ -28,147 +40,152 @@ def get_chat_history(session_id):
 def save_chat_history(session_id, question, answer):
     if session_id not in CHAT_HISTORY: CHAT_HISTORY[session_id] = []
     CHAT_HISTORY[session_id].append((question, answer))
-    if len(CHAT_HISTORY[session_id]) > 5: CHAT_HISTORY[session_id].pop(0)
+    if len(CHAT_HISTORY[session_id]) > 10: CHAT_HISTORY[session_id].pop(0)
 
-# --- 3. XỬ LÝ XÃ GIAO (CHITCHAT) - QUAN TRỌNG ---
-def is_chitchat(question):
+# --- 3. ĐỊNH NGHĨA CÔNG CỤ (TOOLS) ---
+# Agent sẽ nhìn vào docstring ("""...""") để biết khi nào dùng tool nào.
+
+@tool
+def lookup_grammar_book(query: str):
     """
-    Dùng AI để phân loại xem đây là câu chào hỏi xã giao (Chitchat) 
-    hay là câu hỏi cần tra cứu kiến thức (Learning).
+    Dùng công cụ này để tra cứu kiến thức về Ngữ pháp Tiếng Anh (Grammar), 
+    cấu trúc câu (Sentence Structure), các thì (Tenses) trong sách giáo khoa.
     """
-    prompt = f"""
-    Classify the user input into one of two categories: 'chitchat' or 'learning'.
-    
-    Definitions:
-    - 'chitchat': Greetings (Hello, Hi), personal questions about the bot (Who are you?), closing (Bye), gratitude (Thanks), or general small talk.
-    - 'learning': Questions asking for knowledge about English, Grammar, Vocabulary, definitions, examples, translations, or how to use words.
-    
-    CRITICAL RULE: 
-    If the input contains BOTH a greeting and a learning question (e.g., "Hello, what is a noun?"), classify it as 'learning'.
-    
-    Input: "{question}"
-    
-    Return ONLY one word: 'chitchat' or 'learning'.
-    """
+    print(f"📘 [Tool] Đang tra sách Ngữ pháp: {query}")
     try:
-        # Gọi Gemini để phân loại (nhanh gọn)
-        result = llm.invoke(prompt).strip().lower()
-        
-        # In ra log để bạn theo dõi nó quyết định thế nào
-        print(f"🤖 Intent Classifier: '{question}' -> {result.upper()}")
-        
-        if "chitchat" in result:
-            return True
-        return False # Mặc định là 'learning' để đi tra sách
+        vector_store = Chroma(
+            persist_directory=settings.CHROMA_DB_DIR,
+            embedding_function=embedding_model,
+            collection_name="grammar_collection"
+        )
+        retriever = vector_store.as_retriever(search_kwargs={"k": 4})
+        docs = retriever.invoke(query)
+        return "\n\n".join([doc.page_content for doc in docs])
     except Exception as e:
-        print(f"⚠️ Lỗi phân loại, mặc định tra sách: {e}")
-        return False
+        print(f"❌ Lỗi khi tra sách Ngữ pháp: {e}")
+        return "Sách giáo khoa không đề cập chi tiết. Hãy sử dụng kiến thức chuyên môn của bạn để giải thích đầy đủ cho học viên."
 
-def handle_chitchat(question, history):
-    """Trả lời xã giao thân thiện"""
-    history_text = "\n".join([f"User: {q}\nBot: {a}" for q, a in history])
-    
-    prompt = f"""
-    Bạn là trợ lý ảo học tập tên là "Lingora". Tính cách: Thân thiện, hài hước, lễ phép.
-    
-    [Lịch sử chat]:
-    {history_text}
-    
-    [User nói]: "{question}"
-    
-    Hãy trả lời người dùng một cách tự nhiên bằng tiếng Việt (không cần tra kiến thức).
-    Nếu họ chào, hãy chào lại và mời họ đặt câu hỏi về Tiếng Anh.
+@tool
+def lookup_vocab_book(query: str):
     """
-    return llm.invoke(prompt)
-
-# --- 4. HÀM VIẾT LẠI CÂU HỎI & DETECT INTENT (Giữ nguyên logic cũ) ---
-def contextualize_query(question, history):
-    if not history: return question
-    
-    # Chỉ lấy 2 lượt hỏi đáp gần nhất để tránh nhiễu thông tin quá cũ
-    recent_history = history[-2:] 
-    history_str = "\n".join([f"User: {q}\nAI: {a}" for q, a in recent_history])
-    
-    prompt = f"""
-    [Chat History]:
-    {history_str}
-    
-    [User's Input]:
-    {question}
-    
-    TASK: Rewrite the User's Input to be a standalone question that can be understood without the chat history.
-    RULE: Keep the original intent EXACTLY. Do not narrow down the scope unless the user explicitly asks to.
-    
-    [Rewritten Question]:
+    Dùng công cụ này để tra cứu Từ vựng (Vocabulary), định nghĩa từ (Definition),
+    thành ngữ (Idioms) hoặc cụm từ trong sách giáo khoa.
     """
+    print(f"📗 [Tool] Đang tra sách Từ vựng: {query}")
     try:
-        return llm.invoke(prompt).strip()
-    except:
-        return question
+        vector_store = Chroma(
+            persist_directory=settings.CHROMA_DB_DIR,
+            embedding_function=embedding_model,
+            collection_name="vocab_collection"
+        )
+        retriever = vector_store.as_retriever(search_kwargs={"k": 4})
+        docs = retriever.invoke(query)
+        return "\n\n".join([doc.page_content for doc in docs])
+    except Exception as e:
+        print(f"❌ Lỗi khi tra sách Từ vựng: {e}")
+        return "Sách giáo khoa không đề cập chi tiết. Hãy sử dụng kiến thức chuyên môn của bạn để giải thích đầy đủ cho học viên."
 
-def detect_intent(question):
-    # Logic cũ
-    keywords = ["nghĩa", "mean", "vocab", "từ vựng", "định nghĩa"]
-    for k in keywords: 
-        if k in question.lower(): return "vocab"
-    return "grammar"
+# Tool Search Google (Tavily)
+search_web_tool = TavilySearch(
+    max_results=3,
+    description="Dùng công cụ này để tìm kiếm thông tin KHÔNG có trong sách giáo khoa, kiến thức xã hội, hoặc các từ lóng (slang) mới nhất."
+)
 
-# --- 5. LOGIC CHÍNH ĐÃ NÂNG CẤP ---
-def get_answer(question: str, type: str = None, session_id: str = "default"):
-    history = get_chat_history(session_id)
+# Gom tất cả tools lại
+tools = [lookup_grammar_book, lookup_vocab_book, search_web_tool]
+
+# --- 4. TẠO AGENT ---
+def create_lingora_agent():
+    # Prompt System cho Agent
+    system_prompt = """
+    Bạn là Lingora - Trợ lý ảo dạy Tiếng Anh thông minh.
+    Bạn có 3 công cụ: Sách Ngữ Pháp, Sách Từ Vựng, Google Search.
+
+    NHIỆM VỤ CỦA BẠN:
+    1. Nhận câu hỏi từ học viên.
+    2. QUYẾT ĐỊNH xem nên dùng công cụ nào:
+       - Nếu hỏi về ngữ pháp -> Dùng 'lookup_grammar_book'.
+       - Nếu hỏi về từ vựng -> Dùng 'lookup_vocab_book'.
+       - Nếu hỏi về kiến thức ngoài lề hoặc sách không có -> Dùng 'tavily_search_results_json'.
+       - Nếu là chào hỏi xã giao (Hello, Hi) -> KHÔNG dùng tool, tự trả lời thân thiện, vui vẻ, nhẹ nhàng.
     
-    # --- CHECK 1: CÓ PHẢI XÃ GIAO KHÔNG? ---
-    if is_chitchat(question):
-        print("💬 Mode: Chitchat (Không tốn công tra sách)")
-        response = handle_chitchat(question, history)
-        save_chat_history(session_id, question, response)
-        return response
-    # ----------------------------------------
+    QUY TẮC TRẢ LỜI (QUAN TRỌNG):
+    - Trả lời bằng Tiếng Việt tự nhiên.
+    - **TUYỆT ĐỐI KHÔNG XIN LỖI** nếu không tìm thấy trong sách. Cứ thế mà trả lời bằng kiến thức của bạn.
+    - **KHÔNG NHẮC TÊN CÔNG CỤ** (Ví dụ: Đừng nói "Công cụ tra cứu không có...", "Theo Tavily...").
+    - Nếu thông tin lấy từ sách, hãy giải thích chi tiết.
 
-    # Nếu không phải xã giao -> Quy trình RAG bình thường
-    refined_question = contextualize_query(question, history)
-    
-    if not type or type == "auto":
-        type = detect_intent(refined_question)
-    
-    collection_name = "grammar_collection" if type == "grammar" else "vocab_collection"
-    print(f"🔍 Tìm kiếm '{refined_question}' trong {collection_name}")
+    SAU KHI CÓ THÔNG TIN TỪ TOOL:
+    - Trả lời học viên bằng Tiếng Việt.
+    - Trả lời tự nhiên, không nhắc tên công cụ (VD: Đừng nói "Theo kết quả Tavily...").
+    - Nếu thông tin lấy từ sách, hãy giải thích chi tiết.
+    """
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", system_prompt),
+        MessagesPlaceholder(variable_name="chat_history"), # Nơi nhét lịch sử vào
+        ("human", "{input}"),
+        MessagesPlaceholder(variable_name="agent_scratchpad"), # Nơi Agent suy nghĩ
+    ])
 
-    vector_store = Chroma(
-        persist_directory=settings.CHROMA_DB_DIR,
-        embedding_function=embedding_model,
-        collection_name=collection_name
+    # Tạo Agent
+    agent = create_openai_functions_agent(llm, tools, prompt)
+    
+    # Executor là bộ máy chạy Agent
+    agent_executor = AgentExecutor(
+        agent=agent, 
+        tools=tools, 
+        verbose=True, # Bật True để nhìn thấy suy nghĩ của Agent trên terminal
+        handle_parsing_errors=True
     )
-    # Tăng k=10 để tìm sâu hơn
-    retriever = vector_store.as_retriever(search_kwargs={"k": 10})
+    return agent_executor
+
+# Khởi tạo 1 lần dùng chung
+lingora_agent = create_lingora_agent()
+
+# --- 5. HÀM CHÍNH (ĐƯỢC GỌI TỪ API) ---
+def get_answer(question: str, type: str = None, session_id: str = "default"):
+    # 1. Lấy lịch sử chat thô
+    raw_history = get_chat_history(session_id)
     
-    # Lấy tài liệu
-    docs = retriever.invoke(refined_question)
-    context_text = "\n\n".join([doc.page_content for doc in docs])
+    # 2. Chuyển đổi sang format của LangChain (Memory của Agent)
+    lc_history = []
+    for q, a in raw_history:
+        lc_history.append(HumanMessage(content=q))
+        lc_history.append(AIMessage(content=a))
     
-    # Prompt RAG
-    final_prompt = f"""
-    Bạn là Lingora - một giáo viên Tiếng Anh chuyên nghiệp, thân thiện và am hiểu sâu sắc.
-    Nhiệm vụ của bạn là giải thích câu hỏi cho học viên dựa trên kiến thức được cung cấp.
+    print(f"🤖 Agent đang suy nghĩ cho session: {session_id}...")
 
-    🔴 QUY TẮC GIAO TIẾP (BẮT BUỘC):
-    1. **PHONG CÁCH TỰ NHIÊN:** Trả lời như kiến thức của chính bạn. TUYỆT ĐỐI KHÔNG nói các câu như: "Dựa vào sách", "Theo tài liệu", "Trang 295", "Sách không đề cập".
-    2. **XỬ LÝ THIẾU THÔNG TIN:** Nếu ngữ cảnh được cung cấp không đủ, hãy TỰ ĐỘNG bổ sung bằng kiến thức chuyên môn của bạn một cách trôi chảy. Đừng báo cáo "Sách thiếu thông tin".
-    3. **KHÔNG TRÍCH DẪN SỐ TRANG:** Hãy loại bỏ mọi số trang, tên chương ra khỏi câu trả lời.
-    4. **CẤU TRÚC:** Trình bày ngắn gọn, dễ hiểu, dùng Bullet point nếu liệt kê.
-
-    [Kiến thức nền (để bạn tham khảo)]:
-    {context_text}
-
-    [Câu hỏi của học viên]:
-    {refined_question}
-
-    👉 Hãy trả lời học viên ngay (Tiếng Việt):
-    """
-    
     try:
-        response_text = llm.invoke(final_prompt)
-        save_chat_history(session_id, question, response_text)
-        return response_text
+        # 3. Chạy Agent
+        result = lingora_agent.invoke({
+            "input": question,
+            "chat_history": lc_history
+        })
+        
+        raw_output = result['output']
+        final_response = ""
+        # Trường hợp 1: Nó trả về chuỗi bình thường (Ngon)
+        if isinstance(raw_output, str):
+            final_response = raw_output
+            
+        # Trường hợp 2: Nó trả về List (như cái lỗi bạn gặp)
+        elif isinstance(raw_output, list):
+            for part in raw_output:
+                # Nếu là chuỗi thì cộng vào
+                if isinstance(part, str):
+                    final_response += part
+                # Nếu là Dictionary (có chứa 'text') thì lấy phần text
+                elif isinstance(part, dict) and 'text' in part:
+                    final_response += part['text']
+        
+        # Trường hợp 3: Nó trả về Object lạ -> Ép sang string
+        else:
+            final_response = str(raw_output)
+        # 4. Lưu lại lịch sử
+        save_chat_history(session_id, question, final_response)
+        
+        return final_response
+
     except Exception as e:
-        return f"Lỗi hệ thống: {str(e)}"
+        print(f"❌ Agent Error: {e}")
+        return "Xin lỗi, hệ thống đang gặp chút trục trặc khi suy nghĩ. Bạn hỏi lại thử xem?"
