@@ -3,12 +3,13 @@ from langchain_chroma import Chroma
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_tavily import TavilySearch
 from langchain_core.tools import tool
-from langchain_classic.agents import create_openai_functions_agent, AgentExecutor # Import trực tiếp từ file gốc
+from langchain_classic.agents import create_openai_tools_agent, AgentExecutor
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import HumanMessage, AIMessage
 from langchain_core.globals import set_llm_cache
 from langchain_community.cache import InMemoryCache
 from src.config.env import settings
+from typing import Any, Iterable, Optional, Sequence
 import os
 
 # --- 1. CẤU HÌNH CƠ BẢN ---
@@ -41,6 +42,37 @@ def save_chat_history(session_id, question, answer):
     if session_id not in CHAT_HISTORY: CHAT_HISTORY[session_id] = []
     CHAT_HISTORY[session_id].append((question, answer))
     if len(CHAT_HISTORY[session_id]) > 10: CHAT_HISTORY[session_id].pop(0)
+
+def build_langchain_history(history_payload: Optional[Iterable[Any]], session_id: str):
+    lc_history = []
+
+    if history_payload:
+        for entry in history_payload:
+            sender = None
+            content = None
+
+            if isinstance(entry, dict):
+                sender = entry.get("sender")
+                content = entry.get("content")
+            else:
+                sender = getattr(entry, "sender", None)
+                content = getattr(entry, "content", None)
+
+            if not content:
+                continue
+
+            if str(sender).upper() == "USER":
+                lc_history.append(HumanMessage(content=content))
+            else:
+                lc_history.append(AIMessage(content=content))
+
+    else:
+        raw_history = get_chat_history(session_id)
+        for q, a in raw_history:
+            lc_history.append(HumanMessage(content=q))
+            lc_history.append(AIMessage(content=a))
+
+    return lc_history[-6:]
 
 # --- 3. ĐỊNH NGHĨA CÔNG CỤ (TOOLS) ---
 # Agent sẽ nhìn vào docstring ("""...""") để biết khi nào dùng tool nào.
@@ -98,27 +130,21 @@ tools = [lookup_grammar_book, lookup_vocab_book, search_web_tool]
 def create_lingora_agent():
     # Prompt System cho Agent
     system_prompt = """
-    Bạn là Lingora - Trợ lý ảo dạy Tiếng Anh thông minh.
+    Bạn là LingoraBot - Trợ lý ảo dạy Tiếng Anh.
     Bạn có 3 công cụ: Sách Ngữ Pháp, Sách Từ Vựng, Google Search.
 
-    NHIỆM VỤ CỦA BẠN:
-    1. Nhận câu hỏi từ học viên.
-    2. QUYẾT ĐỊNH xem nên dùng công cụ nào:
-       - Nếu hỏi về ngữ pháp -> Dùng 'lookup_grammar_book'.
-       - Nếu hỏi về từ vựng -> Dùng 'lookup_vocab_book'.
-       - Nếu hỏi về kiến thức ngoài lề hoặc sách không có -> Dùng 'tavily_search_results_json'.
-       - Nếu là chào hỏi xã giao (Hello, Hi) -> KHÔNG dùng tool, tự trả lời thân thiện, vui vẻ, nhẹ nhàng.
-    
-    QUY TẮC TRẢ LỜI (QUAN TRỌNG):
-    - Trả lời bằng Tiếng Việt tự nhiên.
-    - **TUYỆT ĐỐI KHÔNG XIN LỖI** nếu không tìm thấy trong sách. Cứ thế mà trả lời bằng kiến thức của bạn.
-    - **KHÔNG NHẮC TÊN CÔNG CỤ** (Ví dụ: Đừng nói "Công cụ tra cứu không có...", "Theo Tavily...").
-    - Nếu thông tin lấy từ sách, hãy giải thích chi tiết.
+    NHIỆM VỤ DUY NHẤT:
+    - Xử lý và trả lời câu hỏi MỚI NHẤT của người dùng (nằm trong biến input).
 
-    SAU KHI CÓ THÔNG TIN TỪ TOOL:
-    - Trả lời học viên bằng Tiếng Việt.
-    - Trả lời tự nhiên, không nhắc tên công cụ (VD: Đừng nói "Theo kết quả Tavily...").
-    - Nếu thông tin lấy từ sách, hãy giải thích chi tiết.
+    🔴 QUY TẮC "VÀNG" KHI DÙNG LỊCH SỬ (IGNORE HISTORY CONTENT):
+    1. **IGNORE PREVIOUS ANSWERS:** Lịch sử chat chỉ để bạn hiểu ngữ cảnh (ví dụ user nói "nó là gì" thì tìm trong lịch sử xem "nó" là gì).
+    2. **CẤM LẶP LẠI:** Tuyệt đối KHÔNG nhắc lại, không tóm tắt, không copy-paste bất kỳ nội dung nào của các câu trả lời trước đó.
+    3. **CÂU TRẢ LỜI ĐỘC LẬP:** Câu trả lời của bạn phải mới hoàn toàn, đi thẳng vào vấn đề của câu hỏi mới. Không bắt đầu bằng "Như đã nói...", "Về câu hỏi trước...".
+
+    QUY TẮC KHÁC:
+    - Trả lời bằng Tiếng Việt tự nhiên, thân thiện.
+    - Nếu sách không có, dùng kiến thức của bạn, KHÔNG được xin lỗi.
+    - Không nhắc tên công cụ (lookup...).
     """
     prompt = ChatPromptTemplate.from_messages([
         ("system", system_prompt),
@@ -128,7 +154,7 @@ def create_lingora_agent():
     ])
 
     # Tạo Agent
-    agent = create_openai_functions_agent(llm, tools, prompt)
+    agent = create_openai_tools_agent(llm, tools, prompt)
     
     # Executor là bộ máy chạy Agent
     agent_executor = AgentExecutor(
@@ -143,25 +169,19 @@ def create_lingora_agent():
 lingora_agent = create_lingora_agent()
 
 # --- 5. HÀM CHÍNH (ĐƯỢC GỌI TỪ API) ---
-def get_answer(question: str, type: str = None, session_id: str = "default"):
-    # 1. Lấy lịch sử chat thô
-    raw_history = get_chat_history(session_id)
+def get_answer(question: str, type: str = None, session_id: str = "default", history: Optional[Sequence[dict]] = None):
+    lc_history = build_langchain_history(history, session_id)
     
-    # 2. Chuyển đổi sang format của LangChain (Memory của Agent)
-    lc_history = []
-    for q, a in raw_history:
-        lc_history.append(HumanMessage(content=q))
-        lc_history.append(AIMessage(content=a))
-    
-    print(f"🤖 Agent đang suy nghĩ cho session: {session_id}...")
+    print(f"🤖 Agent đang suy nghĩ cho session: {session_id}...; có history: {len(lc_history)}")
 
     try:
         # 3. Chạy Agent
+        print(f"question: {question}")
         result = lingora_agent.invoke({
             "input": question,
             "chat_history": lc_history
         })
-        
+        print(f"result: {result}")
         raw_output = result['output']
         final_response = ""
         # Trường hợp 1: Nó trả về chuỗi bình thường (Ngon)
@@ -182,10 +202,34 @@ def get_answer(question: str, type: str = None, session_id: str = "default"):
         else:
             final_response = str(raw_output)
         # 4. Lưu lại lịch sử
-        save_chat_history(session_id, question, final_response)
+        if history is None:
+            save_chat_history(session_id, question, final_response)
         
         return final_response
 
     except Exception as e:
         print(f"❌ Agent Error: {e}")
         return "Xin lỗi, hệ thống đang gặp chút trục trặc khi suy nghĩ. Bạn hỏi lại thử xem?"
+
+def generate_chat_title(question: str):
+    prompt = f"""
+    Nhiệm vụ: Tóm tắt câu hỏi sau thành một TIÊU ĐỀ ngắn gọn, súc tích (dưới 6 từ).
+    Yêu cầu:
+    - Bỏ các từ thừa như "cho mình hỏi", "làm sao để", "là gì".
+    - Giữ lại từ khóa chính.
+    - Viết hoa chữ cái đầu.
+    - Ví dụ: "Thì hiện tại đơn dùng khi nào" -> "Cách dùng thì Hiện tại đơn"
+    
+    Câu hỏi: "{question}"
+    
+    Tiêu đề:
+    """
+    try:
+        # Gọi LLM (dùng biến llm đã khai báo ở trên)
+        title = llm.invoke(prompt).content
+        
+        # Làm sạch chuỗi (bỏ ngoặc kép, khoảng trắng thừa)
+        return title.strip().replace('"', '').replace("'", "")
+    except Exception:
+        # Fallback nếu AI lỗi: Cắt chuỗi thủ công
+        return question[:50] + "..."

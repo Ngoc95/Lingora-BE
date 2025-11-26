@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import Optional
+from typing import List, Optional
 from src.rag import get_answer
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -13,9 +13,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 # Định nghĩa dữ liệu đầu vào (Request Body)
+class HistoryMessage(BaseModel):
+    sender: str
+    content: str
+
 class ChatRequest(BaseModel):
     question: str
     type: Optional[str] = None
+    session_id: Optional[str] = None
+    history: Optional[List[HistoryMessage]] = None
 
 @app.get("/")
 def read_root():
@@ -31,13 +37,23 @@ def chat_endpoint(request: ChatRequest):
         "type": "grammar"
     }
     """
-    if request.type not in ["grammar", "vocab"]:
-        raise HTTPException(status_code=400, detail="Type must be 'grammar' or 'vocab'")
-    
     if not request.question.strip():
         raise HTTPException(status_code=400, detail="Question cannot be empty")
 
     # Gọi hàm logic bên file rag.py
-    answer = get_answer(request.question, request.type)
+    answer = get_answer(
+        question=request.question,
+        type=request.type,
+        session_id=request.session_id or "default",
+        history=request.history,
+    )
     
     return {"answer": answer}
+class TitleRequest(BaseModel):
+    question: str
+
+@app.post("/generate-title")
+def title_endpoint(request: TitleRequest):
+    from src.rag import generate_chat_title
+    title = generate_chat_title(request.question)
+    return {"title": title}
