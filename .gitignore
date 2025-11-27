@@ -52,6 +52,13 @@ prisma/
 tmp/
 temp/
 
+# Cache
+src/cache/*
+!src/cache/.gitkeep
+
+# Script
+**/scripts/
+
 # OS files
 ehthumbs.db
 desktop.ini
