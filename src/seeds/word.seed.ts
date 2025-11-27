@@ -16,6 +16,7 @@ interface CachedWordData {
   cefr: CefrLevel
   type: WordType
   meaning: string
+  vnMeaning?: string
   example?: string
   exampleTranslation?: string
   audioUrl?: string | null
@@ -38,7 +39,7 @@ interface CacheMetadata {
 }
 
 const cacheDir = path.join(__dirname, '../cache')
-const cachePath = path.join(cacheDir, 'word_details.json')
+const cachePath = path.join(cacheDir, 'word_details_with_vn.json')
 const metadataPath = path.join(cacheDir, 'cache_metadata.json')
 
 // =======================================================================
@@ -108,6 +109,7 @@ export async function saveCachedWordsToDB() {
       word: wordData.headword,
       phonetic: wordData.phonetic || undefined,
       meaning: wordData.meaning,
+      vnMeaning: wordData.vnMeaning || undefined,
       type: wordData.type,
       cefrLevel: wordData.cefr,
       example: wordData.example || undefined,
@@ -144,6 +146,36 @@ export async function saveCachedWordsToDB() {
 // // =======================================================================
 // // 🔹 Cache một batch
 // // =======================================================================
+// interface CachedWordData {
+//   headword: string
+//   phonetic?: string | null
+//   cefr: CefrLevel
+//   type: WordType
+//   meaning: string
+//   example?: string
+//   exampleTranslation?: string
+//   audioUrl?: string | null
+//   imageUrl?: string | null
+//   failed?: boolean
+//   topicId?: number
+// }
+
+// interface CsvWordRow {
+//   headword: string
+//   cefr: string
+// }
+
+// interface CacheMetadata {
+//   lastProcessedIndex: number
+//   totalProcessed: number
+//   totalSuccess: number
+//   totalFailed: number
+//   lastUpdated: string
+// }
+
+// const cacheDir = path.join(__dirname, '../cache')
+// const cachePath = path.join(cacheDir, 'word_details.json')
+// const metadataPath = path.join(cacheDir, 'cache_metadata.json')
 // async function cacheBatch(BATCH_LIMIT: number, records: CsvWordRow[], topics: Topic[]) {
 //   let cache: Record<string, CachedWordData> = {}
 //   if (fs.existsSync(cachePath)) {

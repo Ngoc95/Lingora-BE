@@ -20,6 +20,9 @@ export const createWordValidation = validate(
                 trim: true,
                 ...isRequired('meaning'),
             },
+            vnMeaning: {
+                trim: true,
+            },
             phonetic: {
                 trim: true,
                 custom: {

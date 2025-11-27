@@ -12,6 +12,7 @@ import postRouter from "./post.route";
 import commentRouter from "./comment.route";
 import likeRouter from "./like.route";
 import chatRouter from "./chat.route";
+import translateRouter from "./translate.route";
 
 const router = Router();
 
@@ -28,5 +29,6 @@ router.use("/posts", postRouter);
 router.use("/comments", commentRouter);
 router.use("/likes", likeRouter);
 router.use("/chat", chatRouter);
+router.use("/translate", translateRouter);
 
 export default router;
