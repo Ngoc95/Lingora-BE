@@ -17,6 +17,9 @@ export const updateWordValidation = validate(
             meaning: {
                 trim: true,
             },
+            vnMeaning: {
+                trim: true,
+            },
             phonetic: {
                 trim: true,
                 custom: {

@@ -10,6 +10,18 @@ import { wrapRequestHandler } from "~/utils/handler";
 
 const wordRouter = Router();
 
+// Public dictionary lookup
+wordRouter.get(
+    '/dictionary',
+    wrapRequestHandler(wordController.lookupWord)
+)
+
+// Public word suggestions for autocomplete
+wordRouter.get(
+    '/suggest',
+    wrapRequestHandler(wordController.suggestWords)
+)
+
 // access token validation
 wordRouter.use(accessTokenValidation)
 
@@ -22,6 +34,7 @@ wordRouter.use(accessTokenValidation)
  * @body : {
  *  word: string
  *  meaning: string
+ *  vnMeaning?: string
  *  phonetic?: string
  *  cefrLevel?: string
  *  type?: string
@@ -46,7 +59,7 @@ wordRouter.post(
  * @path : 
  * @header : Authorization
  * @query : {limit: number, page:number, search:string, cefrLevel:CefrLevel, type:WordType, topicId:number, sort: string}
- * search?: string (search for word, meaning, example)
+ * search?: string (search for word, meaning, vnMeaning, example)
  * sort like -id,+word
  * sort field must be in ['id', 'word', 'cefrLevel']
  * filter field must be in [
@@ -88,6 +101,7 @@ wordRouter.get(
  * @body : {
     word?: string
     meaning?: string
+    vnMeaning?: string
     phonetic?: string
     cefrLevel?: CefrLevel (A1, A2, B1, B2, C1, C2)
     type?: WordType (mở wordType.enum.ts để xem các loại từ)
