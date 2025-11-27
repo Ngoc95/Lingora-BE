@@ -20,6 +20,7 @@ import { UserTopicProgress } from "./userTopicProgress.entity";
 import { UserWordProgress } from "./userWordProgress.entity";
 import { StudySet } from "./studySet.entity";
 import { UserStudySet } from "./userStudySet.entity";
+import { ChatSession } from "./chatSession.entity";
 
 @Entity()
 export class User extends BaseEntity {
@@ -82,6 +83,9 @@ export class User extends BaseEntity {
 
     @OneToMany(() => RefreshToken, (token) => token.user)
     tokens?: RefreshToken[]
+
+    @OneToMany(() => ChatSession, (chatSession) => chatSession.user)
+    chatSessions?: ChatSession[]
 
     @CreateDateColumn()
     createdAt!: Date;
