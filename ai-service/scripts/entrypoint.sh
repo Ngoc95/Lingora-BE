@@ -10,6 +10,12 @@ mkdir -p "${DATA_PATH:-/app/data}" "${CHROMA_DB_DIR:-/app/chroma_db_store}"
 export DATA_PATH="${DATA_PATH:-/app/data}"
 export CHROMA_DB_DIR="${CHROMA_DB_DIR:-/app/chroma_db_store}"
 
+# Debug: Hiển thị environment variables
+echo "📋 Environment:"
+echo "   DATA_PATH=$DATA_PATH"
+echo "   CHROMA_DB_DIR=$CHROMA_DB_DIR"
+echo "   Working directory: $(pwd)"
+
 # Kiểm tra ChromaDB đã có chưa
 echo "🔍 Đang kiểm tra ChromaDB..."
 

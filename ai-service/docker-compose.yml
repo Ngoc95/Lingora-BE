@@ -6,9 +6,6 @@ services:
       - "8000:8000"
     env_file:
       - .env
-    environment:
-      - DATA_PATH=/app/data
-      - CHROMA_DB_DIR=/app/chroma_db_store
     volumes:
       # Persist ChromaDB - data sẽ được giữ lại khi container restart
       - ./chroma_db_store:/app/chroma_db_store
