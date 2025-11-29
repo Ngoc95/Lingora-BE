@@ -56,8 +56,6 @@ temp/
 src/cache/*
 !src/cache/.gitkeep
 
-# Script
-**/scripts/
 
 # OS files
 ehthumbs.db

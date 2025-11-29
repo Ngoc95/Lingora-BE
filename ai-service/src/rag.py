@@ -1,4 +1,4 @@
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_openai import OpenAIEmbeddings
 from langchain_chroma import Chroma
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_tavily import TavilySearch
@@ -19,9 +19,9 @@ os.environ["TAVILY_API_KEY"] = settings.TAVILY_API_KEY
 set_llm_cache(InMemoryCache())
 
 # Setup Embeddings
-embedding_model = HuggingFaceEmbeddings(
-    model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
-    model_kwargs={'device': 'cpu'}
+embedding_model = OpenAIEmbeddings(
+    openai_api_key=settings.OPENAI_API_KEY,
+    model="text-embedding-3-small" 
 )
 
 # Setup LLM (Gemini)

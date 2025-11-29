@@ -13,10 +13,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy toàn bộ code vào
 COPY . .
 
-RUN python3 -m src.ingest
+# Tạo entrypoint script và set quyền
+COPY scripts/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 # Mở cổng 8000
 EXPOSE 8000
 
-# Lệnh chạy server
+# Entrypoint sẽ check và setup nếu cần
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]

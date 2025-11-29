@@ -1,0 +1,9 @@
+data/
+chroma_db_store/
+.git/
+.gitignore
+.env
+*.md
+venv/
+.venv/
+__pycache__/

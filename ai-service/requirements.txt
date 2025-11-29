@@ -8,9 +8,9 @@ langchain-google-genai
 langchain-text-splitters
 langchain-chroma
 langchain-core
-langchain-huggingface
+langchain-openai
 chromadb
-sentence-transformers
 langchain-classic
 tavily-python
 langchain-tavily
+requests
