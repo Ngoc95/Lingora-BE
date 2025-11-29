@@ -5,3 +5,5 @@ venv/
 .env
 data/
 chroma_db_store/
+
+!data/.gitkeep
