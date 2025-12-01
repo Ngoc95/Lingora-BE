@@ -24,6 +24,21 @@ embedding_model = OpenAIEmbeddings(
     model="text-embedding-3-small" 
 )
 
+# NEW: create Chroma stores & retrievers once and reuse
+grammar_vector_store = Chroma(
+    persist_directory=settings.CHROMA_DB_DIR,
+    embedding_function=embedding_model,
+    collection_name="grammar_collection",
+)
+grammar_retriever = grammar_vector_store.as_retriever(search_kwargs={"k": 4})
+
+vocab_vector_store = Chroma(
+    persist_directory=settings.CHROMA_DB_DIR,
+    embedding_function=embedding_model,
+    collection_name="vocab_collection",
+)
+vocab_retriever = vocab_vector_store.as_retriever(search_kwargs={"k": 4})
+
 # Setup LLM (Gemini)
 llm = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash", # Hoặc 1.5-flash
@@ -85,13 +100,8 @@ def lookup_grammar_book(query: str):
     """
     print(f"📘 [Tool] Đang tra sách Ngữ pháp: {query}")
     try:
-        vector_store = Chroma(
-            persist_directory=settings.CHROMA_DB_DIR,
-            embedding_function=embedding_model,
-            collection_name="grammar_collection"
-        )
-        retriever = vector_store.as_retriever(search_kwargs={"k": 4})
-        docs = retriever.invoke(query)
+        # dùng retriever tái sử dụng, không tạo lại Chroma mỗi lần
+        docs = grammar_retriever.invoke(query)
         return "\n\n".join([doc.page_content for doc in docs])
     except Exception as e:
         print(f"❌ Lỗi khi tra sách Ngữ pháp: {e}")
@@ -105,13 +115,7 @@ def lookup_vocab_book(query: str):
     """
     print(f"📗 [Tool] Đang tra sách Từ vựng: {query}")
     try:
-        vector_store = Chroma(
-            persist_directory=settings.CHROMA_DB_DIR,
-            embedding_function=embedding_model,
-            collection_name="vocab_collection"
-        )
-        retriever = vector_store.as_retriever(search_kwargs={"k": 4})
-        docs = retriever.invoke(query)
+        docs = vocab_retriever.invoke(query)
         return "\n\n".join([doc.page_content for doc in docs])
     except Exception as e:
         print(f"❌ Lỗi khi tra sách Từ vựng: {e}")
@@ -169,42 +173,87 @@ def create_lingora_agent():
 lingora_agent = create_lingora_agent()
 
 # --- 5. HÀM CHÍNH (ĐƯỢC GỌI TỪ API) ---
-def get_answer(question: str, type: str = None, session_id: str = "default", history: Optional[Sequence[dict]] = None):
+def _simple_rag_answer(question: str, retrieved_text: str) -> str:
+    """
+    Gọi LLM 1 lần với context đã retrieve sẵn – nhanh hơn Agent + Tools.
+    """
+    prompt = f"""
+    Bạn là LingoraBot - Trợ lý ảo dạy Tiếng Anh.
+
+    Đây là tài liệu tham khảo (có thể là trích từ sách hoặc tài liệu liên quan):
+
+    ----------
+    {retrieved_text}
+    ----------
+
+    Nhiệm vụ:
+    - Trả lời CÂU HỎI của học viên bên dưới một cách ngắn gọn, dễ hiểu.
+    - Nếu tài liệu không đủ, dùng kiến thức của bạn để giải thích, nhưng KHÔNG nói rằng tài liệu thiếu.
+
+    CÂU HỎI: {question}
+    """
+    resp = llm.invoke(prompt)
+    return getattr(resp, "content", str(resp))
+
+
+def get_answer(
+    question: str,
+    type: str = None,
+    session_id: str = "default",
+    history: Optional[Sequence[dict]] = None,
+):
     lc_history = build_langchain_history(history, session_id)
-    
+
     print(f"🤖 Agent đang suy nghĩ cho session: {session_id}...; có history: {len(lc_history)}")
 
+    # --- FAST PATHS: không dùng Agent đầy đủ khi không cần ---
     try:
-        # 3. Chạy Agent
+        normalized_type = (type or "").lower().strip()
+
+        if normalized_type in {"grammar", "nguphap"}:
+            print("⚡ Fast-path: grammar RAG")
+            docs = grammar_retriever.invoke(question)
+            context = "\n\n".join(doc.page_content for doc in docs)
+            answer = _simple_rag_answer(question, context)
+            if history is None:
+                save_chat_history(session_id, question, answer)
+            return answer
+
+        if normalized_type in {"vocab", "vocabulary", "tuvung"}:
+            print("⚡ Fast-path: vocab RAG")
+            docs = vocab_retriever.invoke(question)
+            context = "\n\n".join(doc.page_content for doc in docs)
+            answer = _simple_rag_answer(question, context)
+            if history is None:
+                save_chat_history(session_id, question, answer)
+            return answer
+
+        # --- FALLBACK: dùng Agent đầy đủ như hiện tại ---
         print(f"question: {question}")
-        result = lingora_agent.invoke({
-            "input": question,
-            "chat_history": lc_history
-        })
+        result = lingora_agent.invoke(
+            {
+                "input": question,
+                "chat_history": lc_history,
+            }
+        )
         print(f"result: {result}")
-        raw_output = result['output']
+        raw_output = result["output"]
         final_response = ""
-        # Trường hợp 1: Nó trả về chuỗi bình thường (Ngon)
+
         if isinstance(raw_output, str):
             final_response = raw_output
-            
-        # Trường hợp 2: Nó trả về List (như cái lỗi bạn gặp)
         elif isinstance(raw_output, list):
             for part in raw_output:
-                # Nếu là chuỗi thì cộng vào
                 if isinstance(part, str):
                     final_response += part
-                # Nếu là Dictionary (có chứa 'text') thì lấy phần text
-                elif isinstance(part, dict) and 'text' in part:
-                    final_response += part['text']
-        
-        # Trường hợp 3: Nó trả về Object lạ -> Ép sang string
+                elif isinstance(part, dict) and "text" in part:
+                    final_response += part["text"]
         else:
             final_response = str(raw_output)
-        # 4. Lưu lại lịch sử
+
         if history is None:
             save_chat_history(session_id, question, final_response)
-        
+
         return final_response
 
     except Exception as e:
