@@ -3,6 +3,7 @@ import { examController } from "~/controllers/exam.controller";
 import {
   accessTokenValidation,
   checkPermission,
+  optionalAccessToken,
 } from "~/middlewares/auth.middlewares";
 import { Resource } from "~/enums/resource.enum";
 
@@ -10,7 +11,7 @@ const examRouter = Router();
 
 // Public exam browsing
 examRouter.get("/exams", examController.listExams);
-examRouter.get("/exams/:examId", examController.getExamDetail);
+examRouter.get("/exams/:examId", optionalAccessToken, examController.getExamDetail);
 examRouter.get(
   "/exams/:examId/sections/:sectionId",
   examController.getSectionDetail

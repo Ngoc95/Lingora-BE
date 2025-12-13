@@ -80,6 +80,32 @@ class AiService {
       });
     }
   }
+
+  async gradeWriting(question: string, answer: string) {
+    try {
+      const { data } = await this.client.post("/score/writing", {
+        question,
+        answer,
+      });
+      return data;
+    } catch (error) {
+      console.error("AI Writing Grading Error:", error);
+      return null;
+    }
+  }
+
+  async gradeSpeaking(question: string, audioUrl: string) {
+    try {
+      const { data } = await this.client.post("/score/speaking", {
+        question,
+        audio_url: audioUrl,
+      });
+      return data;
+    } catch (error) {
+      console.error("AI Speaking Grading Error:", error);
+      return null;
+    }
+  }
 }
 
 export const aiService = new AiService();

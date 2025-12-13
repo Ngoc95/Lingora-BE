@@ -8,22 +8,18 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm'
-import { ExamGroupType } from '~/enums/exam.enum'
-import { ExamSection } from './examSection.entity'
-import { ExamQuestionGroup } from './examQuestionGroup.entity'
+import { ExamSectionGroup } from './examSectionGroup.entity'
+import { ExamQuestion } from './examQuestion.entity'
 
 @Entity()
-export class ExamSectionGroup extends BaseEntity {
+export class ExamQuestionGroup extends BaseEntity {
   @PrimaryGeneratedColumn()
   id!: number
 
-  @ManyToOne(() => ExamSection, (section) => section.questionGroups, {
+  @ManyToOne(() => ExamSectionGroup, (group) => group.questionGroups, {
     onDelete: 'CASCADE'
   })
-  section!: ExamSection
-
-  @Column({ type: 'enum', enum: ExamGroupType, default: ExamGroupType.GENERAL })
-  groupType!: ExamGroupType
+  sectionGroup!: ExamSectionGroup
 
   @Column({ type: 'text' })
   title!: string
@@ -37,16 +33,13 @@ export class ExamSectionGroup extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   resourceUrl?: string
 
-  @Column({ type: 'int', default: 1 })
-  displayOrder!: number
-
   @Column({ type: 'jsonb', default: () => `'{}'` })
   metadata!: Record<string, any>
 
-  @OneToMany(() => ExamQuestionGroup, (group) => group.sectionGroup, {
+  @OneToMany(() => ExamQuestion, (question) => question.group, {
     cascade: true
   })
-  questionGroups!: ExamQuestionGroup[]
+  questions!: ExamQuestion[]
 
   @CreateDateColumn()
   createdAt!: Date
@@ -54,4 +47,3 @@ export class ExamSectionGroup extends BaseEntity {
   @UpdateDateColumn()
   updatedAt!: Date
 }
-

@@ -153,6 +153,123 @@ class VNPayReturnService {
             transactionId: transaction.id,
         }
     }
+
+    /**
+     * Xử lý VNPay IPN (Instant Payment Notification)
+     * Trả về kết quả theo chuẩn document VNPay
+     */
+    handleVNPayIPN = async (params: Record<string, string>) => {
+        try {
+            // 1. Verify signature
+            if (!verifyVNPayReturn(params)) {
+                return { RspCode: '97', Message: 'Invalid signature' }
+            }
+
+            const orderId = params['vnp_TxnRef']
+            const amount = params['vnp_Amount']
+            const responseCode = params['vnp_ResponseCode']
+            const transactionStatus = params['vnp_TransactionStatus']
+            const vnpTransactionNo = params['vnp_TransactionNo']
+
+            // 2. Check Order Exists
+            const transactionRepo = await this.db.getRepository(Transaction)
+            const transaction = await transactionRepo.findOne({
+                where: { orderId: orderId },
+                relations: ['user', 'studySet', 'studySet.owner'],
+            })
+
+            if (!transaction) {
+                return { RspCode: '01', Message: 'Order not found' }
+            }
+
+            // 3. Check Amount
+            const paidAmount = Number(amount) / 100
+            const studySetRepo = await this.db.getRepository(StudySet)
+            const studySet = await studySetRepo.findOne({
+                where: { id: transaction.studySet?.id },
+            })
+
+            if (!studySet) {
+                return { RspCode: '01', Message: 'Product not found' }
+            }
+
+            // Check if amount matches (allow small diff for float)
+            // Note: transaction amount should be checked against the expected amount
+            // Here we check against studySet price assuming it hasn't changed, 
+            // but ideally we should check against the amount recorded in transaction if available.
+            // For now, let's assume studySet price is the truth.
+            if (Math.abs(paidAmount - Number(studySet.price)) > 0.01) {
+                 return { RspCode: '04', Message: 'Invalid amount' }
+            }
+
+            // 4. Check Order Status (Idempotency)
+            if (transaction.status === TransactionStatus.SUCCESS) {
+                return { RspCode: '02', Message: 'Order already confirmed' }
+            }
+
+            // 5. Build payment result and update
+            // Check if payment was successful from VNPay side
+            const isSuccess = responseCode === '00' && transactionStatus === '00'
+
+            // Update transaction info
+            transaction.vnpTransactionNo = vnpTransactionNo
+            transaction.vnpResponseCode = responseCode
+            
+            if (isSuccess) {
+                transaction.status = TransactionStatus.SUCCESS
+
+                // Create UserStudySet if not exists
+                const userStudySetRepo = await this.db.getRepository(UserStudySet)
+                // Use transaction.user and transaction.studySet which were loaded in relations
+                const userId = transaction.user?.id
+                const studySetId = transaction.studySet?.id
+
+                if (userId && studySetId) {
+                    const existingPurchase = await userStudySetRepo.findOne({
+                        where: {
+                            user: { id: userId },
+                            studySet: { id: studySetId },
+                        },
+                    })
+
+                    if (!existingPurchase) {
+                        const userStudySet = userStudySetRepo.create({
+                            user: { id: userId } as any,
+                            studySet: { id: studySetId } as any,
+                            purchasePrice: paidAmount,
+                        })
+                        await userStudySetRepo.save(userStudySet)
+                        
+                         // Emit purchase event
+                        const buyer = transaction.user as User
+                        const purchasedStudySet = transaction.studySet as StudySet
+                        const ownerId = purchasedStudySet.owner?.id
+
+                        if (buyer && ownerId) {
+                            eventBus.emit(EVENTS.ORDER, {
+                                buyer,
+                                studySetId,
+                                studySetOwnerId: ownerId,
+                                amount: paidAmount,
+                                isFree: false
+                            })
+                        }
+                    }
+                }
+
+            } else {
+                 transaction.status = TransactionStatus.FAILED
+            }
+            
+            await transactionRepo.save(transaction)
+
+            return { RspCode: '00', Message: 'Confirm Success' }
+
+        } catch (error) {
+            console.error('IPN Error:', error)
+            return { RspCode: '99', Message: 'Unknown error' }
+        }
+    }
 }
 
 export const vnpayReturnService = new VNPayReturnService()

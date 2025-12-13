@@ -310,8 +310,10 @@ class StudySetService {
         const isPublicAndPublished =
             studySet.visibility === StudySetVisibility.PUBLIC &&
             studySet.status === StudySetStatus.PUBLISHED
-
-        if (!isOwner && !isPublicAndPublished && !isPurchased) {
+        console.log('isOwner:', isOwner)
+        console.log('isPublicAndPublished:', isPublicAndPublished)
+        console.log('isPurchased:', isPurchased)
+        if (!isOwner && !isPurchased) {
             throw new BadRequestError({ message: 'You do not have access to this study set' })
         }
 

@@ -3,6 +3,7 @@ import { DatabaseService } from "./database.service";
 import { Exam } from "~/entities/exam.entity";
 import { ExamSection } from "~/entities/examSection.entity";
 import { ExamSectionGroup } from "~/entities/examSectionGroup.entity";
+import { ExamQuestionGroup } from "~/entities/examQuestionGroup.entity";
 import { ExamQuestion } from "~/entities/examQuestion.entity";
 import { ExamAttempt } from "~/entities/examAttempt.entity";
 import { ExamAttemptAnswer } from "~/entities/examAttemptAnswer.entity";
@@ -11,14 +12,18 @@ import {
   ExamMode,
   ExamSectionType,
   ExamType,
+  ExamQuestionType,
 } from "~/enums/exam.enum";
+import { aiService } from "~/services/ai.service";
 import { BadRequestError, NotFoundRequestError } from "~/core/error.response";
 import { StartExamAttemptBodyReq } from "~/dtos/req/exam/startExamAttemptBody.req";
 import { SubmitExamSectionBodyReq } from "~/dtos/req/exam/submitExamSectionBody.req";
 import {
   ImportExamBodyReq,
   ImportExamSectionGroupReq,
+  ImportExamQuestionGroupReq,
   ImportExamSectionReq,
+  ImportExamBulkBodyReq,
 } from "~/dtos/req/exam/importExamBody.req";
 import { GetExamListQueryReq } from "~/dtos/req/exam/getExamListQuery.req";
 import {
@@ -76,7 +81,6 @@ class ExamService {
       title: exam.title,
       code: exam.code,
       examType: exam.examType,
-      level: exam.level,
       totalDurationSeconds: exam.totalDurationSeconds,
       thumbnailUrl: exam.thumbnailUrl,
       isPublished: exam.isPublished,
@@ -99,7 +103,7 @@ class ExamService {
     };
   };
 
-  getExamDetail = async (examId: number) => {
+  getExamDetail = async (examId: number, userId?: number) => {
     const examRepo = await this.db.getRepository(Exam);
     const exam = await examRepo.findOne({
       where: { id: examId },
@@ -110,28 +114,57 @@ class ExamService {
       throw new NotFoundRequestError("Exam not found");
     }
 
+    let sectionProgress: Record<string, any> = {};
+    if (userId) {
+      const attemptRepo = await this.db.getRepository(ExamAttempt);
+      const attempts = await attemptRepo.find({
+        where: {
+          exam: { id: examId },
+          user: { id: userId },
+        },
+      });
+
+      attempts.forEach((attempt) => {
+        const p = attempt.sectionProgress || {};
+        Object.keys(p).forEach((sectionId) => {
+          const existing = sectionProgress[sectionId];
+          const current = p[sectionId];
+
+          if (
+            !existing ||
+            (current.status === "COMPLETED" && existing.status !== "COMPLETED")
+          ) {
+            sectionProgress[sectionId] = current;
+          }
+        });
+      });
+    }
     return {
       id: exam.id,
       title: exam.title,
       code: exam.code,
       examType: exam.examType,
+
       description: exam.description,
-      level: exam.level,
       totalDurationSeconds: exam.totalDurationSeconds,
       thumbnailUrl: exam.thumbnailUrl,
       isPublished: exam.isPublished,
       metadata: exam.metadata,
       sections: exam.sections
         ?.sort((a, b) => a.displayOrder - b.displayOrder)
-        .map((section) => ({
-          id: section.id,
-          title: section.title,
-          sectionType: section.sectionType,
-          displayOrder: section.displayOrder,
-          durationSeconds: section.durationSeconds,
-          instructions: section.instructions,
-          audioUrl: section.audioUrl,
-        })),
+        .map((section) => {
+          const progress = sectionProgress[section.id] || {};
+          return {
+            id: section.id,
+            title: section.title,
+            sectionType: section.sectionType,
+            displayOrder: section.displayOrder,
+            durationSeconds: section.durationSeconds,
+            instructions: section.instructions,
+            audioUrl: section.audioUrl,
+            status: progress.status || "NOT_STARTED", // "COMPLETED" | "NOT_STARTED"
+          };
+        }),
     };
   };
 
@@ -143,7 +176,12 @@ class ExamService {
     const sectionRepo = await this.db.getRepository(ExamSection);
     const section = await sectionRepo.findOne({
       where: { id: sectionId, exam: { id: examId } },
-      relations: ["exam", "questionGroups", "questionGroups.questions"],
+      relations: [
+        "exam",
+        "questionGroups",
+        "questionGroups.questionGroups", // Load the new deeper level
+        "questionGroups.questionGroups.questions",
+      ],
     });
 
     if (!section) {
@@ -264,7 +302,11 @@ class ExamService {
 
     const section = await sectionRepo.findOne({
       where: { id: sectionId, exam: { id: attempt.exam.id } },
-      relations: ["questionGroups", "questionGroups.questions"],
+      relations: [
+        "questionGroups",
+        "questionGroups.questionGroups",
+        "questionGroups.questionGroups.questions",
+      ],
     });
 
     if (!section) {
@@ -275,9 +317,10 @@ class ExamService {
       throw new BadRequestError({ message: "Answers payload is empty" });
     }
 
-    const questionIds = section.questionGroups.flatMap(
-      (group) => group.questions?.map((question) => question.id) || []
-    );
+    const questionIds = section.questionGroups
+      .flatMap((g) => g.questionGroups || [])
+      .flatMap((g) => g.questions || [])
+      .map((q) => q.id);
 
     const answersMap = new Map(
       payload.answers.map((item) => [item.questionId, item.answer])
@@ -301,49 +344,60 @@ class ExamService {
 
     const answersToSave: ExamAttemptAnswer[] = [];
 
-    for (const group of section.questionGroups) {
-      for (const question of group.questions || []) {
-        const rawAnswer = answersMap.get(question.id);
-        let normalizedAnswer =
-          typeof rawAnswer === "undefined" ? null : rawAnswer;
-        const isObjective = this.isObjectiveQuestion(question);
-        let isCorrect: boolean | undefined = undefined;
-        let score: number | undefined = undefined;
+    // Traverse 4 levels: Section -> SectionGroup -> QuestionGroup -> Question
+    for (const sectionGroup of section.questionGroups) {
+      for (const questionGroup of sectionGroup.questionGroups || []) {
+        for (const question of questionGroup.questions || []) {
+          const rawAnswer = answersMap.get(question.id);
+          let normalizedAnswer =
+            typeof rawAnswer === "undefined" ? null : rawAnswer;
+          const isObjective = this.isObjectiveQuestion(question);
+          let isCorrect: boolean | undefined = undefined;
+          let score: number | undefined = undefined;
 
-        if (normalizedAnswer !== null) {
-          answeredCount += 1;
-        }
-
-        if (isObjective && normalizedAnswer !== null) {
-          isCorrect = this.compareAnswer(
-            question.correctAnswer,
-            normalizedAnswer
-          );
-          score = isCorrect ? question.scoreWeight : 0;
-          if (isCorrect) {
-            correctCount += 1;
-            earnedScore += question.scoreWeight;
+          if (normalizedAnswer !== null) {
+            answeredCount += 1;
           }
-        } else if (isObjective) {
-          score = 0;
+
+          if (isObjective && normalizedAnswer !== null) {
+            isCorrect = this.compareAnswer(
+              question.correctAnswer,
+              normalizedAnswer
+            );
+            score = isCorrect ? question.scoreWeight : 0;
+            if (isCorrect) {
+              correctCount += 1;
+              earnedScore += question.scoreWeight;
+            }
+          } else if (isObjective) {
+            score = 0;
+          }
+
+          const answerEntity =
+            existingMap.get(question.id) ||
+            answerRepo.create({
+              attempt: { id: attempt.id } as any,
+              question: { id: question.id } as any,
+              section: { id: section.id } as any,
+            });
+
+          // Ensure question details (type, prompt) are available for AI grading
+          answerEntity.question = question;
+
+          answerEntity.answerPayload = normalizedAnswer;
+          answerEntity.isCorrect = isCorrect;
+          answerEntity.score = typeof score === "number" ? score : undefined;
+          answersToSave.push(answerEntity);
         }
-
-        const answerEntity =
-          existingMap.get(question.id) ||
-          answerRepo.create({
-            attempt: { id: attempt.id } as any,
-            question: { id: question.id } as any,
-            section: { id: section.id } as any,
-          });
-
-        answerEntity.answerPayload = normalizedAnswer;
-        answerEntity.isCorrect = isCorrect;
-        answerEntity.score = typeof score === "number" ? score : undefined;
-        answersToSave.push(answerEntity);
       }
     }
 
     await answerRepo.save(answersToSave);
+
+    // Trigger Async AI Grading
+    this.triggerAsyncGrading(attempt, answersToSave).catch((err) =>
+      console.error("Async Grading Error:", err)
+    );
 
     const totalQuestions = questionIds.length;
     const progressSnapshot = {
@@ -431,15 +485,24 @@ class ExamService {
     };
   };
 
-  listAttempts = async (userId: number) => {
+  listAttempts = async (
+    userId: number,
+    query?: { page?: number; limit?: number }
+  ) => {
     const attemptRepo = await this.db.getRepository(ExamAttempt);
-    const attempts = await attemptRepo.find({
-      where: { user: { id: userId } },
+    const page = Number(query?.page) > 0 ? Number(query?.page) : 1;
+    const limit = Number(query?.limit) > 0 ? Math.min(Number(query?.limit), 50) : DEFAULT_LIMIT;
+    const skip = (page - 1) * limit;
+
+    const [attempts, total] = await attemptRepo.findAndCount({
+      where: { user: { id: userId }, status: ExamAttemptStatus.SUBMITTED },
       relations: ["exam"],
       order: { createdAt: "DESC" },
+      skip,
+      take: limit,
     });
 
-    return attempts.map((attempt) => ({
+    const items = attempts.map((attempt) => ({
       id: attempt.id,
       exam: {
         id: attempt.exam.id,
@@ -453,6 +516,13 @@ class ExamService {
       submittedAt: attempt.submittedAt,
       scoreSummary: attempt.scoreSummary,
     }));
+
+    return {
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      total,
+      attempts: items,
+    };
   };
 
   getAttemptDetail = async (attemptId: number, userId: number) => {
@@ -460,7 +530,7 @@ class ExamService {
     const answerRepo = await this.db.getRepository(ExamAttemptAnswer);
 
     const attempt = await attemptRepo.findOne({
-      where: { id: attemptId },
+      where: { id: attemptId, user: { id: userId } },
       relations: ["exam", "user"],
     });
 
@@ -476,7 +546,12 @@ class ExamService {
 
     const answers = await answerRepo.find({
       where: { attempt: { id: attemptId } },
-      relations: ["question", "question.group", "section"],
+      relations: [
+        "question",
+        "question.group",
+        "question.group.sectionGroup",
+        "section",
+      ],
     });
 
     const sectionsMap = new Map<
@@ -491,7 +566,15 @@ class ExamService {
             id: number;
             title: string;
             groupType: string;
-            questions: any[];
+            questionGroups: Map<
+              number,
+              {
+                id: number;
+                title: string;
+                description?: string;
+                questions: any[];
+              }
+            >;
           }
         >;
       }
@@ -499,6 +582,10 @@ class ExamService {
 
     for (const answer of answers) {
       const section = answer.section;
+      const question = answer.question;
+      const questionGroup = question.group;
+      const sectionGroup = questionGroup.sectionGroup;
+
       if (!sectionsMap.has(section.id)) {
         sectionsMap.set(section.id, {
           id: section.id,
@@ -509,26 +596,36 @@ class ExamService {
       }
 
       const sectionBucket = sectionsMap.get(section.id)!;
-      const group = answer.question.group;
 
-      if (!sectionBucket.groups.has(group.id)) {
-        sectionBucket.groups.set(group.id, {
-          id: group.id,
-          title: group.title,
-          groupType: group.groupType,
+      if (!sectionBucket.groups.has(sectionGroup.id)) {
+        sectionBucket.groups.set(sectionGroup.id, {
+          id: sectionGroup.id,
+          title: sectionGroup.title,
+          groupType: sectionGroup.groupType,
+          questionGroups: new Map(),
+        });
+      }
+
+      const groupBucket = sectionBucket.groups.get(sectionGroup.id)!;
+
+      if (!groupBucket.questionGroups.has(questionGroup.id)) {
+        groupBucket.questionGroups.set(questionGroup.id, {
+          id: questionGroup.id,
+          title: questionGroup.title,
+          description: questionGroup.description,
           questions: [],
         });
       }
 
-      const groupBucket = sectionBucket.groups.get(group.id)!;
+      const qGroupBucket = groupBucket.questionGroups.get(questionGroup.id)!;
 
-      groupBucket.questions.push({
-        questionId: answer.question.id,
-        prompt: answer.question.prompt,
-        questionType: answer.question.questionType,
-        options: answer.question.options,
-        correctAnswer: answer.question.correctAnswer,
-        explanation: answer.question.explanation,
+      qGroupBucket.questions.push({
+        questionId: question.id,
+        prompt: question.prompt,
+        questionType: question.questionType,
+        options: question.options,
+        correctAnswer: question.correctAnswer,
+        explanation: question.explanation,
         userAnswer: answer.answerPayload,
         isCorrect: answer.isCorrect,
         score: answer.score,
@@ -540,7 +637,10 @@ class ExamService {
       id: section.id,
       title: section.title,
       sectionType: section.sectionType,
-      groups: Array.from(section.groups.values()),
+      groups: Array.from(section.groups.values()).map((g) => ({
+        ...g,
+        questionGroups: Array.from(g.questionGroups.values()),
+      })),
     }));
 
     return {
@@ -575,7 +675,6 @@ class ExamService {
       code: payload.code,
       title: payload.title,
       description: payload.description,
-      level: payload.level,
       totalDurationSeconds: payload.totalDurationSeconds ?? 0,
       thumbnailUrl: payload.thumbnailUrl,
       metadata: payload.metadata || {},
@@ -589,6 +688,50 @@ class ExamService {
     const saved = await examRepo.save(examEntity);
 
     return this.getExamDetail(saved.id);
+  };
+
+  importExams = async (payloads: ImportExamBulkBodyReq) => {
+    const dataSource = this.db.dataSource;
+    const results: Array<Awaited<ReturnType<typeof this.getExamDetail>>> = [];
+
+    const codes = payloads.map((p) => p.code);
+    const duplicateCodes = codes.filter(
+      (code, idx) => codes.indexOf(code) !== idx
+    );
+    if (duplicateCodes.length > 0) {
+      throw new BadRequestError({ message: "Duplicate exam codes in payload" });
+    }
+
+    await dataSource.transaction(async (manager) => {
+      const examRepo = manager.getRepository(Exam);
+      const existing = await examRepo.find({ where: { code: In(codes) } });
+      if (existing.length > 0) {
+        throw new BadRequestError({ message: "Exam code already exists" });
+      }
+
+      for (const payload of payloads) {
+        const examEntity = examRepo.create({
+          examType: payload.examType,
+          code: payload.code,
+          title: payload.title,
+          description: payload.description,
+          totalDurationSeconds: payload.totalDurationSeconds ?? 0,
+          thumbnailUrl: payload.thumbnailUrl,
+          metadata: payload.metadata || {},
+          isPublished: payload.isPublished ?? false,
+          sections:
+            payload.sections?.map((section, sIndex) =>
+              this.mapSectionPayload(section, sIndex)
+            ) || [],
+        } as DeepPartial<Exam>);
+
+        const saved = await examRepo.save(examEntity);
+        const detail = await this.getExamDetail(saved.id);
+        results.push(detail);
+      }
+    });
+
+    return results;
   };
 
   private sanitizeSection(section: ExamSection, includeCorrectAnswer: boolean) {
@@ -611,22 +754,30 @@ class ExamService {
           resourceUrl: group.resourceUrl,
           displayOrder: group.displayOrder,
           groupType: group.groupType,
-          questions: (group.questions || []).map((question) => {
-            const sanitized: Record<string, any> = {
-              id: question.id,
-              prompt: question.prompt,
-              questionType: question.questionType,
-              options: question.options,
-              metadata: question.metadata,
-            };
+          questionGroups: (group.questionGroups || []).map((qGroup) => ({
+            id: qGroup.id,
+            title: qGroup.title,
+            description: qGroup.description,
+            content: qGroup.content,
+            resourceUrl: qGroup.resourceUrl,
+            metadata: qGroup.metadata,
+            questions: (qGroup.questions || []).map((question) => {
+              const sanitized: Record<string, any> = {
+                id: question.id,
+                prompt: question.prompt,
+                questionType: question.questionType,
+                options: question.options,
+                metadata: question.metadata,
+              };
 
-            if (includeCorrectAnswer) {
-              sanitized.correctAnswer = question.correctAnswer;
-              sanitized.explanation = question.explanation;
-            }
+              if (includeCorrectAnswer) {
+                sanitized.correctAnswer = question.correctAnswer;
+                sanitized.explanation = question.explanation;
+              }
 
-            return sanitized;
-          }),
+              return sanitized;
+            }),
+          })),
         })),
     };
   }
@@ -651,14 +802,25 @@ class ExamService {
     }
 
     if (Array.isArray(correctAnswer)) {
+      // Case 1: Alternative Answers (Question has multiple valid answers, User submits one string)
+      // e.g. correctAnswer=["roads", "road system"], submitted="roads" -> TRUE
+      if (typeof submitted === "string") {
+        return correctAnswer
+          .map((item) =>
+            typeof item === "string" ? item.trim().toLowerCase() : item
+          )
+          .includes(submitted.trim().toLowerCase());
+      }
+
+      // Case 2: Multiple Select (Question requires multiple answers, User submits array)
       if (!Array.isArray(submitted)) return false;
       if (correctAnswer.length !== submitted.length) return false;
       const normalizedCorrect = correctAnswer.map((item) =>
         typeof item === "string" ? item.trim().toLowerCase() : item
-      );
+      ).sort();
       const normalizedSubmitted = submitted.map((item) =>
         typeof item === "string" ? item.trim().toLowerCase() : item
-      );
+      ).sort();
       return normalizedCorrect.every(
         (value, index) => value === normalizedSubmitted[index]
       );
@@ -719,6 +881,15 @@ class ExamService {
               ? IELTS_READING_GENERAL_BAND_TABLE
               : IELTS_READING_ACADEMIC_BAND_TABLE
           );
+        } else if (sectionType === ExamSectionType.WRITING || sectionType === ExamSectionType.SPEAKING) {
+          // For Writing/Speaking, use the average of AI-graded scores
+          const sectionAnswers = answers.filter(ans => ans.section.id === numericSectionId);
+          const scoredAnswers = sectionAnswers.filter(ans => typeof ans.score === 'number');
+          
+          if (scoredAnswers.length > 0) {
+            const avgScore = scoredAnswers.reduce((sum, ans) => sum + (ans.score || 0), 0) / scoredAnswers.length;
+            summary.band = Math.round(avgScore * 2) / 2; // Round to nearest 0.5
+          }
         }
         sectionsSummary[numericSectionId] = summary;
       }
@@ -807,6 +978,23 @@ class ExamService {
       groupType: group.groupType,
       displayOrder: group.displayOrder ?? index + 1,
       metadata: group.metadata || {},
+      questionGroups:
+        group.questionGroups?.map((qGroup, qgIndex) =>
+          this.mapQuestionGroupPayload(qGroup, qgIndex)
+        ) || [],
+    };
+  }
+
+  private mapQuestionGroupPayload(
+    group: ImportExamQuestionGroupReq,
+    _index: number
+  ): DeepPartial<ExamQuestionGroup> {
+    return {
+      title: group.title,
+      description: group.description,
+      content: group.content,
+      resourceUrl: group.resourceUrl,
+      metadata: group.metadata || {},
       questions:
         group.questions?.map((question, qIndex) =>
           this.mapQuestionPayload(question, qIndex)
@@ -815,7 +1003,7 @@ class ExamService {
   }
 
   private mapQuestionPayload(
-    question: ImportExamSectionGroupReq["questions"][number],
+    question: ImportExamQuestionGroupReq["questions"][number],
     _index: number
   ): DeepPartial<ExamQuestion> {
     return {
@@ -827,6 +1015,83 @@ class ExamService {
       scoreWeight: question.scoreWeight ?? 1,
       metadata: question.metadata || {},
     };
+  }
+
+  private async triggerAsyncGrading(
+    attempt: ExamAttempt,
+    answers: ExamAttemptAnswer[]
+  ) {
+    const answerRepo = await this.db.getRepository(ExamAttemptAnswer);
+    const attemptRepo = await this.db.getRepository(ExamAttempt);
+
+    const gradingPromises = answers.map(async (ans) => {
+      // Check if answer needs AI grading
+      // Writing
+      if (
+        ans.question.questionType === ExamQuestionType.ESSAY &&
+        ans.answerPayload
+      ) {
+        const result = await aiService.gradeWriting(
+          ans.question.prompt,
+          String(ans.answerPayload)
+        );
+        console.log(result);
+        if (result) {
+          ans.score = result.score;
+          ans.aiFeedback = {
+            feedback: result.feedback,
+            correctedVersion: result.corrected_version,
+          };
+          ans.isCorrect = result.score >= 5; // Example threshold
+          await answerRepo.save(ans);
+        }
+      }
+      // Speaking
+      else if (
+        ans.question.questionType === ExamQuestionType.SPEAKING_PROMPT &&
+        ans.answerPayload
+      ) {
+        // answerPayload should be the audio URL
+        const result = await aiService.gradeSpeaking(
+          ans.question.prompt,
+          String(ans.answerPayload)
+        );
+        console.log(result);
+        if (result) {
+          ans.score = result.score;
+          ans.aiFeedback = {
+            feedback: result.feedback,
+            correctedVersion: result.corrected_version,
+            transcript: result.transcript,
+          };
+          ans.isCorrect = result.score >= 5;
+          await answerRepo.save(ans);
+        }
+      }
+    });
+
+    await Promise.all(gradingPromises);
+
+    // If the attempt was already finalized, we might need to update the summary
+    // But since this runs async, checking current status from DB is safer
+    const freshAttempt = await attemptRepo.findOne({
+      where: { id: attempt.id },
+      relations: ["exam"],
+    });
+
+    if (
+      freshAttempt &&
+      freshAttempt.status === ExamAttemptStatus.SUBMITTED
+    ) {
+      // Re-calculate summary
+      const allAnswers = await answerRepo.find({
+        where: { attempt: { id: freshAttempt.id } },
+        relations: ["question", "section"],
+      });
+      const newSummary = this.buildScoreSummary(freshAttempt.exam, allAnswers);
+      freshAttempt.scoreSummary = newSummary;
+      await attemptRepo.save(freshAttempt);
+    }
   }
 }
 

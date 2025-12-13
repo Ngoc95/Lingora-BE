@@ -9,7 +9,7 @@ import {
   UpdateDateColumn
 } from 'typeorm'
 import { ExamQuestionType } from '~/enums/exam.enum'
-import { ExamSectionGroup } from './examSectionGroup.entity'
+import { ExamQuestionGroup } from './examQuestionGroup.entity'
 import { ExamAttemptAnswer } from './examAttemptAnswer.entity'
 
 @Entity()
@@ -17,10 +17,10 @@ export class ExamQuestion extends BaseEntity {
   @PrimaryGeneratedColumn()
   id!: number
 
-  @ManyToOne(() => ExamSectionGroup, (group) => group.questions, {
+  @ManyToOne(() => ExamQuestionGroup, (group) => group.questions, {
     onDelete: 'CASCADE'
   })
-  group!: ExamSectionGroup
+  group!: ExamQuestionGroup
 
   @Column({ type: 'enum', enum: ExamQuestionType, default: ExamQuestionType.MULTIPLE_CHOICE })
   questionType!: ExamQuestionType

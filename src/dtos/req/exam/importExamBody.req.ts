@@ -15,6 +15,15 @@ export interface ImportExamQuestionReq {
   metadata?: Record<string, any>;
 }
 
+export interface ImportExamQuestionGroupReq {
+  title: string;
+  description?: string;
+  content?: string;
+  resourceUrl?: string;
+  metadata?: Record<string, any>;
+  questions: ImportExamQuestionReq[];
+}
+
 export interface ImportExamSectionGroupReq {
   groupType: ExamGroupType;
   title: string;
@@ -23,7 +32,7 @@ export interface ImportExamSectionGroupReq {
   resourceUrl?: string;
   displayOrder?: number;
   metadata?: Record<string, any>;
-  questions: ImportExamQuestionReq[];
+  questionGroups: ImportExamQuestionGroupReq[];
 }
 
 export interface ImportExamSectionReq {
@@ -42,10 +51,12 @@ export interface ImportExamBodyReq {
   code: string;
   title: string;
   description?: string;
-  level?: string;
+
   totalDurationSeconds?: number;
   thumbnailUrl?: string;
   metadata?: Record<string, any>;
   isPublished?: boolean;
   sections: ImportExamSectionReq[];
 }
+
+export type ImportExamBulkBodyReq = ImportExamBodyReq[];

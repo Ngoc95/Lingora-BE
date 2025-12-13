@@ -5,7 +5,7 @@ import { ExamType } from "~/enums/exam.enum";
 import { GetExamListQueryReq } from "~/dtos/req/exam/getExamListQuery.req";
 import { StartExamAttemptBodyReq } from "~/dtos/req/exam/startExamAttemptBody.req";
 import { SubmitExamSectionBodyReq } from "~/dtos/req/exam/submitExamSectionBody.req";
-import { ImportExamBodyReq } from "~/dtos/req/exam/importExamBody.req";
+import { ImportExamBodyReq, ImportExamBulkBodyReq } from "~/dtos/req/exam/importExamBody.req";
 
 class ExamController {
   listExams = async (req: Request, res: Response) => {
@@ -40,7 +40,8 @@ class ExamController {
 
   getExamDetail = async (req: Request, res: Response) => {
     const examId = Number(req.params.examId);
-    const metaData = await examService.getExamDetail(examId);
+    const userId = req.user?.id;
+    const metaData = await examService.getExamDetail(examId, userId);
 
     return new SuccessResponse({
       message: "Get exam detail successfully",
@@ -103,7 +104,10 @@ class ExamController {
   };
 
   listExamAttempts = async (req: Request, res: Response) => {
-    const metaData = await examService.listAttempts(req.user!.id);
+    const q = req.query || {};
+    const page = q.page ? Number(q.page) : undefined;
+    const limit = q.limit ? Number(q.limit) : undefined;
+    const metaData = await examService.listAttempts(req.user!.id, { page, limit });
 
     return new SuccessResponse({
       message: "Get exam attempts successfully",
@@ -125,13 +129,22 @@ class ExamController {
   };
 
   importExam = async (req: Request, res: Response) => {
-    const body = req.body as ImportExamBodyReq;
-    const metaData = await examService.importExam(body);
-
-    return new CREATED({
-      message: "Import exam successfully",
-      metaData,
-    }).send(res);
+    const raw = req.body as unknown;
+    if (Array.isArray(raw)) {
+      const body = raw as ImportExamBulkBodyReq;
+      const metaData = await examService.importExams(body);
+      return new CREATED({
+        message: "Import exams successfully",
+        metaData,
+      }).send(res);
+    } else {
+      const body = raw as ImportExamBodyReq;
+      const metaData = await examService.importExam(body);
+      return new CREATED({
+        message: "Import exam successfully",
+        metaData,
+      }).send(res);
+    }
   };
 }
 

@@ -57,3 +57,37 @@ def title_endpoint(request: TitleRequest):
     from src.rag import generate_chat_title
     title = generate_chat_title(request.question)
     return {"title": title}
+
+class GradeWritingRequest(BaseModel):
+    question: str
+    answer: str
+
+class GradeSpeakingRequest(BaseModel):
+    question: str
+    audio_url: str
+
+@app.post("/score/writing")
+def score_writing_endpoint(request: GradeWritingRequest):
+    from src.grading import grade_writing
+    result = grade_writing(request.question, request.answer)
+    return result
+
+@app.post("/score/speaking")
+def score_speaking_endpoint(request: GradeSpeakingRequest):
+    from src.grading import transcribe_audio, grade_speaking
+    
+    # 1. Transcribe the audio
+    transcript = transcribe_audio(request.audio_url)
+    if not transcript:
+        raise HTTPException(status_code=400, detail="Failed to transcribe audio")
+        
+    # 2. Grade the transcript
+    result = grade_speaking(request.question, transcript)
+    
+    # 3. Return combined result
+    return {
+        "score": result.score,
+        "feedback": result.feedback,
+        "corrected_version": result.corrected_version,
+        "transcript": transcript
+    }

@@ -28,8 +28,7 @@ export class Exam extends BaseEntity {
   @Column({ type: "text", nullable: true })
   description?: string;
 
-  @Column({ type: "text", nullable: true })
-  level?: string;
+
 
   @Column({ type: "int", default: 0 })
   totalDurationSeconds!: number;
