@@ -7,6 +7,7 @@ import { NotificationTarget, NotificationType } from '~/enums/notification.enum'
 import { notificationService } from '~/services/notification.service'
 import { Post } from '~/entities/post.entity'
 import { Comment } from '~/entities/comment.entity'
+import { StudySet } from '~/entities/studySet.entity'
 
 eventBus.on(
     EVENTS.LIKE,
@@ -19,7 +20,7 @@ eventBus.on(
         createdBy: User
         targetType: TargetType
     }) => {
-        // Get owner of the target (Post or Comment)
+        // Get owner of the target (Post, Comment, StudySet)
         const ownerId = await getOwnerId(targetId, targetType)
 
         // Don't send notification if user likes their own content
@@ -66,6 +67,18 @@ const getOwnerId = async (targetId: number, targetType: TargetType): Promise<num
                 }
             })
             return comment?.createdBy?.id || null
+        } else if (targetType === TargetType.STUDY_SET) {
+            const studySet = await StudySet.findOne({
+                where: { id: targetId },
+                relations: ['owner'],
+                select: {
+                    id: true,
+                    owner: {
+                        id: true
+                    }
+                }
+            })
+            return studySet?.owner?.id || null
         }
         return null
     } catch (error) {
@@ -80,7 +93,12 @@ const createLikeNotification = async (
     ownerId: number,
     createdBy: User
 ) => {
-    const targetTypeLabel = targetType === TargetType.POST ? 'bài viết' : 'bình luận'
+    const targetTypeLabel =
+        targetType === TargetType.POST
+            ? 'bài viết'
+            : targetType === TargetType.COMMENT
+            ? 'bình luận'
+            : 'học liệu'
 
     const notification = await notificationService.createNotification(
         NotificationType.LIKE,
