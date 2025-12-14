@@ -54,25 +54,39 @@ class NotificationService {
                 notification: true,
                 isRead: true,
                 readAt: true,
-                user: {
-                    id: true
-                },
                 id: true,
-                createdAt: true,
-                deletedAt: true,
-                updatedAt: true
+                createdAt: true
             },
             relations: {
-                user: true,
                 notification: true
             }
         })
 
+        const unreadCount = await UserNotification.countBy({
+            user: { id: userId },
+            isRead: false
+        })
+
+        const items = notifications.map((item) => {
+            const payload = item.notification?.data || {}
+            return {
+                id: item.id,
+                isRead: item.isRead,
+                readAt: item.readAt ?? null,
+                type: item.notification?.type,
+                message: payload?.message,
+                data: payload?.data,
+                target: item.notification?.target,
+                createdAt: item.createdAt
+            }
+        })
+
         return {
-            notifications,
             total,
+            unreadCount,
             currentPage: page,
-            totalPages: Math.ceil(total / limit)
+            totalPages: Math.ceil(total / limit),
+            notifications: items
         }
     }
 
