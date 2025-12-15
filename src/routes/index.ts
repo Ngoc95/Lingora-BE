@@ -15,6 +15,7 @@ import chatRouter from "./chat.route";
 import translateRouter from "./translate.route";
 import examRouter from "./exam.route";
 import uploadRouter from "./upload.route";
+import notificationRouter from "./notification.route";
 
 const router = Router();
 
@@ -34,5 +35,6 @@ router.use("/chat", chatRouter);
 router.use("/translate", translateRouter);
 router.use("/uploads", uploadRouter);
 router.use("/", examRouter);
+router.use("/notifications", notificationRouter);
 
 export default router;

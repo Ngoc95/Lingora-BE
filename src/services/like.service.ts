@@ -45,7 +45,7 @@ class LikeService {
             targetId: foundLike.targetId,
             targetType: foundLike.targetType
         })
-        return foundLike
+        return unGetData({ fields: ['createdBy'], object: foundLike })
     }
 
     unLike = async ({ targetId, targetType, user }: CreateLikeBodyReq) => {
