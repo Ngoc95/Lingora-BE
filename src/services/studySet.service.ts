@@ -20,7 +20,9 @@ import { EVENTS } from '~/events-handler/constants'
 import eventBus from '~/events-handler/eventBus'
 import { User } from '~/entities/user.entity'
 import { Like } from '~/entities/like.entity'
+import { Comment } from '~/entities/comment.entity'
 import { TargetType } from '~/enums/targetType.enum'
+import { commentService } from './comment.service'
 
 class StudySetService {
     private db = DatabaseService.getInstance()
@@ -172,13 +174,15 @@ class StudySetService {
         // Calculate likeCount and isAlreadyLike for each study set
         const studySetsWithLikeInfo = await Promise.all(
             studySets.map(async (ss) => {
-                const [likeCount, isAlreadyLike] = await Promise.all([
+                const [likeCount, isAlreadyLike, commentCount] = await Promise.all([
                     this.findNumberLikeByStudySetId(ss.id),
-                    this.isAlreadyLikeStudySet(ss.id, userId)
+                    this.isAlreadyLikeStudySet(ss.id, userId),
+                    this.findNumberCommentByStudySetId(ss.id)
                 ])
                 return {
                     ...ss,
                     likeCount,
+                    commentCount,
                     isAlreadyLike,
                     isPurchased: purchasedSetIds.has(ss.id),
                 }
@@ -257,13 +261,15 @@ class StudySetService {
         // Calculate likeCount and isAlreadyLike for each study set
         const studySetsWithLikeInfo = await Promise.all(
             studySets.map(async (ss) => {
-                const [likeCount, isAlreadyLike] = await Promise.all([
+                const [likeCount, isAlreadyLike, commentCount] = await Promise.all([
                     this.findNumberLikeByStudySetId(ss.id),
-                    this.isAlreadyLikeStudySet(ss.id, ownerId)
+                    this.isAlreadyLikeStudySet(ss.id, ownerId),
+                    this.findNumberCommentByStudySetId(ss.id)
                 ])
                 return {
                     ...ss,
                     likeCount,
+                    commentCount,
                     isAlreadyLike,
                 }
             })
@@ -302,45 +308,53 @@ class StudySetService {
             isPurchased = !!purchase
         }
 
-        // Check access: user can view if:
+        // Check access: user can view full content if:
         // 1. It's their own study set
-        // 2. It's public and published
-        // 3. They have purchased it
+        // 2. They have purchased it
         const isOwner = studySet.owner.id === userId
-        const isPublicAndPublished =
-            studySet.visibility === StudySetVisibility.PUBLIC &&
-            studySet.status === StudySetStatus.PUBLISHED
-        console.log('isOwner:', isOwner)
-        console.log('isPublicAndPublished:', isPublicAndPublished)
-        console.log('isPurchased:', isPurchased)
-        if (!isOwner && !isPurchased) {
-            throw new BadRequestError({ message: 'You do not have access to this study set' })
+
+        if (studySet.visibility === StudySetVisibility.PRIVATE && !isOwner) {
+             throw new BadRequestError({ message: 'Study set not found' }) // Hide private sets
         }
 
+        const canViewContent = isOwner || isPurchased
+
         // Calculate likeCount and isAlreadyLike
-        const [likeCount, isAlreadyLike] = await Promise.all([
+        const [likeCount, isAlreadyLike, comments, commentCount] = await Promise.all([
             this.findNumberLikeByStudySetId(studySetId),
-            userId ? this.isAlreadyLikeStudySet(studySetId, userId) : Promise.resolve(false)
+            userId ? this.isAlreadyLikeStudySet(studySetId, userId) : Promise.resolve(false),
+            commentService.findChildComment(studySetId, null, TargetType.STUDY_SET, userId),
+            this.findNumberCommentByStudySetId(studySetId)
         ])
 
         // Exclude password từ owner
+        let ownerWithoutPassword = null
         if (studySet.owner) {
-            const { password, ...ownerWithoutPassword } = studySet.owner as any
-            return {
-                ...studySet,
-                owner: ownerWithoutPassword,
-                isPurchased,
-                likeCount,
-                isAlreadyLike,
-            }
+            const { password, ...rest } = studySet.owner as any
+            ownerWithoutPassword = rest
         }
 
-        return {
-            ...studySet,
+        const baseResponse = {
+            id: studySet.id,
+            title: studySet.title,
+            description: studySet.description,
+            visibility: studySet.visibility,
+            price: studySet.price,
+            status: studySet.status,
+            createdAt: studySet.createdAt,
+            updatedAt: studySet.updatedAt,
+            owner: ownerWithoutPassword,
             isPurchased,
             likeCount,
+            commentCount,
             isAlreadyLike,
+            comments,
+            // Include flashcards/quizzes only if allowed
+            flashcards: canViewContent ? studySet.flashcards : [],
+            quizzes: canViewContent ? studySet.quizzes : [],
         }
+
+        return baseResponse
     }
 
     updateStudySetById = async (
@@ -560,6 +574,13 @@ class StudySetService {
 
     findNumberLikeByStudySetId = async (id: number) => {
         return Like.countBy({
+            targetId: id,
+            targetType: TargetType.STUDY_SET
+        })
+    }
+
+    findNumberCommentByStudySetId = async (id: number) => {
+        return Comment.countBy({
             targetId: id,
             targetType: TargetType.STUDY_SET
         })

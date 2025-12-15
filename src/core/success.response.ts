@@ -24,6 +24,16 @@ export class SuccessResponse {
   }
 }
 
+export class OK extends SuccessResponse {
+  constructor({ message = 'OK', metaData = {} }: { message?: string; metaData?: object; options?: object }) {
+    super({
+      message,
+      statusCode: 200,
+      metaData
+    })
+  }
+}
+
 export class CREATED extends SuccessResponse {
   constructor({ message = 'Created', metaData = {} }: { message?: string; metaData?: object; options?: object }) {
     super({
