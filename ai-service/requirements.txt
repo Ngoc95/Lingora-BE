@@ -1,0 +1,17 @@
+fastapi
+uvicorn
+python-dotenv
+pypdf
+langchain
+langchain-community
+langchain-google-genai
+langchain-text-splitters
+langchain-chroma
+langchain-core
+langchain-openai
+chromadb
+langchain-classic
+tavily-python
+langchain-tavily
+requests
+openai

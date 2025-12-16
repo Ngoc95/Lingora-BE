@@ -4,6 +4,7 @@ import { WordType } from "~/enums/wordType.enum"
 export interface UpdateWordBodyReq {
     word?: string
     meaning?: string
+    vnMeaning?: string
     phonetic?: string
     cefrLevel?: CefrLevel
     type?: WordType

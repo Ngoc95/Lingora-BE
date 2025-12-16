@@ -1,5 +1,5 @@
 import { Repository, ObjectLiteral, DataSource } from 'typeorm'
-import { seedInitialData } from '~/seeds/seed'
+
 import { env } from '~/config/env';
 
 export class DatabaseService {
@@ -48,7 +48,6 @@ export class DatabaseService {
   async syncDB() {
     await this.appDataSource.synchronize()
     console.log('🔄 Database synchronized')
-    await seedInitialData()
   }
 
   async init() {

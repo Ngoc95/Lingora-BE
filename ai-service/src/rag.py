@@ -1,0 +1,284 @@
+from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain_chroma import Chroma
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_tavily import TavilySearch
+from langchain_core.tools import tool
+from langchain_classic.agents import create_openai_tools_agent, AgentExecutor
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.globals import set_llm_cache
+from langchain_community.cache import InMemoryCache
+from src.config.env import settings
+from typing import Any, Iterable, Optional, Sequence
+import os
+
+# --- 1. CẤU HÌNH CƠ BẢN ---
+# Setup Tavily Key
+os.environ["TAVILY_API_KEY"] = settings.TAVILY_API_KEY
+
+set_llm_cache(InMemoryCache())
+
+# Setup Embeddings
+embedding_model = OpenAIEmbeddings(
+    openai_api_key=settings.OPENAI_API_KEY,
+    model="text-embedding-3-small" 
+)
+
+# NEW: create Chroma stores & retrievers once and reuse
+grammar_vector_store = Chroma(
+    persist_directory=settings.CHROMA_DB_DIR,
+    embedding_function=embedding_model,
+    collection_name="grammar_collection",
+)
+grammar_retriever = grammar_vector_store.as_retriever(search_kwargs={"k": 4})
+
+vocab_vector_store = Chroma(
+    persist_directory=settings.CHROMA_DB_DIR,
+    embedding_function=embedding_model,
+    collection_name="vocab_collection",
+)
+vocab_retriever = vocab_vector_store.as_retriever(search_kwargs={"k": 4})
+
+# Setup LLM (OpenAI)
+llm = ChatOpenAI(
+    model="gpt-4.1-nano",
+    openai_api_key=settings.OPENAI_API_KEY,
+    temperature=0 # Để Agent ra quyết định chính xác, nên để temp thấp
+)
+
+# --- 2. BỘ NHỚ (MEMORY) ---
+# Vẫn dùng cách lưu dictionary đơn giản của bạn, nhưng tí nữa sẽ convert
+CHAT_HISTORY = {}
+
+def get_chat_history(session_id):
+    return CHAT_HISTORY.get(session_id, [])
+
+def save_chat_history(session_id, question, answer):
+    if session_id not in CHAT_HISTORY: CHAT_HISTORY[session_id] = []
+    CHAT_HISTORY[session_id].append((question, answer))
+    if len(CHAT_HISTORY[session_id]) > 10: CHAT_HISTORY[session_id].pop(0)
+
+def build_langchain_history(history_payload: Optional[Iterable[Any]], session_id: str):
+    lc_history = []
+
+    if history_payload:
+        for entry in history_payload:
+            sender = None
+            content = None
+
+            if isinstance(entry, dict):
+                sender = entry.get("sender")
+                content = entry.get("content")
+            else:
+                sender = getattr(entry, "sender", None)
+                content = getattr(entry, "content", None)
+
+            if not content:
+                continue
+
+            if str(sender).upper() == "USER":
+                lc_history.append(HumanMessage(content=content))
+            else:
+                lc_history.append(AIMessage(content=content))
+
+    else:
+        raw_history = get_chat_history(session_id)
+        for q, a in raw_history:
+            lc_history.append(HumanMessage(content=q))
+            lc_history.append(AIMessage(content=a))
+
+    return lc_history[-6:]
+
+# --- 3. ĐỊNH NGHĨA CÔNG CỤ (TOOLS) ---
+# Agent sẽ nhìn vào docstring ("""...""") để biết khi nào dùng tool nào.
+
+@tool
+def lookup_grammar_book(query: str):
+    """
+    Dùng công cụ này để tra cứu kiến thức về Ngữ pháp Tiếng Anh (Grammar), 
+    cấu trúc câu (Sentence Structure), các thì (Tenses) trong sách giáo khoa.
+    """
+    print(f"📘 [Tool] Đang tra sách Ngữ pháp: {query}")
+    try:
+        # dùng retriever tái sử dụng, không tạo lại Chroma mỗi lần
+        docs = grammar_retriever.invoke(query)
+        return "\n\n".join([doc.page_content for doc in docs])
+    except Exception as e:
+        print(f"❌ Lỗi khi tra sách Ngữ pháp: {e}")
+        return "Sách giáo khoa không đề cập chi tiết. Hãy sử dụng kiến thức chuyên môn của bạn để giải thích đầy đủ cho học viên."
+
+@tool
+def lookup_vocab_book(query: str):
+    """
+    Dùng công cụ này để tra cứu Từ vựng (Vocabulary), định nghĩa từ (Definition),
+    thành ngữ (Idioms) hoặc cụm từ trong sách giáo khoa.
+    """
+    print(f"📗 [Tool] Đang tra sách Từ vựng: {query}")
+    try:
+        docs = vocab_retriever.invoke(query)
+        return "\n\n".join([doc.page_content for doc in docs])
+    except Exception as e:
+        print(f"❌ Lỗi khi tra sách Từ vựng: {e}")
+        return "Sách giáo khoa không đề cập chi tiết. Hãy sử dụng kiến thức chuyên môn của bạn để giải thích đầy đủ cho học viên."
+
+# Tool Search Google (Tavily)
+search_web_tool = TavilySearch(
+    max_results=3,
+    description="Dùng công cụ này để tìm kiếm thông tin KHÔNG có trong sách giáo khoa, kiến thức xã hội, hoặc các từ lóng (slang) mới nhất."
+)
+
+# Gom tất cả tools lại
+tools = [lookup_grammar_book, lookup_vocab_book, search_web_tool]
+
+# --- 4. TẠO AGENT ---
+def create_lingora_agent():
+    # Prompt System cho Agent
+    system_prompt = """
+    Bạn là LingoraBot - Trợ lý ảo dạy Tiếng Anh.
+    Bạn có 3 công cụ: Sách Ngữ Pháp, Sách Từ Vựng, Google Search.
+
+    NHIỆM VỤ DUY NHẤT:
+    - Xử lý và trả lời câu hỏi MỚI NHẤT của người dùng (nằm trong biến input).
+
+    🔴 QUY TẮC "VÀNG" KHI DÙNG LỊCH SỬ (IGNORE HISTORY CONTENT):
+    1. **IGNORE PREVIOUS ANSWERS:** Lịch sử chat chỉ để bạn hiểu ngữ cảnh (ví dụ user nói "nó là gì" thì tìm trong lịch sử xem "nó" là gì).
+    2. **CẤM LẶP LẠI:** Tuyệt đối KHÔNG nhắc lại, không tóm tắt, không copy-paste bất kỳ nội dung nào của các câu trả lời trước đó.
+    3. **CÂU TRẢ LỜI ĐỘC LẬP:** Câu trả lời của bạn phải mới hoàn toàn, đi thẳng vào vấn đề của câu hỏi mới. Không bắt đầu bằng "Như đã nói...", "Về câu hỏi trước...".
+
+    QUY TẮC KHÁC:
+    - Trả lời bằng Tiếng Việt tự nhiên, thân thiện.
+    - Nếu sách không có, dùng kiến thức của bạn, KHÔNG được xin lỗi.
+    - Không nhắc tên công cụ (lookup...).
+    """
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", system_prompt),
+        MessagesPlaceholder(variable_name="chat_history"), # Nơi nhét lịch sử vào
+        ("human", "{input}"),
+        MessagesPlaceholder(variable_name="agent_scratchpad"), # Nơi Agent suy nghĩ
+    ])
+
+    # Tạo Agent
+    agent = create_openai_tools_agent(llm, tools, prompt)
+    
+    # Executor là bộ máy chạy Agent
+    agent_executor = AgentExecutor(
+        agent=agent, 
+        tools=tools, 
+        verbose=True, # Bật True để nhìn thấy suy nghĩ của Agent trên terminal
+        handle_parsing_errors=True
+    )
+    return agent_executor
+
+# Khởi tạo 1 lần dùng chung
+lingora_agent = create_lingora_agent()
+
+# --- 5. HÀM CHÍNH (ĐƯỢC GỌI TỪ API) ---
+def _simple_rag_answer(question: str, retrieved_text: str) -> str:
+    """
+    Gọi LLM 1 lần với context đã retrieve sẵn – nhanh hơn Agent + Tools.
+    """
+    prompt = f"""
+    Bạn là LingoraBot - Trợ lý ảo dạy Tiếng Anh.
+
+    Đây là tài liệu tham khảo (có thể là trích từ sách hoặc tài liệu liên quan):
+
+    ----------
+    {retrieved_text}
+    ----------
+
+    Nhiệm vụ:
+    - Trả lời CÂU HỎI của học viên bên dưới một cách ngắn gọn, dễ hiểu.
+    - Nếu tài liệu không đủ, dùng kiến thức của bạn để giải thích, nhưng KHÔNG nói rằng tài liệu thiếu.
+
+    CÂU HỎI: {question}
+    """
+    resp = llm.invoke(prompt)
+    return getattr(resp, "content", str(resp))
+
+
+def get_answer(
+    question: str,
+    type: str = None,
+    session_id: str = "default",
+    history: Optional[Sequence[dict]] = None,
+):
+    lc_history = build_langchain_history(history, session_id)
+
+    print(f"🤖 Agent đang suy nghĩ cho session: {session_id}...; có history: {len(lc_history)}")
+
+    # --- FAST PATHS: không dùng Agent đầy đủ khi không cần ---
+    try:
+        normalized_type = (type or "").lower().strip()
+
+        if normalized_type in {"grammar", "nguphap"}:
+            print("⚡ Fast-path: grammar RAG")
+            docs = grammar_retriever.invoke(question)
+            context = "\n\n".join(doc.page_content for doc in docs)
+            answer = _simple_rag_answer(question, context)
+            if history is None:
+                save_chat_history(session_id, question, answer)
+            return answer
+
+        if normalized_type in {"vocab", "vocabulary", "tuvung"}:
+            print("⚡ Fast-path: vocab RAG")
+            docs = vocab_retriever.invoke(question)
+            context = "\n\n".join(doc.page_content for doc in docs)
+            answer = _simple_rag_answer(question, context)
+            if history is None:
+                save_chat_history(session_id, question, answer)
+            return answer
+
+        # --- FALLBACK: dùng Agent đầy đủ như hiện tại ---
+        print(f"question: {question}")
+        result = lingora_agent.invoke(
+            {
+                "input": question,
+                "chat_history": lc_history,
+            }
+        )
+        print(f"result: {result}")
+        raw_output = result["output"]
+        final_response = ""
+
+        if isinstance(raw_output, str):
+            final_response = raw_output
+        elif isinstance(raw_output, list):
+            for part in raw_output:
+                if isinstance(part, str):
+                    final_response += part
+                elif isinstance(part, dict) and "text" in part:
+                    final_response += part["text"]
+        else:
+            final_response = str(raw_output)
+
+        if history is None:
+            save_chat_history(session_id, question, final_response)
+
+        return final_response
+
+    except Exception as e:
+        print(f"❌ Agent Error: {e}")
+        return "Xin lỗi, hệ thống đang gặp chút trục trặc khi suy nghĩ. Bạn hỏi lại thử xem?"
+
+def generate_chat_title(question: str):
+    prompt = f"""
+    Nhiệm vụ: Tóm tắt câu hỏi sau thành một TIÊU ĐỀ ngắn gọn, súc tích (dưới 6 từ).
+    Yêu cầu:
+    - Bỏ các từ thừa như "cho mình hỏi", "làm sao để", "là gì".
+    - Giữ lại từ khóa chính.
+    - Viết hoa chữ cái đầu.
+    - Ví dụ: "Thì hiện tại đơn dùng khi nào" -> "Cách dùng thì Hiện tại đơn"
+    
+    Câu hỏi: "{question}"
+    
+    Tiêu đề:
+    """
+    try:
+        # Gọi LLM (dùng biến llm đã khai báo ở trên)
+        title = llm.invoke(prompt).content
+        
+        # Làm sạch chuỗi (bỏ ngoặc kép, khoảng trắng thừa)
+        return title.strip().replace('"', '').replace("'", "")
+    except Exception:
+        # Fallback nếu AI lỗi: Cắt chuỗi thủ công
+        return question[:50] + "..."

@@ -28,6 +28,9 @@ export class Word extends BaseEntity {
     meaning!: string
 
     @Column({ type: 'text', nullable: true })
+    vnMeaning?: string
+
+    @Column({ type: 'text', nullable: true })
     example?: string
 
     @Column({ type: 'text', nullable: true })

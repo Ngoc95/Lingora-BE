@@ -217,3 +217,31 @@ export const checkPermission = (action: keyof Query, resource: string) => {
         return next()
     }
 }
+
+export const optionalAccessToken = async (req: Request, res: Response, next: NextFunction) => {
+    const authorizationHeader = req.headers.authorization
+
+    if (!authorizationHeader) {
+        return next()
+    }
+
+    const token = authorizationHeader.split(' ')[1] || authorizationHeader
+
+    try {
+        const decoded = (await verifyToken(token, env.JWT_ACCESS_SECRET as string)) as { userId: number }
+
+        const foundUser = await User.findOne({
+            where: { id: decoded.userId },
+            relations: ['roles']
+        })
+
+        if (!foundUser) {
+            throw new AuthRequestError('User not found')
+        }
+
+        req.user = foundUser
+        next()
+    } catch (error) {
+        next(new AuthRequestError('Access token is invalid.'))
+    }
+}
