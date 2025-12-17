@@ -23,6 +23,17 @@ class CommentController {
         }).send(res)
     }
 
+    getCommentById = async (req: Request, res: Response) => {
+        if (!req.params?.commentId) throw new BadRequestError({ message: 'Comment id invalid' })
+
+        const commentId = parseInt(req.params.commentId)
+
+        return new SuccessResponse({
+            message: 'Get comment by id successfully!',
+            metaData: await commentService.getCommentById(commentId)
+        }).send(res)
+    }
+
     createComment = async (req: Request<ParamsDictionary, any, { content: string; parentId: number }>, res: Response) => {
         const targetId = parseInt(req.params?.targetId || req.params?.id)
         const targetType = (req.query?.targetType as TargetType) || TargetType.POST
@@ -42,7 +53,7 @@ class CommentController {
     updateComment = async (req: Request<ParamsDictionary, any, { content: string; parentId: number }>, res: Response) => {
         const targetId = parseInt(req.params?.targetId || req.params?.id)
         const targetType = (req.query?.targetType as TargetType) || TargetType.POST
-        
+
         if (!req.params?.commentId) throw new BadRequestError({ message: 'Comment id invalid' })
 
         const commentId = parseInt(req.params?.commentId)

@@ -2,6 +2,7 @@ import {
     BaseEntity,
     Column,
     CreateDateColumn,
+    DeleteDateColumn,
     Entity,
     ManyToOne,
     OneToMany,
@@ -78,6 +79,8 @@ export class StudySet extends BaseEntity {
     @UpdateDateColumn()
     updatedAt!: Date
 
+    @DeleteDateColumn()
+    deletedAt?: Date
+
     static allowSortList = ['id', 'title', 'createdAt', 'price']
 }
-

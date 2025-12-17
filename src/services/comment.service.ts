@@ -4,6 +4,8 @@ import { CreateCommentBodyReq } from '~/dtos/req/comment/createCommentBody.req'
 import { UpdateCommentBodyReq } from '~/dtos/req/comment/updateCommentBody.req'
 import { Comment } from '~/entities/comment.entity'
 import { Like } from '~/entities/like.entity'
+import { Post } from '~/entities/post.entity'
+import { StudySet } from '~/entities/studySet.entity'
 import { TargetType } from '~/enums/targetType.enum'
 import { EVENTS } from '~/events-handler/constants'
 import eventBus from '~/events-handler/eventBus'
@@ -60,6 +62,69 @@ class CommentService {
         }
 
         return childComments
+    }
+
+    getCommentById = async (commentId: number) => {
+        const comment = await Comment.findOne({
+            where: { id: commentId },
+            select: {
+                id: true,
+                content: true,
+                createdAt: true,
+                targetId: true,
+                targetType: true,
+                createdBy: {
+                    id: true,
+                    username: true,
+                    avatar: true
+                }
+            },
+            relations: ['createdBy']
+        })
+
+        if (!comment) {
+            throw new BadRequestError({ message: 'Comment not found!' })
+        }
+
+        // Get target info (post or study set)
+        let targetInfo: any = null
+
+        if (comment.targetType === TargetType.POST) {
+            const post = await Post.findOne({
+                where: { id: comment.targetId },
+                select: {
+                    id: true,
+                    title: true
+                }
+            })
+            if (post) {
+                targetInfo = {
+                    id: post.id,
+                    type: TargetType.POST,
+                    title: post.title
+                }
+            }
+        } else if (comment.targetType === TargetType.STUDY_SET) {
+            const studySet = await StudySet.findOne({
+                where: { id: comment.targetId },
+                select: {
+                    id: true,
+                    title: true
+                }
+            })
+            if (studySet) {
+                targetInfo = {
+                    id: studySet.id,
+                    type: TargetType.STUDY_SET,
+                    title: studySet.title
+                }
+            }
+        }
+
+        return {
+            ...comment,
+            target: targetInfo
+        }
     }
 
     comment = async ({ content, targetId, targetType, user, parentId = null }: CreateCommentBodyReq) => {

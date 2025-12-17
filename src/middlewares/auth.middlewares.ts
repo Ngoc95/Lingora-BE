@@ -16,9 +16,43 @@ import { checkDuplicateUser, checkRolesExistence, checkUserExistence } from "~/u
 import { isEmail, isPassword, isRequired, isUsername } from "./common.middlewares";
 import validator from "validator";
 
+// Helper function to validate user status (BANNED/SUSPENDED/DELETED)
+async function validateUserStatus(user: User): Promise<void> {
+    const userRepository = await DatabaseService.getInstance().getRepository(User)
+
+    // Check if user is banned
+    if (user.status === 'BANNED') {
+        throw new BadRequestError({
+            message: `Tài khoản của bạn đã bị khóa vĩnh viễn. Lý do: ${user.banReason || 'Vi phạm nghiêm trọng quy định'}`
+        })
+    }
+
+    // Check if user is deleted
+    if (user.status === 'DELETED') {
+        throw new BadRequestError({ message: 'Tài khoản không tồn tại' })
+    }
+
+    // Check if user is suspended
+    if (user.status === 'SUSPENDED') {
+        // Check if suspension period has expired
+        if (user.suspendedUntil && new Date() > new Date(user.suspendedUntil)) {
+            user.status = 'ACTIVE' as any
+            user.suspendedUntil = undefined
+            await userRepository.save(user)
+        } else {
+            const suspendedUntil = user.suspendedUntil
+                ? new Date(user.suspendedUntil).toLocaleDateString('vi-VN')
+                : 'không xác định'
+            throw new BadRequestError({
+                message: `Tài khoản của bạn đã bị tạm khóa đến ${suspendedUntil}. Lý do: ${user.banReason || 'Vi phạm quy định'}`
+            })
+        }
+    }
+}
+
 async function validateUserCredentials(identifier: string, password: string) {
     const userRepository = await DatabaseService.getInstance().getRepository(User)
-    
+
     // Nếu identifier là email → normalize email
     let normalizedIdentifier = identifier
     if (validator.isEmail(identifier)) {
@@ -34,6 +68,9 @@ async function validateUserCredentials(identifier: string, password: string) {
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) throw new BadRequestError({ message: 'Invalid credentials' });
+
+    // Validate user status (BANNED/SUSPENDED/DELETED)
+    await validateUserStatus(user)
 
     return user
 }
@@ -165,18 +202,31 @@ export const accessTokenValidation = validate(
                                 where: {
                                     id: decodedAuthorization.userId
                                 },
+                                select: {
+                                    id: true,
+                                    username: true,
+                                    email: true,
+                                    avatar: true,
+                                    status: true,
+                                    suspendedUntil: true,
+                                    banReason: true,
+                                    proficiency: true
+                                },
                                 relations: ['roles']
                             })
 
                             if (foundUser) {
-                                ; (req as any).user = foundUser as User
+                                // Validate user status (BANNED/SUSPENDED/DELETED)
+                                await validateUserStatus(foundUser)
+
+                                    ; (req as any).user = foundUser as User
                             }
 
                         } catch (error) {
                             if (error instanceof jwt.TokenExpiredError) {
                                 throw new AuthRequestError('Access token expired.')
                             }
-                            throw new AuthRequestError('Access token is invalid.')
+                            throw error // Re-throw BadRequestError for status checks
                         }
                         return true
                     }

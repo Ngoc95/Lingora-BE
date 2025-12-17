@@ -39,9 +39,10 @@ class StudySetController {
     getStudySetById = async (req: Request, res: Response) => {
         const studySetId = parseInt(req.params?.id)
         const userId = req.user!.id
+        const isAdmin = req.user!.roles?.some((role: any) => role.name === 'ADMIN') || false
         return new SuccessResponse({
             message: 'Get study set successfully',
-            metaData: await studySetService.getStudySetById(studySetId, userId),
+            metaData: await studySetService.getStudySetById(studySetId, userId, isAdmin),
         }).send(res)
     }
 
