@@ -1,0 +1,1249 @@
+{
+  "examType": "IELTS",
+  "code": "IELTS_CAMBRIDGE_1_TEST_1",
+  "title": "Cambridge IELTS 1 - Practice Test 1",
+  "description": "Digitized practice test from Cambridge IELTS Series 1.",
+  "totalDurationSeconds": 9600,
+  "isPublished": true,
+  "sections": [
+    {
+      "sectionType": "LISTENING",
+      "title": "Listening",
+      "displayOrder": 1,
+      "durationSeconds": 2400,
+      "instructions": "This section contains 4 parts. Listen carefully and answer the questions.",
+      "groups": [
+        {
+          "groupType": "LISTENING_PART",
+          "title": "Practice Test 1 LISTENING SECTION 1",
+          "description": "Questions 1-10",
+          "resourceUrl": "https://res.cloudinary.com/dm8mg7lim/video/upload/v1765521039/Test_1_-_Section_1_mejwwt.mp3",
+          "metadata": {},
+          "questionGroups": [
+            {
+              "title": "Questions 1-5",
+              "description": "Circle the appropriate letter.",
+              "questions": [
+                {
+                  "questionType": "MULTIPLE_CHOICE",
+                  "prompt": "1 What does her briefcase look like?",
+                  "metadata": {
+                    "imageUrl": "https://res.cloudinary.com/dm8mg7lim/image/upload/v1765525888/Screenshot_2025-12-12_145101_jmn0h2.png"
+                  },
+                  "options": [
+                    "A",
+                    "B",
+                    "C",
+                    "D"
+                  ],
+                  "correctAnswer": "A"
+                },
+                {
+                  "questionType": "MULTIPLE_CHOICE",
+                  "prompt": "2 Which picture shows the distinguishing features?",
+                  "metadata": {
+                    "imageUrl": "https://res.cloudinary.com/dm8mg7lim/image/upload/v1765525889/Screenshot_2025-12-12_145107_joedo3.png"
+                  },
+                  "options": [
+                    "A",
+                    "B",
+                    "C",
+                    "D"
+                  ],
+                  "correctAnswer": "C"
+                },
+                {
+                  "questionType": "MULTIPLE_CHOICE",
+                  "prompt": "3 What did she have inside her briefcase?",
+                  "options": [
+                    "wallet, pens and novel",
+                    "papers and wallet",
+                    "pens and novel",
+                    "papers, pens and novel"
+                  ],
+                  "correctAnswer": "papers, pens and novel"
+                },
+                {
+                  "questionType": "MULTIPLE_CHOICE",
+                  "prompt": "4 Where was she standing when she lost her briefcase?",
+                  "metadata": {
+                    "imageUrl": "https://res.cloudinary.com/dm8mg7lim/image/upload/v1765525890/Screenshot_2025-12-12_145111_hampr9.png"
+                  },
+                  "options": [
+                    "A",
+                    "B",
+                    "C",
+                    "D"
+                  ],
+                  "correctAnswer": "D"
+                },
+                {
+                  "questionType": "MULTIPLE_CHOICE",
+                  "prompt": "5 What time was it when she lost her briefcase?",
+                  "metadata": {
+                    "imageUrl": "https://res.cloudinary.com/dm8mg7lim/image/upload/v1765525890/Screenshot_2025-12-12_145115_fopqmv.png"
+                  },
+                  "options": [
+                    "A",
+                    "B",
+                    "C",
+                    "D"
+                  ],
+                  "correctAnswer": "C"
+                }
+              ],
+              "metadata": {
+                "questionStart": 1,
+                "questionEnd": 5
+              }
+            },
+            {
+              "title": "Questions 6-10",
+              "description": "Complete the form. Write NO MORE THAN THREE WORDS for each answer.",
+              "questions": [
+                {
+                  "questionType": "FILL_IN_THE_BLANK",
+                  "prompt": "PERSONAL DETAILS FORM\nName: Mary (6) ...........................................................................................",
+                  "correctAnswer": "Prescott",
+                  "metadata": {
+                    "maxLength": 3,
+                    "contextType": "Form Completion"
+                  }
+                },
+                {
+                  "questionType": "FILL_IN_THE_BLANK",
+                  "prompt": "Address: Flat 2 (7) ............................... (Part 1 of street address)",
+                  "correctAnswer": "41",
+                  "metadata": {
+                    "maxLength": 3,
+                    "contextType": "Form Completion"
+                  }
+                },
+                {
+                  "questionType": "FILL_IN_THE_BLANK",
+                  "prompt": "Address: (8) ..................................................... Road, Canterbury (Part 2 of street address)",
+                  "correctAnswer": "Fountain",
+                  "metadata": {
+                    "maxLength": 3,
+                    "contextType": "Form Completion"
+                  }
+                },
+                {
+                  "questionType": "FILL_IN_THE_BLANK",
+                  "prompt": "Telephone: (9) ......................................................................................................",
+                  "correctAnswer": "752239",
+                  "metadata": {
+                    "maxLength": 3,
+                    "contextType": "Form Completion"
+                  }
+                },
+                {
+                  "questionType": "FILL_IN_THE_BLANK",
+                  "prompt": "Estimated value of lost item: (10) £ ............................................................................",
+                  "correctAnswer": "65",
+                  "metadata": {
+                    "maxLength": 3,
+                    "contextType": "Form Completion"
+                  }
+                }
+              ],
+              "metadata": {
+                "questionStart": 6,
+                "questionEnd": 10
+              }
+            }
+          ]
+        },
+        {
+          "groupType": "LISTENING_PART",
+          "title": "Practice Test 1 - SECTION 2",
+          "description": "You will hear a recording. Answer all the questions in this section.\nQuestions 11-13: News Headlines\nQuestions 14-21: Note Completion",
+          "resourceUrl": "https://res.cloudinary.com/dm8mg7lim/video/upload/v1765521039/Test_1_-_Section_2_uma1k2.mp3",
+          "metadata": {},
+          "questionGroups": [
+            {
+              "title": "Questions 11-13",
+              "description": "Tick the THREE other items which are mentioned in the news headlines.",
+              "questions": [
+                {
+                  "questionType": "MULTIPLE_CHOICE",
+                  "prompt": "Which THREE items are mentioned in the news headlines?",
+                  "options": [
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                    "G",
+                    "H",
+                    "I"
+                  ],
+                  "correctAnswer": [
+                    "E",
+                    "H",
+                    "F"
+                  ],
+                  "metadata": {
+                    "allowMultiple": true,
+                    "maxSelection": 3
+                  }
+                }
+              ],
+              "metadata": {
+                "questionStart": 11,
+                "questionEnd": 13
+              }
+            },
+            {
+              "title": "Questions 14-21",
+              "description": "Complete the notes below by writing NO MORE THAN THREE WORDS in the spaces provided.",
+              "questions": [
+                {
+                  "questionType": "NOTE_COMPLETION",
+                  "prompt": "The Government plans to give $ (14) ................................................ to assist the farmers.",
+                  "correctAnswer": "250 million"
+                },
+                {
+                  "questionType": "NOTE_COMPLETION",
+                  "prompt": "This money was to be spent on improving Sydney’s (15) ........................................................................ but has now been re-allocated.",
+                  "correctAnswer": [
+                    "roads",
+                    "road system"
+                  ]
+                },
+                {
+                  "questionType": "NOTE_COMPLETION",
+                  "prompt": "Farmers say that the money will not help them because it is (16) .............................................................. .",
+                  "correctAnswer": "too late"
+                },
+                {
+                  "questionType": "NOTE_COMPLETION",
+                  "prompt": "An aeroplane which was carrying a group of (17) .................................................. was forced to land...",
+                  "correctAnswer": [
+                    "school children",
+                    "boys"
+                  ]
+                },
+                {
+                  "questionType": "NOTE_COMPLETION",
+                  "prompt": "The aeroplane was forced to land just (18) ................................................. minutes after take-off.",
+                  "correctAnswer": "3"
+                },
+                {
+                  "questionType": "NOTE_COMPLETION",
+                  "prompt": "The passengers were rescued by (19) ............................................................ .",
+                  "correctAnswer": [
+                    "boats",
+                    "pleasure crafty",
+                    "boats and pleasure craft"
+                  ]
+                },
+                {
+                  "questionType": "NOTE_COMPLETION",
+                  "prompt": "The passengers thanked the (20) ............................................................... for saving their lives...",
+                  "correctAnswer": "pilot"
+                },
+                {
+                  "questionType": "NOTE_COMPLETION",
+                  "prompt": "Unfortunately they lost their (21) .................................................................. .",
+                  "correctAnswer": "instruments"
+                }
+              ],
+              "metadata": {
+                "questionStart": 14,
+                "questionEnd": 21
+              }
+            }
+          ]
+        },
+        {
+          "groupType": "LISTENING_PART",
+          "title": "Practice Test 1 Section 3",
+          "description": "You will hear a conversation between a student and a lecturer.\nQuestions 22-25\nQuestions 26-31",
+          "resourceUrl": "https://res.cloudinary.com/dm8mg7lim/video/upload/v1765521040/Test_1_-_Section_3_jzloep.mp3",
+          "metadata": {
+            "source_reference": "SECTION 3 Questions 22-31"
+          },
+          "questionGroups": [
+            {
+              "title": "Questions 22-25",
+              "description": "Circle the appropriate letter.",
+              "questions": [
+                {
+                  "questionType": "MULTIPLE_CHOICE",
+                  "prompt": "The orientation meeting",
+                  "metadata": {
+                    "options_list": [
+                      "took place recently",
+                      "took place last term",
+                      "will take place tomorrow",
+                      "will take place next week"
+                    ]
+                  },
+                  "options": [
+                    "took place recently",
+                    "took place last term",
+                    "will take place tomorrow",
+                    "will take place next week"
+                  ],
+                  "correctAnswer": "took place recently"
+                },
+                {
+                  "questionType": "MULTIPLE_CHOICE",
+                  "prompt": "Attendance at lectures is",
+                  "metadata": {
+                    "options_list": [
+                      "optional after 4 pm.",
+                      "closely monitored.",
+                      "difficult to enforce.",
+                      "sometimes unnecessary."
+                    ]
+                  },
+                  "options": [
+                    "optional after 4 pm.",
+                    "closely monitored.",
+                    "difficult to enforce.",
+                    "sometimes unnecessary."
+                  ],
+                  "correctAnswer": "closely monitored."
+                },
+                {
+                  "questionType": "MULTIPLE_CHOICE",
+                  "prompt": "Tutorials take place",
+                  "metadata": {
+                    "options_list": [
+                      "every morning.",
+                      "twice a week.",
+                      "three mornings a week.",
+                      "three afternoons a week."
+                    ]
+                  },
+                  "options": [
+                    "every morning.",
+                    "twice a week.",
+                    "three mornings a week.",
+                    "three afternoons a week."
+                  ],
+                  "correctAnswer": "three mornings a week."
+                },
+                {
+                  "questionType": "MULTIPLE_CHOICE",
+                  "prompt": "The lecturer’s name is",
+                  "metadata": {
+                    "options_list": [
+                      "Roberts.",
+                      "Rawson.",
+                      "Rogers.",
+                      "Robertson."
+                    ]
+                  },
+                  "options": [
+                    "Roberts.",
+                    "Rawson.",
+                    "Rogers.",
+                    "Robertson."
+                  ],
+                  "correctAnswer": "Roberts."
+                }
+              ],
+              "metadata": {
+                "questionStart": 22,
+                "questionEnd": 25
+              }
+            },
+            {
+              "title": "Questions 26-31",
+              "description": "Complete the notes below using NO MORE THAN THREE WORDS.",
+              "questions": [
+                {
+                  "questionType": "NOTE_COMPLETION",
+                  "prompt": "Students must: (26) __________ for 25 minutes (Tutorial paper requirements)",
+                  "metadata": {
+                    "wordLimit": 3,
+                    "context_key": "26",
+                    "full_context_template": "Tutorial paper: Students must: [ANSWER] for 25 minutes"
+                  },
+                  "correctAnswer": [
+                    "talk",
+                    "give a talk"
+                  ]
+                },
+                {
+                  "questionType": "NOTE_COMPLETION",
+                  "prompt": "Students must: (27) __________ (Tutorial paper requirements)",
+                  "metadata": {
+                    "wordLimit": 3,
+                    "context_key": "27",
+                    "full_context_template": "Tutorial paper: Students must: [ANSWER]"
+                  },
+                  "correctAnswer": "write up work"
+                },
+                {
+                  "questionType": "NOTE_COMPLETION",
+                  "prompt": "Essay topic: Usually (28) __________",
+                  "metadata": {
+                    "wordLimit": 3,
+                    "context_key": "28",
+                    "full_context_template": "Essay topic: Usually [ANSWER]"
+                  },
+                  "correctAnswer": "can choose"
+                },
+                {
+                  "questionType": "NOTE_COMPLETION",
+                  "prompt": "Type of exam: (29) __________",
+                  "metadata": {
+                    "wordLimit": 3,
+                    "context_key": "29",
+                    "full_context_template": "Type of exam: [ANSWER]"
+                  },
+                  "correctAnswer": "open book"
+                },
+                {
+                  "questionType": "NOTE_COMPLETION",
+                  "prompt": "Library: Important books are in (30) __________",
+                  "metadata": {
+                    "wordLimit": 3,
+                    "context_key": "30",
+                    "full_context_template": "Library: Important books are in [ANSWER]"
+                  },
+                  "correctAnswer": "closed reserve"
+                },
+                {
+                  "questionType": "NOTE_COMPLETION",
+                  "prompt": "Focus of course: Focus on (31) __________",
+                  "metadata": {
+                    "wordLimit": 3,
+                    "context_key": "31",
+                    "full_context_template": "Focus of course: Focus on [ANSWER]"
+                  },
+                  "correctAnswer": [
+                    "vocational",
+                    "work",
+                    "employment"
+                  ]
+                }
+              ],
+              "metadata": {
+                "questionStart": 26,
+                "questionEnd": 31
+              }
+            }
+          ]
+        },
+        {
+          "groupType": "LISTENING_PART",
+          "title": "Practice Test 1 - SECTION 4",
+          "description": "You will hear a talk given by a lecturer to students who are starting a university course. First you have some time to look at Questions 32 to 41.\nQuestions 32-41",
+          "resourceUrl": "https://res.cloudinary.com/dm8mg7lim/video/upload/v1765521040/Test_1_-_Section_4_tfvji2.mp3",
+          "metadata": {},
+          "questionGroups": [
+            {
+              "title": "Questions 32-33",
+              "description": "Listen to the following talk given by a lecturer.",
+              "questions": [
+                {
+                  "questionType": "MULTIPLE_CHOICE",
+                  "prompt": "32 The speaker works within the Faculty of",
+                  "options": [
+                    "Science and Technology.",
+                    "Arts and Social Sciences.",
+                    "Architecture.",
+                    "Law."
+                  ],
+                  "correctAnswer": "Arts and Social Sciences."
+                },
+                {
+                  "questionType": "MULTIPLE_CHOICE",
+                  "prompt": "33 The Faculty consists firstly of",
+                  "options": [
+                    "subjects.",
+                    "degrees.",
+                    "divisions.",
+                    "departments."
+                  ],
+                  "correctAnswer": "divisions."
+                }
+              ],
+              "metadata": {
+                "questionStart": 32,
+                "questionEnd": 33
+              }
+            },
+            {
+              "title": "Questions 34-36",
+              "description": "Complete the notes in NO MORE THAN THREE WORDS.",
+              "questions": [
+                {
+                  "questionType": "NOTE_COMPLETION",
+                  "prompt": "34 Complete the notes: The subjects taken in the first semester in this course are psychology, sociology, ___________ and [another subject].",
+                  "metadata": {
+                    "instruction": "Complete the notes in NO MORE THAN THREE WORDS."
+                  },
+                  "correctAnswer": "history and economics"
+                },
+                {
+                  "questionType": "NOTE_COMPLETION",
+                  "prompt": "35 Complete the notes: Students may have problems with ___________ and [another problem].",
+                  "metadata": {
+                    "instruction": "Complete the notes in NO MORE THAN THREE WORDS."
+                  },
+                  "correctAnswer": "deadlines"
+                },
+                {
+                  "questionType": "NOTE_COMPLETION",
+                  "prompt": "36 Complete the notes: Students may have problems with [Q35 answer] and ___________ .",
+                  "metadata": {
+                    "instruction": "Complete the notes in NO MORE THAN THREE WORDS."
+                  },
+                  "correctAnswer": "attendance"
+                }
+              ],
+              "metadata": {
+                "questionStart": 34,
+                "questionEnd": 36
+              }
+            },
+            {
+              "title": "Questions 37-41",
+              "description": "Circle the appropriate letter.",
+              "questions": [
+                {
+                  "questionType": "MULTIPLE_CHOICE",
+                  "prompt": "37 The speaker says students can visit her",
+                  "options": [
+                    "every morning.",
+                    "some mornings.",
+                    "mornings only.",
+                    "Friday morning."
+                  ],
+                  "correctAnswer": "some mornings."
+                },
+                {
+                  "questionType": "MULTIPLE_CHOICE",
+                  "prompt": "38 According to the speaker, a tutorial",
+                  "options": [
+                    "is a type of lecture.",
+                    "is less important than a lecture.",
+                    "provides a chance to share views.",
+                    "provides an alternative to groupwork."
+                  ],
+                  "correctAnswer": "provides a chance to share views."
+                },
+                {
+                  "questionType": "MULTIPLE_CHOICE",
+                  "prompt": "39 When writing essays, the speaker advises the students to",
+                  "options": [
+                    "research their work well.",
+                    "name the books they have read.",
+                    "share work with their friends.",
+                    "avoid using other writers’ ideas."
+                  ],
+                  "correctAnswer": "name the books they have read."
+                },
+                {
+                  "questionType": "MULTIPLE_CHOICE",
+                  "prompt": "40 The speaker thinks that plagiarism is",
+                  "options": [
+                    "a common problem.",
+                    "an acceptable risk.",
+                    "a minor concern.",
+                    "a serious offence."
+                  ],
+                  "correctAnswer": "a serious offence."
+                },
+                {
+                  "questionType": "MULTIPLE_CHOICE",
+                  "prompt": "41 The speaker’s aims are to",
+                  "options": [
+                    "introduce students to university expectations.",
+                    "introduce students to the members of staff.",
+                    "warn students about the difficulties of studying.",
+                    "guide students round the university."
+                  ],
+                  "correctAnswer": "introduce students to university expectations."
+                }
+              ],
+              "metadata": {
+                "questionStart": 37,
+                "questionEnd": 41
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sectionType": "READING",
+      "title": "Reading",
+      "displayOrder": 2,
+      "durationSeconds": 3600,
+      "instructions": "Read the passages and answer the questions.",
+      "groups": [
+        {
+          "groupType": "PASSAGE",
+          "title": "Practice Test 1: Reading Passage 1",
+          "content": "The control of fire was the first and perhaps greatest of humanity’s steps towards a life-enhancing technology. To early man, fire was a divine gift randomly delivered in the form of lightning, forest fire or burning lava. Unable to make flame for themselves, the earliest peoples probably stored fire by keeping slow burning logs alight or by carrying charcoal in pots.\n\nHow and where man learnt how to produce flame at will is unknown. It was probably a secondary invention, accidentally made during tool-making operations with wood or stone. Studies of primitive societies suggest that the earliest method of making fire was through friction. European peasants would insert a wooden drill in a round hole and rotate it briskly between their palms. This process could be speeded up by wrapping a cord around the drill and pulling on each end.\n\nThe Ancient Greeks used lenses or concave mirrors to concentrate the sun’s rays and burning glasses were also used by Mexican Aztecs and the Chinese.\n\nPercussion methods of fire-lighting date back to Paleolithic times, when some Stone Age tool-makers discovered that chipping flints produced sparks. The technique became more efficient after the discovery of iron, about 5000 years ago. In Arctic North America, the Eskimos produced a slow-burning spark by striking quartz against iron pyrites, a compound that contains sulphur. The Chinese lit their fires by striking porcelain with bamboo. In Europe, the combination of steel, flint and tinder remained the main method of fire-lighting until the mid 19th century.\n\nFire-lighting was revolutionised by the discovery of phosphorus, isolated in 1669 by a German alchemist trying to transmute silver into gold. Impressed by the element’s combustibility, several 17th century chemists used it to manufacture fire-lighting devices, but the results were dangerously inflammable. With phosphorus costing the equivalent of several hundred pounds per ounce, the first matches were expensive.\n\nThe quest for a practical match really began after 1781 when a group of French chemists came up with the Phosphoric Candle or Ethereal Match, a sealed glass tube containing a twist of paper tipped with phosphorus. When the tube was broken, air rushed in, causing the phosphorus to self-combust. An even more hazardous device, popular in America, was the Instantaneous Light Box — a bottle filled with sulphuric acid into which splints treated with chemicals were dipped.\n\nThe first matches resembling those used today were made in 1827 by John Walker, an English pharmacist who borrowed the formula from a military rocket-maker called Congreve. Costing a shilling a box, Congreves were splints coated with sulphur and tipped with potassium chlorate. To light them, the user drew them quickly through folded glass paper.\n\nWalker never patented his invention, and three years later it was copied by a Samuel Jones, who marketed his product as Lucifers. About the same time, a French chemistry student called Charles Sauria produced the first “strike-anywhere” match by substituting white phosphorus for the potassium chlorate in the Walker formula. However, since white phosphorus is a deadly poison, from 1845 match-makers exposed to its fumes succumbed to necrosis, a disease that eats away jaw-bones. It wasn’t until 1906 that the substance was eventually banned.\n\nThat was 62 years after a Swedish chemist called Pasch had discovered non-toxic red or amorphous phosphorus, a development exploited commercially by Pasch’s compatriot J E Lundstrom in 1885. Lundstrom’s safety matches were safe because the red phosphorus was non-toxic; it was painted on to the striking surface instead of the match tip, which contained potassium chlorate with a relatively high ignition temperature of 182 degrees centigrade.\n\nAmerica lagged behind Europe in match technology and safety standards. It wasn’t until 1900 that the Diamond Match Company bought a French patent for safety matches — but the formula did not work properly in the different climatic conditions prevailing in America and it was another 11 years before scientists finally adapted the French patent for the US.\n\nThe Americans, however, can claim several “firsts” in match technology and marketing. In 1892 the Diamond Match Company pioneered book matches. The innovation didn’t catch on until after 1896, when a brewery had the novel idea of advertising its product in match books. Today book matches are the most widely used type in the US, with 90 percent handed out free by hotels, restaurants and others.\n\nOther American innovations include an anti-afterglow solution to prevent the match from smouldering after it has been blown out; and the waterproof match, which lights after eight hours in water.",
+          "metadata": {},
+          "questionGroups": [
+            {
+              "title": "Questions 1-8",
+              "description": "Complete the summary below. Choose your answers from the box at the bottom of the page. You may use any of the words more than once",
+              "content": "[\"Mexicans\",\"random\",\"rotating\",\"despite\",\"preserve\",\"realising\",\"sunlight\",\"lacking\",\"heavenly\",\"percussion\",\"chance\",\"friction\",\"unaware\",\"without\",\"make\",\"heating\",\"Eskimos\",\"surprised\",\"until\",\"smoke\"]",
+              "questions": [
+                {
+                  "questionType": "FILL_IN_THE_BLANK",
+                  "prompt": "They tried to (1) burning logs or charcoal.",
+                  "correctAnswer": "preserve"
+                },
+                {
+                  "questionType": "FILL_IN_THE_BLANK",
+                  "prompt": "...charcoal (2) that they could create fire themselves.",
+                  "metadata": {
+                    "blankNumber": 2
+                  },
+                  "correctAnswer": "unaware"
+                },
+                {
+                  "questionType": "FILL_IN_THE_BLANK",
+                  "prompt": "It is suspected that the first man-made flames were produced by (3).",
+                  "metadata": {
+                    "blankNumber": 3
+                  },
+                  "correctAnswer": "chance"
+                },
+                {
+                  "questionType": "FILL_IN_THE_BLANK",
+                  "prompt": "The very first fire-lighting methods involved the creation of (4)...",
+                  "metadata": {
+                    "blankNumber": 4
+                  },
+                  "correctAnswer": "friction"
+                },
+                {
+                  "questionType": "FILL_IN_THE_BLANK",
+                  "prompt": "...rapidly (5) a wooden stick in a round hole.",
+                  "metadata": {
+                    "blankNumber": 5
+                  },
+                  "correctAnswer": "rotating"
+                },
+                {
+                  "questionType": "FILL_IN_THE_BLANK",
+                  "prompt": "The use of (6) or persistent chipping was also widespread...",
+                  "metadata": {
+                    "blankNumber": 6
+                  },
+                  "correctAnswer": "percussion"
+                },
+                {
+                  "questionType": "FILL_IN_THE_BLANK",
+                  "prompt": "...such as the Chinese and (7).",
+                  "metadata": {
+                    "blankNumber": 7
+                  },
+                  "correctAnswer": "Eskimos"
+                },
+                {
+                  "questionType": "FILL_IN_THE_BLANK",
+                  "prompt": "...continued until the 1850s (8) the discovery of phosphorus some years earlier.",
+                  "metadata": {
+                    "blankNumber": 8
+                  },
+                  "correctAnswer": "despite"
+                }
+              ],
+              "metadata": {
+                "questionStart": 1,
+                "questionEnd": 8,
+                "contentType": "word_list"
+              }
+            },
+            {
+              "title": "Questions 9-15",
+              "description": "Look at the following notes. Decide which type of match (A-H) corresponds with each description.",
+              "questions": [
+                {
+                  "questionType": "MATCHING",
+                  "prompt": "made using a less poisonous type of phosphorus",
+                  "options": [
+                    "A. the Ethereal Match",
+                    "B. the Instantaneous Lightbox",
+                    "C. Congreves",
+                    "D. Lucifers",
+                    "E. the first strike-anywhere match",
+                    "F. Lundstrom’s safety match",
+                    "G. book matches",
+                    "H. waterproof matches"
+                  ],
+                  "metadata": {
+                    "questionNumber": 9,
+                    "matchingInstruction": "Decide which type of match (A-H) corresponds with each description."
+                  },
+                  "correctAnswer": "F. Lundstrom’s safety match"
+                },
+                {
+                  "questionType": "MATCHING",
+                  "prompt": "identical to a previous type of match",
+                  "options": [
+                    "A. the Ethereal Match",
+                    "B. the Instantaneous Lightbox",
+                    "C. Congreves",
+                    "D. Lucifers",
+                    "E. the first strike-anywhere match",
+                    "F. Lundstrom’s safety match",
+                    "G. book matches",
+                    "H. waterproof matches"
+                  ],
+                  "metadata": {
+                    "questionNumber": 10
+                  },
+                  "correctAnswer": "D. Lucifers"
+                },
+                {
+                  "questionType": "MATCHING",
+                  "prompt": "caused a deadly illness",
+                  "options": [
+                    "A. the Ethereal Match",
+                    "B. the Instantaneous Lightbox",
+                    "C. Congreves",
+                    "D. Lucifers",
+                    "E. the first strike-anywhere match",
+                    "F. Lundstrom’s safety match",
+                    "G. book matches",
+                    "H. waterproof matches"
+                  ],
+                  "metadata": {
+                    "questionNumber": 11
+                  },
+                  "correctAnswer": "E. the first strike-anywhere match"
+                },
+                {
+                  "questionType": "MATCHING",
+                  "prompt": "first to look like modern matches",
+                  "options": [
+                    "A. the Ethereal Match",
+                    "B. the Instantaneous Lightbox",
+                    "C. Congreves",
+                    "D. Lucifers",
+                    "E. the first strike-anywhere match",
+                    "F. Lundstrom’s safety match",
+                    "G. book matches",
+                    "H. waterproof matches"
+                  ],
+                  "metadata": {
+                    "questionNumber": 12
+                  },
+                  "correctAnswer": "C. Congreves"
+                },
+                {
+                  "questionType": "MATCHING",
+                  "prompt": "first matches used for advertising",
+                  "options": [
+                    "A. the Ethereal Match",
+                    "B. the Instantaneous Lightbox",
+                    "C. Congreves",
+                    "D. Lucifers",
+                    "E. the first strike-anywhere match",
+                    "F. Lundstrom’s safety match",
+                    "G. book matches",
+                    "H. waterproof matches"
+                  ],
+                  "metadata": {
+                    "questionNumber": 13
+                  },
+                  "correctAnswer": "G. book matches"
+                },
+                {
+                  "questionType": "MATCHING",
+                  "prompt": "relied on an airtight glass container",
+                  "options": [
+                    "A. the Ethereal Match",
+                    "B. the Instantaneous Lightbox",
+                    "C. Congreves",
+                    "D. Lucifers",
+                    "E. the first strike-anywhere match",
+                    "F. Lundstrom’s safety match",
+                    "G. book matches",
+                    "H. waterproof matches"
+                  ],
+                  "metadata": {
+                    "questionNumber": 14
+                  },
+                  "correctAnswer": "A. the Ethereal Match"
+                },
+                {
+                  "questionType": "MATCHING",
+                  "prompt": "made with the help of an army design",
+                  "options": [
+                    "A. the Ethereal Match",
+                    "B. the Instantaneous Lightbox",
+                    "C. Congreves",
+                    "D. Lucifers",
+                    "E. the first strike-anywhere match",
+                    "F. Lundstrom’s safety match",
+                    "G. book matches",
+                    "H. waterproof matches"
+                  ],
+                  "metadata": {
+                    "questionNumber": 15
+                  },
+                  "correctAnswer": "C. Congreves"
+                }
+              ],
+              "metadata": {
+                "questionStart": 9,
+                "questionEnd": 15,
+                "contentType": "options_list"
+              }
+            }
+          ]
+        },
+        {
+          "groupType": "PASSAGE",
+          "title": "Practice Test 1: Reading Passage 2",
+          "content": "One of London Zoo’s recent advertisements caused me some irritation, so patently did it distort reality. Headlined “Without zoos you might as well tell these animals to get stuffed”, it was bordered with illustrations of several endangered species and went on to extol the myth that without zoos like London Zoo these animals “will almost certainly disappear forever”. With the zoo world’s rather mediocre record on conservation, one might be forgiven for being slightly sceptical about such an advertisement.\nZoos were originally created as places of entertainment, and their suggested involvement with conservation didn’t seriously arise until about 30 years ago, when the Zoological Society of London held the first formal international meeting on the subject. Eight years later, a series of world conferences took place, entitled “The Breeding of Endangered Species”, and from this point onwards conservation became the zoo community’s buzzword. This commitment has now been clearh defined in The World Zoo Conservation Strategy (WZCS, September 1993), which although an important and welcome document does seem to be based on an unrealistic optimism about the nature of the zoo industry\nThe WZCS estimates that there are about 10,000 zoos in the world, of which around 1,000 represent a core of quality collections capable of participating in co-ordinated conservation programmes. This is probably the document’s first failing, as I believe that 10,000 is a serious underestimate of the total number of places masquerading as zoological establishments. Of course it is difficult to get accurate data but, to put the issue into perspective, I have found that, in a year of working in Eastern Europe, I discover fresh zoos on almost a weekly basis.\nThe second flaw in the reasoning of the WZCS document is the naive faith it places in its 1,000 core zoos. One would assume that the calibre of these institutions would have been carefully examined, but it appears that the criterion for inclusion on this select list might merely be that the zoo is a member of a zoo federation or association. This might be a good starting point, working on the premise that members must meet certain standards, but again the facts don’t support the theory. The greatly respected American Association of Zoological Parks and Aquariums (AAZPA) has had extremely dubious members, and in the UK the Federation of Zoological Gardens of Great Britain and Ireland has occasionally had members that have been roundly censured in the national press. These include Robin Hill Adventure Park on the Isle of Wight, which many considered the most notorious collection of animals in the country. This establishment, which for years was protected by the Isle’s local council (which viewed it as a tourist amenity), was finally closed down following a damning report by a veterinary inspector appointed under the terms of the Zoo Licensing Act 1981. As it was always a collection of dubious repute, one is obliged to reflect upon the standards that the Zoo Federation sets when granting membership. The situation is even worse in developing countries where little money is available for redevelopment and it is hard to see a way of incorporating collections into the overall scheme of the WZCS.\nEven assuming that the WZCS’s 1,000 core zoos are all of a high standard complete with scientific staff and research facilities, trained and dedicated keepers, accommodation that permits normal or natural behaviour, and a policy of co-operating fully with one another what might be the potential for conservation? Colin Tudge, author of Last Animals at the Zoo (Oxford University Press, 1992), argues that “if the world’s zoos worked together in co-operative breeding programmes, then even without further expansion they could save around 2,000 species of endangered land vertebrates’. This seems an extremely optimistic proposition from a man who must be aware of the failings and weaknesses of the zoo industry the man who, when a member of the council of London Zoo, had to persuade the zoo to devote more of its activities to conservation. Moreover, where are the facts to support such optimism?\nToday approximately 16 species might be said to have been “saved” by captive breeding programmes, although a number of these can hardly be looked upon as resounding successes. Beyond that, about a further 20 species are being seriously considered for zoo conservation programmes. Given that the international conference at London Zoo was held 30 years ago, this is pretty slow progress, and a long way off Tudge’s target of 2,000.",
+          "description": "Reading Passage 2",
+          "metadata": {
+            "section_source": "Practice Test 1"
+          },
+          "questionGroups": [
+            {
+              "title": "Questions 16-22",
+              "description": "YES/NO/NOT GIVEN questions.",
+              "questions": [
+                {
+                  "questionType": "YES_NO_NOT_GIVEN",
+                  "prompt": "London Zoo’s advertisements are dishonest.",
+                  "options": [
+                    "YES",
+                    "NO",
+                    "NOT GIVEN"
+                  ],
+                  "correctAnswer": "YES",
+                  "metadata": {
+                    "question_number": "16"
+                  }
+                },
+                {
+                  "questionType": "YES_NO_NOT_GIVEN",
+                  "prompt": "Zoos made an insignificant contribution to conservation up until 30 years ago.",
+                  "options": [
+                    "YES",
+                    "NO",
+                    "NOT GIVEN"
+                  ],
+                  "correctAnswer": "YES",
+                  "metadata": {
+                    "question_number": "17"
+                  }
+                },
+                {
+                  "questionType": "YES_NO_NOT_GIVEN",
+                  "prompt": "The WZCS document is not known in Eastern Europe.",
+                  "options": [
+                    "YES",
+                    "NO",
+                    "NOT GIVEN"
+                  ],
+                  "correctAnswer": "NOT GIVEN",
+                  "metadata": {
+                    "question_number": "18"
+                  }
+                },
+                {
+                  "questionType": "YES_NO_NOT_GIVEN",
+                  "prompt": "Zoos in the WZCS select list were carefully inspected.",
+                  "options": [
+                    "YES",
+                    "NO",
+                    "NOT GIVEN"
+                  ],
+                  "correctAnswer": "NO",
+                  "metadata": {
+                    "question_number": "19"
+                  }
+                },
+                {
+                  "questionType": "YES_NO_NOT_GIVEN",
+                  "prompt": "No-one knew how the animals were being treated at Robin Hill Adventure Park.",
+                  "options": [
+                    "YES",
+                    "NO",
+                    "NOT GIVEN"
+                  ],
+                  "correctAnswer": "NO",
+                  "metadata": {
+                    "question_number": "20"
+                  }
+                },
+                {
+                  "questionType": "YES_NO_NOT_GIVEN",
+                  "prompt": "Colin Tudge was dissatisfied with the treatment of animals at London Zoo.",
+                  "options": [
+                    "YES",
+                    "NO",
+                    "NOT GIVEN"
+                  ],
+                  "correctAnswer": "NOT GIVEN",
+                  "metadata": {
+                    "question_number": "21"
+                  }
+                },
+                {
+                  "questionType": "YES_NO_NOT_GIVEN",
+                  "prompt": "The number of successful zoo conservation programmes is unsatisfactory.",
+                  "options": [
+                    "YES",
+                    "NO",
+                    "NOT GIVEN"
+                  ],
+                  "correctAnswer": "YES",
+                  "metadata": {
+                    "question_number": "22"
+                  }
+                }
+              ],
+              "metadata": {
+                "questionStart": 16,
+                "questionEnd": 22
+              }
+            },
+            {
+              "title": "Questions 23-25",
+              "description": "Multiple choice questions.",
+              "questions": [
+                {
+                  "questionType": "MULTIPLE_CHOICE",
+                  "prompt": "What were the objectives of the WZCS document?",
+                  "options": [
+                    "to improve the calibre of zoos world-wide",
+                    "to identify zoos suitable for conservation practice",
+                    "to provide funds for zoos in underdeveloped countries",
+                    "to list the endangered species of the world"
+                  ],
+                  "correctAnswer": "to identify zoos suitable for conservation practice",
+                  "scoreWeight": 1,
+                  "metadata": {
+                    "question_number": "23"
+                  }
+                },
+                {
+                  "questionType": "MULTIPLE_CHOICE",
+                  "prompt": "Why does the writer refer to Robin Hill Adventure Park?",
+                  "options": [
+                    "to support the Isle of Wight local council",
+                    "to criticise the 1981 Zoo Licensing Act",
+                    "to illustrate a weakness in the WZCS document",
+                    "to exemplify the standards in AAZPA zoos"
+                  ],
+                  "correctAnswer": "to illustrate a weakness in the WZCS document",
+                  "scoreWeight": 1,
+                  "metadata": {
+                    "question_number": "24"
+                  }
+                },
+                {
+                  "questionType": "MULTIPLE_CHOICE",
+                  "prompt": "What word best describes the writer’s response to Colin Tudges’ prediction on captive breeding programmes?",
+                  "options": [
+                    "disbelieving",
+                    "impartial",
+                    "prejudiced",
+                    "accepting"
+                  ],
+                  "correctAnswer": "disbelieving",
+                  "scoreWeight": 1,
+                  "metadata": {
+                    "question_number": "25"
+                  }
+                }
+              ],
+              "metadata": {
+                "questionStart": 23,
+                "questionEnd": 25
+              }
+            },
+            {
+              "title": "Questions 26-28",
+              "description": "Select THREE factors.",
+              "questions": [
+                {
+                  "questionType": "MULTIPLE_CHOICE",
+                  "prompt": "The writer mentions a number of factors which lead him to doubt the value of the WZCS document. Which THREE of the following factors are mentioned? Write your answers (A-F) in boxes 26-28 on your answer sheet.",
+                  "options": [
+                    "the number of unregistered zoos in the world",
+                    "the lack of money in developing countries",
+                    "the actions of the Isle of Wight local council",
+                    "the failure of the WZCS to examine the standards of the “core zoos”",
+                    "the unrealistic aim of the WZCS in view of the number of species “saved” to date",
+                    "the policies of WZCS zoo managers"
+                  ],
+                  "correctAnswer": [
+                    "the number of unregistered zoos in the world",
+                    "the unrealistic aim of the WZCS in view of the number of species “saved” to date",
+                    "the failure of the WZCS to examine the standards of the “core zoos”"
+                  ],
+                  "scoreWeight": 3,
+                  "metadata": {
+                    "question_type_detail": "Select Three Factors (A-F)",
+                    "question_range": "26-28",
+                    "maxSelection": 3,
+                    "allowMultiple": true
+                  }
+                }
+              ],
+              "metadata": {
+                "questionStart": 26,
+                "questionEnd": 28
+              }
+            }
+          ]
+        },
+        {
+          "groupType": "PASSAGE",
+          "title": "Practice Test 1: Reading Passage 3",
+          "content": "Architecture is the art and conditions created by quick-and-easy-to-handle science of designing buildings industrialisation. A new style of reinforced concrete and an and structures. A building architecture emerged to reflect improved ability to reflects the scientific and more idealistic notions for the prefabricate building sections technological achievements future. It was made possible by meant that builders could of the age as well as the ideas new materials and construction meet the budgets of and aspirations of the techniques and was known as commissioning authorities designer and client. The Modernism. and handle a renewed appearance of individual By the 1930s many buildings demand for development buildings, however, is often emerging from this movement quickly and cheaply. But this controversial. were designed in the led to many badly designed The use of an architectural International Style. This was buildings, which discredited style cannot be said to start or largely characterised by the bold the original aims of finish on a specific date. use of new materials and simple, Modernism.\nNeither is it possible to say geometric forms, often with Influenced by Le Corbusier’s ideas on town exactly what characterises a white walls supported by stilt- planning, every large British particular movement. But the like pillars. These were stripped city built multi-storey housing origins of what is now of unnecessary decoration that estates in the 1960s. Mass- generally known as modern would detract from their primary produced, low-cost high-rises architecture can be traced purpose – to be used or lived in. seemed to offer a solution to back to the social and Walter Gropius, Charles the problem of housing a technological changes of the Jeanneret (better known as Le growing inner-city population. 18th and 19th centuries. Corbusier) and Ludwig Mies van But far from meeting human Instead of using timber, der Rohe were among the most needs, the new estates often stone and traditional building influential of the many architects proved to be windswept techniques, architects began who contributed to the deserts lacking essential to explore ways of creating development of Modernism in social facilities and services. buildings by using the latest the first half of the century. But Many of these buildings were technology and materials the economic depression of the poorly designed and such as steel, glass and 1930s and the second world war constructed and have since concrete strengthened steel (1939-45) prevented their ideas been demolished.\nbars, known as reinforced from being widely realised until By the 1970s, a new respect concrete. Technological the economic conditions for the place of buildings advances also helped bring improved and war-torn cities within the existing townscape about the decline of rural had to be rebuilt. By the 1950s, arose. Preserving historic industries and an increase in the International Style had buildings or keeping only their urban populations as people developed into a universal facades (or fronts) grew moved to the towns to work in approach to building, which common. Architects also the new factories. Such rapid standardised the appearance of began to make more use of and uncontrolled growth new buildings in cities across the building styles and materials helped to turn parts of cities world. that were traditional to the into slums.\nBy the 1920s architects Unfortunately, this Modernist area. The architectural style throughout Europe were interest in geometric simplicity usually referred to as High reacting against the and function became exploited Tech was also emerging. It celebrated scientific and for profit. The rediscovery of engineering achievements by openly parading the sophisticated techniques used in construction. Such buildings are commonly made of metal and glass; examples are Stansted airport and the Lloyd’s building in London.\nDisillusionment at the different styles of architecture in Twentieth century failure of many of the poor the same building became architecture will mainly be imitations of Modernist known as Post Modern. Other remembered for its tall architecture led to interest in architects looked back to the buildings. They have been various styles and ideas from classical tradition. The trend in made possible by the the past and present. By the architecture now favours smaller development of light steel 1980s the coexistence of scale building design that frames and safe passenger reflects a growing public lifts. They originated in the US awareness of environmental over a century ago to help issues such as energy meet the demand for more efficiency. Like the Modernists, economical use of land. As people today recognise that a construction techniques well designed environment improved, the skyscraper improves the quality of life but is became a reality. Ruth Coleman is not necessarily achieved by adopting one well defined style of architecture.",
+          "description": "Reading Passage 3",
+          "metadata": {},
+          "questionGroups": [
+            {
+              "title": "Questions 29-35",
+              "description": "Fill in the blanks.",
+              "questions": [
+                {
+                  "questionType": "FILL_IN_THE_BLANK",
+                  "prompt": "Q29: Materials for the 'Before 18th century' period:",
+                  "correctAnswer": "timber and stone",
+                  "scoreWeight": 1
+                },
+                {
+                  "questionType": "FILL_IN_THE_BLANK",
+                  "prompt": "Q30: Introduction of ... (Style of Period 1920s):",
+                  "correctAnswer": "Modernism",
+                  "scoreWeight": 1
+                },
+                {
+                  "questionType": "FILL_IN_THE_BLANK",
+                  "prompt": "Q31: Style of Period (1930s - 1950s):",
+                  "correctAnswer": "International Style",
+                  "scoreWeight": 1
+                },
+                {
+                  "questionType": "FILL_IN_THE_BLANK",
+                  "prompt": "Q32: Characteristics of the 1960s period:",
+                  "correctAnswer": "badly designed buildings",
+                  "scoreWeight": 1
+                },
+                {
+                  "questionType": "FILL_IN_THE_BLANK",
+                  "prompt": "Q33: ... of historic buildings (Characteristics 1970s):",
+                  "correctAnswer": "preservation",
+                  "scoreWeight": 1
+                },
+                {
+                  "questionType": "FILL_IN_THE_BLANK",
+                  "prompt": "Q34: Beginning of ... era (Style of Period 1970s):",
+                  "correctAnswer": "High Tech",
+                  "scoreWeight": 1
+                },
+                {
+                  "questionType": "FILL_IN_THE_BLANK",
+                  "prompt": "Q35: Characteristics of the 1980s period:",
+                  "correctAnswer": [
+                    "co-existence of styles",
+                    "different styles together",
+                    "styles mixed"
+                  ],
+                  "scoreWeight": 1
+                }
+              ],
+              "metadata": {
+                "questionStart": 29,
+                "questionEnd": 35
+              }
+            },
+            {
+              "title": "Questions 36-40",
+              "description": "Matching questions. You may use any effect more than once if you wish.",
+              "questions": [
+                {
+                  "questionType": "MATCHING",
+                  "prompt": "36. A rapid movement of people from rural areas to cities is triggered by technological advance.",
+                  "options": [
+                    "A. The quality of life is improved.",
+                    "B. Architecture reflects the age.",
+                    "C. A number of these have been knocked down.",
+                    "D. Light steel frames and lifts are developed.",
+                    "E. Historical buildings are preserved.",
+                    "F. All decoration is removed.",
+                    "G. Parts of cities become slums.",
+                    "H. Modernist ideas cannot be put into practice until the second half of the 20th century."
+                  ],
+                  "correctAnswer": "G. Parts of cities become slums.",
+                  "scoreWeight": 1
+                },
+                {
+                  "questionType": "MATCHING",
+                  "prompt": "37. Buildings become simple and functional.",
+                  "options": [
+                    "A. The quality of life is improved.",
+                    "B. Architecture reflects the age.",
+                    "C. A number of these have been knocked down.",
+                    "D. Light steel frames and lifts are developed.",
+                    "E. Historical buildings are preserved.",
+                    "F. All decoration is removed.",
+                    "G. Parts of cities become slums.",
+                    "H. Modernist ideas cannot be put into practice until the second half of the 20th century."
+                  ],
+                  "correctAnswer": "F. All decoration is removed.",
+                  "scoreWeight": 1
+                },
+                {
+                  "questionType": "MATCHING",
+                  "prompt": "38. An economic depression and the second world war hit Europe.",
+                  "options": [
+                    "A. The quality of life is improved.",
+                    "B. Architecture reflects the age.",
+                    "C. A number of these have been knocked down.",
+                    "D. Light steel frames and lifts are developed.",
+                    "E. Historical buildings are preserved.",
+                    "F. All decoration is removed.",
+                    "G. Parts of cities become slums.",
+                    "H. Modernist ideas cannot be put into practice until the second half of the 20th century."
+                  ],
+                  "correctAnswer": "H. Modernist ideas cannot be put into practice until the second half of the 20th century.",
+                  "scoreWeight": 1
+                },
+                {
+                  "questionType": "MATCHING",
+                  "prompt": "39. Multi-storey housing estates are built according to contemporary ideas on town planning.",
+                  "options": [
+                    "A. The quality of life is improved.",
+                    "B. Architecture reflects the age.",
+                    "C. A number of these have been knocked down.",
+                    "D. Light steel frames and lifts are developed.",
+                    "E. Historical buildings are preserved.",
+                    "F. All decoration is removed.",
+                    "G. Parts of cities become slums.",
+                    "H. Modernist ideas cannot be put into practice until the second half of the 20th century."
+                  ],
+                  "correctAnswer": "C. A number of these have been knocked down.",
+                  "scoreWeight": 1
+                },
+                {
+                  "questionType": "MATCHING",
+                  "prompt": "40. Less land must be used for building.",
+                  "options": [
+                    "A. The quality of life is improved.",
+                    "B. Architecture reflects the age.",
+                    "C. A number of these have been knocked down.",
+                    "D. Light steel frames and lifts are developed.",
+                    "E. Historical buildings are preserved.",
+                    "F. All decoration is removed.",
+                    "G. Parts of cities become slums.",
+                    "H. Modernist ideas cannot be put into practice until the second half of the 20th century."
+                  ],
+                  "correctAnswer": "D. Light steel frames and lifts are developed.",
+                  "scoreWeight": 1
+                }
+              ],
+              "metadata": {
+                "questionStart": 36,
+                "questionEnd": 40
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sectionType": "WRITING",
+      "title": "Writing",
+      "displayOrder": 3,
+      "durationSeconds": 1200,
+      "instructions": "Complete the writing tasks.",
+      "groups": [
+        {
+          "groupType": "WRITING_TASK",
+          "title": "WRITING TASK 1",
+          "description": "You should spend about 20 minutes on this task.",
+          "content": "The charts below show the results of a survey of adult education. The first chart shows the reasons why adults decide to study. The pie chart shows how people think the costs of adult education should be shared.\n\n[Data Context: Chart 1 Reasons (Likely Bar Chart)]\nReasons listed: Interest in subject, To gain qualifications, Helpful for current job, To improve prospects of promotion, Enjoy learning/studying, To be able to change jobs, To meet people. (Note: Specific values for these categories are based on the visual chart, not provided here.)\n\n[Data Context: Chart 2 Cost Sharing (Pie Chart)]\nTaxpayer: 25%\nIndividual: 40%\nEmployer: 35%",
+          "resourceUrl": "https://res.cloudinary.com/dm8mg7lim/image/upload/v1765525626/test_1-writing_1_z5ckvt.png",
+          "metadata": {},
+          "questionGroups": [
+            {
+              "title": "WRITING TASK 1",
+              "description": "You should spend about 20 minutes on this task.",
+              "questions": [
+                {
+                  "questionType": "ESSAY",
+                  "prompt": "Write a report for a university lecturer, describing the information shown below. You should write at least 150 words.",
+                  "metadata": {
+                    "word_count_minimum": 150,
+                    "task_type": "Academic Writing Task 1 (Report)"
+                  }
+                }
+              ],
+              "metadata": {}
+            }
+          ]
+        },
+        {
+          "groupType": "WRITING_TASK",
+          "title": "WRITING TASK 2",
+          "description": "Present a written argument or case to an educated reader with no specialist knowledge of the following topic. You should write at least 250 words. Use your own ideas, knowledge and experience and support your arguments with examples and relevant evidence.",
+          "metadata": {},
+          "questionGroups": [
+            {
+              "title": "WRITING TASK 2",
+              "description": "Present a written argument or case to an educated reader with no specialist knowledge of the following topic. You should write at least 250 words. Use your own ideas, knowledge and experience and support your arguments with examples and relevant evidence.",
+              "questions": [
+                {
+                  "questionType": "ESSAY",
+                  "prompt": "There are many different types of music in the world today. Why do we need music? Is the traditional music of a country more important than the International music that is heard everywhere nowadays?",
+                  "scoreWeight": 1,
+                  "metadata": {
+                    "task_type": "Discussion/Opinion Essay",
+                    "word_count_minimum": 250
+                  }
+                }
+              ],
+              "metadata": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sectionType": "SPEAKING",
+      "title": "Speaking",
+      "displayOrder": 4,
+      "durationSeconds": 900,
+      "instructions": "Complete the speaking tasks.",
+      "groups": [
+        {
+          "groupType": "SPEAKING_PART",
+          "title": "CANDIDATE’S CUE CARD Task 1: UNIVERSITY CLUBS AND ASSOCIATIONS",
+          "description": "This is a role-play task. The candidate acts as a new university student, and the examiner acts as a Student Union representative. The candidate should use the provided bullet points to guide the conversation.",
+          "content": "INTERVIEWER’S NOTES (Information for the Examiner):\n\nOverseas Students Club\n- Meets once a week in Student Centre, near Library (All welcome)\n- Helps students meet others\n- Financial contributions welcome\n\nChess Club\n- Meets once a week in Library (Not suitable for beginners)\n- Plays other universities (Serious players only)\n- No subscription\n\nTable Tennis Club\n- Meets every day at lunch-time in student area near canteen (All welcome)\n- Arranges tournaments\n- $5.00 subscription",
+          "metadata": {},
+          "questionGroups": [
+            {
+              "title": "CANDIDATE’S CUE CARD Task 1: UNIVERSITY CLUBS AND ASSOCIATIONS",
+              "description": "This is a role-play task. The candidate acts as a new university student, and the examiner acts as a Student Union representative. The candidate should use the provided bullet points to guide the conversation.",
+              "questions": [
+                {
+                  "questionType": "SPEAKING_PROMPT",
+                  "prompt": "You have just arrived at a new university. It is orientation week and you want to know about the different clubs and associations you can join. Your examiner is a Student Union representative.\n\nAsk the examiner about:\n\n1. types of clubs\n2. meeting times\n3. benefits\n4. costs",
+                  "scoreWeight": 1
+                }
+              ],
+              "metadata": {}
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

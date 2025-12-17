@@ -1,8 +1,8 @@
-import { AccessControl } from 'accesscontrol'
-import { Resource } from '~/enums/resource.enum'
-import { RoleName } from '~/enums/role.enum'
+import { AccessControl } from "accesscontrol";
+import { Resource } from "~/enums/resource.enum";
+import { RoleName } from "~/enums/role.enum";
 
-const ac = new AccessControl()
+const ac = new AccessControl();
 
 // ========================
 // LEARNER (Học viên)
@@ -14,6 +14,7 @@ ac.grant(RoleName.LEARNER)
   .readAny(Resource.TOPIC)
   .readAny(Resource.WORD)
   .readAny(Resource.STUDY_SET)
+  .readAny(Resource.EXAM)
   .updateOwn(Resource.STUDY_SET)
   .deleteOwn(Resource.STUDY_SET)
   .createOwn(Resource.STUDY_SET)
@@ -76,6 +77,8 @@ ac.grant(RoleName.ADMIN)
   .readAny(Resource.REPORT)
   .updateAny(Resource.REPORT)
   .deleteAny(Resource.REPORT)
+  .createAny(Resource.EXAM)
+  .updateAny(Resource.EXAM)
+  .deleteAny(Resource.EXAM);
 
-
-export default ac
+export default ac;

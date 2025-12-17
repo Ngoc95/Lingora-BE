@@ -1,4 +1,4 @@
-from langchain_openai import OpenAIEmbeddings
+from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_chroma import Chroma
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_tavily import TavilySearch
@@ -39,10 +39,10 @@ vocab_vector_store = Chroma(
 )
 vocab_retriever = vocab_vector_store.as_retriever(search_kwargs={"k": 4})
 
-# Setup LLM (Gemini)
-llm = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash", # Hoặc 1.5-flash
-    google_api_key=settings.GOOGLE_API_KEY,
+# Setup LLM (OpenAI)
+llm = ChatOpenAI(
+    model="gpt-4.1-nano",
+    openai_api_key=settings.OPENAI_API_KEY,
     temperature=0 # Để Agent ra quyết định chính xác, nên để temp thấp
 )
 

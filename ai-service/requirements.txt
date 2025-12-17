@@ -14,3 +14,4 @@ langchain-classic
 tavily-python
 langchain-tavily
 requests
+openai
