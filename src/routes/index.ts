@@ -14,6 +14,7 @@ import likeRouter from "./like.route";
 import chatRouter from "./chat.route";
 import translateRouter from "./translate.route";
 import notificationRouter from "./notification.route";
+import reportRouter from "./report.route";
 
 const router = Router();
 
@@ -32,5 +33,6 @@ router.use("/likes", likeRouter);
 router.use("/chat", chatRouter);
 router.use("/translate", translateRouter);
 router.use("/notifications", notificationRouter);
+router.use("/reports", reportRouter);
 
 export default router;

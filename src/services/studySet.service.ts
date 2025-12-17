@@ -277,13 +277,14 @@ class StudySetService {
         }
     }
 
-    getStudySetById = async (studySetId: number, userId?: number) => {
+    getStudySetById = async (studySetId: number, userId?: number, isAdmin: boolean = false) => {
         const studySetRepo = await this.db.getRepository(StudySet)
         const userStudySetRepo = await this.db.getRepository(UserStudySet)
 
         const studySet = await studySetRepo.findOne({
             where: { id: studySetId },
             relations: ['owner', 'flashcards', 'quizzes'],
+            withDeleted: isAdmin // Admin can view soft-deleted content
         })
 
         if (!studySet) {

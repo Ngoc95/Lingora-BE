@@ -33,8 +33,11 @@ eventBus.on(
             parentCommentOwnerId
         )
 
-        //send notification
-        sendMessage({ event: 'notification', userId: ownerId, data: ownerNotification })
+        // Don't send notification if user is commenting on their own content
+        if (ownerNotification && ownerId !== createdBy.id) {
+            sendMessage({ event: 'notification', userId: ownerId, data: ownerNotification })
+        }
+
         if (parentCommentOwnerNotification)
             sendMessage({
                 event: 'notification',

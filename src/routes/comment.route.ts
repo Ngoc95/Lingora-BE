@@ -42,6 +42,24 @@ commentRouter.get(
     wrapRequestHandler(commentController.getChildComment)
 );
 
+// GET
+/**
+ * @description : Get comment by id with target info
+ * @method : GET
+ * @path : /comments/:commentId
+ * @header : Authorization
+ * @params : commentId (number)
+ * @response : {
+ *  id, content, createdAt, targetId, targetType, createdBy,
+ *  target: { id, type (POST/STUDY_SET), title }
+ * }
+ */
+commentRouter.get(
+    '/:commentId',
+    checkParamMiddleware('commentId'),
+    wrapRequestHandler(commentController.getCommentById)
+);
+
 // POST
 /**
  * @description : Create a new comment

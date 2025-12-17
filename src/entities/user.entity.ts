@@ -53,6 +53,12 @@ export class User extends BaseEntity {
     })
     status?: UserStatus
 
+    @Column({ type: 'timestamp', nullable: true })
+    suspendedUntil?: Date
+
+    @Column({ type: 'text', nullable: true })
+    banReason?: string
+
     @Column({
         type: 'enum',
         enum: ProficiencyLevel,
