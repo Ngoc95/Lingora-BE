@@ -20,6 +20,8 @@ import { UserTopicProgress } from "./userTopicProgress.entity";
 import { UserWordProgress } from "./userWordProgress.entity";
 import { StudySet } from "./studySet.entity";
 import { UserStudySet } from "./userStudySet.entity";
+import { RevenueSplit } from "./revenueSplit.entity";
+import { WithdrawalRequest } from "./withdrawalRequest.entity";
 import { ChatSession } from "./chatSession.entity";
 import { ExamAttempt } from "./examAttempt.entity";
 
@@ -88,9 +90,41 @@ export class User extends BaseEntity {
     @OneToMany(() => UserStudySet, (userStudySet) => userStudySet.user, { cascade: true })
     purchasedStudySets?: UserStudySet[];
 
+    @OneToMany(() => RevenueSplit, (revenueSplit) => revenueSplit.owner, { cascade: true })
+    revenueSplits?: RevenueSplit[];
+
     @OneToMany(() => RefreshToken, (token) => token.user)
     tokens?: RefreshToken[]
 
+    // Total earnings from studyset sales (accumulated)
+    @Column({
+        type: 'numeric',
+        precision: 12,
+        scale: 2,
+        default: 0,
+    })
+    totalEarnings!: number
+
+    // Total amount withdrawn
+    @Column({
+        type: 'numeric',
+        precision: 12,
+        scale: 2,
+        default: 0,
+    })
+    withdrawnAmount!: number
+
+    // Amount pending in withdrawal requests
+    @Column({
+        type: 'numeric',
+        precision: 12,
+        scale: 2,
+        default: 0,
+    })
+    pendingWithdrawal!: number
+
+    @OneToMany(() => WithdrawalRequest, (withdrawalRequest) => withdrawalRequest.user, { cascade: true })
+    withdrawalRequests?: WithdrawalRequest[];
     @OneToMany(() => ChatSession, (chatSession) => chatSession.user)
     chatSessions?: ChatSession[]
 
