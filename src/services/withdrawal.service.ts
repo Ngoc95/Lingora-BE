@@ -114,7 +114,27 @@ class WithdrawalService {
             skip,
             take: limit,
             order: sort || { createdAt: 'DESC' },
-            relations: ['user']
+            relations: ['user'],
+            select: {
+                id: true,
+                amount: true,
+                bankName: true,
+                bankAccountNumber: true,
+                bankAccountName: true,
+                bankBranch: true,
+                status: true,
+                rejectionReason: true,
+                transactionReference: true,
+                processedBy: true,
+                createdAt: true,
+                updatedAt: true,
+                user: {
+                    id: true,
+                    username: true,
+                    email: true,
+                    avatar: true
+                }
+            }
         })
 
         return {
@@ -131,7 +151,27 @@ class WithdrawalService {
     getWithdrawalById = async (withdrawalId: number, userId: number) => {
         const withdrawal = await WithdrawalRequest.findOne({
             where: { id: withdrawalId },
-            relations: ['user']
+            relations: ['user'],
+            select: {
+                id: true,
+                amount: true,
+                bankName: true,
+                bankAccountNumber: true,
+                bankAccountName: true,
+                bankBranch: true,
+                status: true,
+                rejectionReason: true,
+                transactionReference: true,
+                processedBy: true,
+                createdAt: true,
+                updatedAt: true,
+                user: {
+                    id: true,
+                    username: true,
+                    email: true,
+                    avatar: true
+                }
+            }
         })
 
         if (!withdrawal) {
@@ -236,7 +276,27 @@ class WithdrawalService {
     getWithdrawalByIdAdmin = async (withdrawalId: number) => {
         const withdrawal = await WithdrawalRequest.findOne({
             where: { id: withdrawalId },
-            relations: ['user']
+            relations: ['user'],
+            select: {
+                id: true,
+                amount: true,
+                bankName: true,
+                bankAccountNumber: true,
+                bankAccountName: true,
+                bankBranch: true,
+                status: true,
+                rejectionReason: true,
+                transactionReference: true,
+                processedBy: true,
+                createdAt: true,
+                updatedAt: true,
+                user: {
+                    id: true,
+                    username: true,
+                    email: true,
+                    avatar: true
+                }
+            }
         })
 
         if (!withdrawal) {
@@ -302,6 +362,25 @@ class WithdrawalService {
             // }
         })
 
+        return this.sanitizeWithdrawal(withdrawal)
+    }
+
+    /**
+     * Sanitize withdrawal to remove sensitive user fields
+     */
+    private sanitizeWithdrawal = (withdrawal: WithdrawalRequest) => {
+        if (withdrawal.user) {
+            const { password, tokens, ...safeUser } = withdrawal.user as any
+            return {
+                ...withdrawal,
+                user: {
+                    id: safeUser.id,
+                    username: safeUser.username,
+                    email: safeUser.email,
+                    avatar: safeUser.avatar
+                }
+            }
+        }
         return withdrawal
     }
 
@@ -340,7 +419,7 @@ class WithdrawalService {
             await manager.save(user)
         })
 
-        return withdrawal
+        return this.sanitizeWithdrawal(withdrawal)
     }
 
     /**
@@ -384,7 +463,7 @@ class WithdrawalService {
             await manager.save(user)
         })
 
-        return withdrawal
+        return this.sanitizeWithdrawal(withdrawal)
     }
 
     /**
@@ -434,7 +513,7 @@ class WithdrawalService {
             await manager.save(user)
         })
 
-        return withdrawal
+        return this.sanitizeWithdrawal(withdrawal)
     }
 }
 
