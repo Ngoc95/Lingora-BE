@@ -44,11 +44,15 @@ examRouter.get(
   examController.getExamAttemptDetail
 );
 
+import { dtoValidation } from "~/middlewares/dtoValidation.middleware";
+import { ImportExamBodyReq } from "~/dtos/req/exam/importExamBody.req";
+
 // Admin import
 examRouter.post(
   "/admin/exams/import",
   accessTokenValidation,
   checkPermission("createAny", Resource.EXAM),
+  dtoValidation(ImportExamBodyReq),
   examController.importExam
 );
 

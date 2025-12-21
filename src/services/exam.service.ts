@@ -1,4 +1,4 @@
-import { DeepPartial, In } from "typeorm";
+import { DeepPartial, In, EntityManager } from "typeorm";
 import { DatabaseService } from "./database.service";
 import { Exam } from "~/entities/exam.entity";
 import { ExamSection } from "~/entities/examSection.entity";
@@ -105,8 +105,8 @@ class ExamService {
     };
   };
 
-  getExamDetail = async (examId: number, userId?: number | null) => {
-    const examRepo = await this.db.getRepository(Exam);
+  getExamDetail = async (examId: number, userId?: number | null, manager?: EntityManager) => {
+    const examRepo = manager ? manager.getRepository(Exam) : await this.db.getRepository(Exam);
     const exam = await examRepo.findOne({
       where: { id: examId },
       relations: ["sections"],
@@ -118,7 +118,7 @@ class ExamService {
 
     let sectionProgress: Record<string, any> = {};
     if (userId) {
-      const attemptRepo = await this.db.getRepository(ExamAttempt);
+      const attemptRepo = manager ? manager.getRepository(ExamAttempt) : await this.db.getRepository(ExamAttempt);
       const attempts = await attemptRepo.find({
         where: {
           exam: { id: examId },
@@ -728,7 +728,7 @@ class ExamService {
         } as DeepPartial<Exam>);
 
         const saved = await examRepo.save(examEntity);
-        const detail = await this.getExamDetail(saved.id);
+        const detail = await this.getExamDetail(saved.id, null, manager);
         results.push(detail);
       }
     });
