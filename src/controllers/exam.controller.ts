@@ -6,6 +6,8 @@ import { GetExamListQueryReq } from "~/dtos/req/exam/getExamListQuery.req";
 import { StartExamAttemptBodyReq } from "~/dtos/req/exam/startExamAttemptBody.req";
 import { SubmitExamSectionBodyReq } from "~/dtos/req/exam/submitExamSectionBody.req";
 import { ImportExamBodyReq, ImportExamBulkBodyReq } from "~/dtos/req/exam/importExamBody.req";
+import { UpdateExamBodyReq } from "~/dtos/req/exam/updateExamBody.req";
+import { AdminGetExamAttemptsQueryReq } from "~/dtos/req/exam/adminGetExamAttemptsQuery.req";
 
 class ExamController {
   listExams = async (req: Request, res: Response) => {
@@ -145,6 +147,56 @@ class ExamController {
         metaData,
       }).send(res);
     }
+  };
+
+  deleteExam = async (req: Request, res: Response) => {
+    const examId = Number(req.params.examId);
+    await examService.deleteExam(examId);
+    return new SuccessResponse({
+      message: "Delete exam successfully",
+    }).send(res);
+  };
+
+  updateExam = async (req: Request, res: Response) => {
+    const examId = Number(req.params.examId);
+    const body = req.body as UpdateExamBodyReq;
+    const metaData = await examService.updateExam(examId, body);
+    return new SuccessResponse({
+      message: "Update exam successfully",
+      metaData,
+    }).send(res);
+  };
+
+  adminListExamAttempts = async (req: Request, res: Response) => {
+    const query = req.query || {};
+    const parsedQuery: AdminGetExamAttemptsQueryReq = {
+        page: query.page ? Number(query.page) : undefined,
+        limit: query.limit ? Number(query.limit) : undefined,
+        search: query.search as string,
+        userId: query.userId ? Number(query.userId) : undefined,
+        examId: query.examId ? Number(query.examId) : undefined,
+        status: query.status as string,
+        startDate: query.startDate as string,
+        endDate: query.endDate as string,
+        minScore: query.minScore ? Number(query.minScore) : undefined,
+        maxScore: query.maxScore ? Number(query.maxScore) : undefined
+    }
+
+    const metaData = await examService.adminListAttempts(parsedQuery);
+    return new SuccessResponse({
+      message: "Get all exam attempts successfully",
+      metaData,
+    }).send(res);
+  };
+
+  adminGetExamAttemptDetail = async (req: Request, res: Response) => {
+    const attemptId = Number(req.params.attemptId);
+    // userId is undefined implies admin access (no ownership check)
+    const metaData = await examService.getAttemptDetail(attemptId);
+    return new SuccessResponse({
+      message: "Get exam attempt detail successfully",
+      metaData,
+    }).send(res);
   };
 }
 

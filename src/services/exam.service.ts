@@ -26,6 +26,8 @@ import {
   ImportExamBulkBodyReq,
 } from "~/dtos/req/exam/importExamBody.req";
 import { GetExamListQueryReq } from "~/dtos/req/exam/getExamListQuery.req";
+import { UpdateExamBodyReq } from "~/dtos/req/exam/updateExamBody.req";
+import { AdminGetExamAttemptsQueryReq } from "~/dtos/req/exam/adminGetExamAttemptsQuery.req";
 import {
   DEFAULT_SECTION_SCORE_KEY,
   IELTS_LISTENING_BAND_TABLE,
@@ -103,7 +105,7 @@ class ExamService {
     };
   };
 
-  getExamDetail = async (examId: number, userId?: number) => {
+  getExamDetail = async (examId: number, userId?: number | null) => {
     const examRepo = await this.db.getRepository(Exam);
     const exam = await examRepo.findOne({
       where: { id: examId },
@@ -525,12 +527,12 @@ class ExamService {
     };
   };
 
-  getAttemptDetail = async (attemptId: number, userId: number) => {
+  getAttemptDetail = async (attemptId: number, userId?: number) => {
     const attemptRepo = await this.db.getRepository(ExamAttempt);
     const answerRepo = await this.db.getRepository(ExamAttemptAnswer);
 
     const attempt = await attemptRepo.findOne({
-      where: { id: attemptId, user: { id: userId } },
+      where: { id: attemptId },
       relations: ["exam", "user"],
     });
 
@@ -538,7 +540,7 @@ class ExamService {
       throw new NotFoundRequestError("Attempt not found");
     }
 
-    if (attempt.user.id !== userId) {
+    if (userId && attempt.user.id !== userId) {
       throw new BadRequestError({
         message: "You are not allowed to view this attempt",
       });
@@ -732,6 +734,113 @@ class ExamService {
     });
 
     return results;
+  };
+
+  // --- Admin Methods ---
+
+  deleteExam = async (examId: number) => {
+    const examRepo = await this.db.getRepository(Exam);
+    const exam = await examRepo.findOne({ where: { id: examId } });
+    if (!exam) {
+      throw new NotFoundRequestError("Exam not found");
+    }
+    await examRepo.remove(exam);
+    return true;
+  };
+
+  updateExam = async (examId: number, body: UpdateExamBodyReq) => {
+    const examRepo = await this.db.getRepository(Exam);
+    const exam = await examRepo.findOne({ where: { id: examId } });
+    if (!exam) {
+      throw new NotFoundRequestError("Exam not found");
+    }
+
+    // Update fields if provided
+    if (body.title) exam.title = body.title;
+    if (body.description) exam.description = body.description;
+    if (body.thumbnailUrl) exam.thumbnailUrl = body.thumbnailUrl;
+    if (typeof body.isPublished !== "undefined") exam.isPublished = body.isPublished;
+    if (body.code) {
+      // Check duplicate code
+      const existing = await examRepo.findOne({ where: { code: body.code } });
+      if (existing && existing.id !== examId) {
+        throw new BadRequestError({ message: "Exam code already exists" });
+      }
+      exam.code = body.code;
+    }
+    if (body.examType) exam.examType = body.examType;
+    if (body.metadata) {
+      exam.metadata = { ...exam.metadata, ...body.metadata };
+    }
+
+    return examRepo.save(exam);
+  };
+
+  adminListAttempts = async (query: AdminGetExamAttemptsQueryReq) => {
+    const attemptRepo = await this.db.getRepository(ExamAttempt);
+    const page = Number(query.page) > 0 ? Number(query.page) : 1;
+    const limit = Number(query.limit) > 0 ? Math.min(Number(query.limit), 50) : DEFAULT_LIMIT;
+    const skip = (page - 1) * limit;
+
+    const qb = attemptRepo
+      .createQueryBuilder("attempt")
+      .leftJoinAndSelect("attempt.exam", "exam")
+      .leftJoinAndSelect("attempt.user", "user")
+      .orderBy("attempt.createdAt", "DESC")
+      .skip(skip)
+      .take(limit);
+
+    if (query.userId) {
+      qb.andWhere("user.id = :userId", { userId: query.userId });
+    }
+    if (query.examId) {
+      qb.andWhere("exam.id = :examId", { examId: query.examId });
+    }
+    if (query.status) {
+      qb.andWhere("attempt.status = :status", { status: query.status });
+    }
+    if (query.search) {
+      qb.andWhere(
+        "(LOWER(user.username) ILIKE :search OR LOWER(user.email) ILIKE :search OR LOWER(exam.title) ILIKE :search)",
+        { search: `%${query.search.toLowerCase()}%` }
+      );
+    }
+    // Date filtering (createdAt or submittedAt?) - assume createdAt
+    if (query.startDate) {
+        qb.andWhere("attempt.createdAt >= :startDate", { startDate: query.startDate });
+    }
+    if (query.endDate) {
+        qb.andWhere("attempt.createdAt <= :endDate", { endDate: query.endDate });
+    }
+
+    const [attempts, total] = await qb.getManyAndCount();
+
+    // Map to sanitized response
+    const items = attempts.map((attempt) => ({
+      id: attempt.id,
+      user: {
+        id: attempt.user.id,
+        username: attempt.user.username,
+        email: attempt.user.email,
+        avatar: attempt.user.avatar
+      },
+      exam: {
+        id: attempt.exam.id,
+        title: attempt.exam.title,
+        code: attempt.exam.code,
+      },
+      status: attempt.status,
+      scoreSummary: attempt.scoreSummary,
+      createdAt: attempt.createdAt,
+      submittedAt: attempt.submittedAt,
+    }));
+
+    return {
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      total,
+      attempts: items,
+    };
   };
 
   private sanitizeSection(section: ExamSection, includeCorrectAnswer: boolean) {

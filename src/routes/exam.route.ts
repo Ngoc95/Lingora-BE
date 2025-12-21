@@ -52,4 +52,32 @@ examRouter.post(
   examController.importExam
 );
 
+examRouter.delete(
+  "/admin/exams/:examId",
+  accessTokenValidation,
+  checkPermission("deleteAny", Resource.EXAM),
+  examController.deleteExam
+);
+
+examRouter.patch(
+  "/admin/exams/:examId",
+  accessTokenValidation,
+  checkPermission("updateAny", Resource.EXAM),
+  examController.updateExam
+);
+
+examRouter.get(
+  "/admin/exam-attempts",
+  accessTokenValidation,
+  checkPermission("readAny", Resource.EXAM),
+  examController.adminListExamAttempts
+);
+
+examRouter.get(
+  "/admin/exam-attempts/:attemptId",
+  accessTokenValidation,
+  checkPermission("readAny", Resource.EXAM),
+  examController.adminGetExamAttemptDetail
+);
+
 export default examRouter;
