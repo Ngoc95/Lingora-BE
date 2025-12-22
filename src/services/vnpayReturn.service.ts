@@ -2,12 +2,14 @@ import { DatabaseService } from './database.service'
 import { UserStudySet } from '~/entities/userStudySet.entity'
 import { StudySet } from '~/entities/studySet.entity'
 import { Transaction } from '~/entities/transaction.entity'
+import { RevenueSplit } from '~/entities/revenueSplit.entity'
 import { BadRequestError } from '~/core/error.response'
 import { verifyVNPayReturn } from '~/utils/vnpay'
 import { TransactionStatus } from '~/enums/transactionStatus.enum'
 import { EVENTS } from '~/events-handler/constants'
 import eventBus from '~/events-handler/eventBus'
 import { User } from '~/entities/user.entity'
+import { calculateRevenueSplit, PLATFORM_FEE_PERCENTAGE } from '~/constants/revenue'
 
 class VNPayReturnService {
     private db = DatabaseService.getInstance()
@@ -121,19 +123,62 @@ class VNPayReturnService {
         if (Math.abs(paidAmount - Number(studySet.price)) > 0.01) {
             throw new BadRequestError({ message: 'Amount mismatch' })
         }
-        // Create purchase record
-        const userStudySet = userStudySetRepo.create({
-            user: { id: userId } as any,
-            studySet: { id: studySetId } as any,
-            purchasePrice: paidAmount,
-        })
-        await userStudySetRepo.save(userStudySet)
 
-        // Emit purchase event
+        // Use transaction to ensure atomicity: purchase record + revenue split + owner earnings update
         const buyer = transaction.user as User
         const purchasedStudySet = transaction.studySet as StudySet
-        const ownerId = purchasedStudySet.owner?.id
+        const owner = purchasedStudySet.owner
 
+        await this.db.dataSource.transaction(async (manager) => {
+            // Create purchase record
+            const userStudySet = manager.getRepository(UserStudySet).create({
+                user: { id: userId } as any,
+                studySet: { id: studySetId } as any,
+                purchasePrice: paidAmount,
+            })
+            await manager.getRepository(UserStudySet).save(userStudySet)
+
+            // Calculate and save revenue split (only if owner is different from buyer)
+            if (owner && owner.id !== userId) {
+                // Calculate revenue split: platform fee and owner earnings
+                const revenueSplit = calculateRevenueSplit(paidAmount, PLATFORM_FEE_PERCENTAGE)
+
+                // Check if revenue split already exists for this transaction (prevent duplicate)
+                const existingRevenueSplit = await manager.getRepository(RevenueSplit).findOne({
+                    where: {
+                        transaction: { id: transaction.id }
+                    }
+                })
+
+                if (!existingRevenueSplit) {
+                    // Create revenue split record
+                    const revenueSplitRecord = manager.getRepository(RevenueSplit).create({
+                        transaction: { id: transaction.id } as any,
+                        studySet: { id: studySetId } as any,
+                        owner: { id: owner.id } as any,
+                        totalAmount: revenueSplit.totalAmount,
+                        ownerEarnings: revenueSplit.ownerEarnings,
+                        platformFee: revenueSplit.platformFee,
+                        platformFeePercentage: revenueSplit.platformFeePercentage,
+                    })
+                    await manager.getRepository(RevenueSplit).save(revenueSplitRecord)
+
+                    // Update owner's total earnings
+                    const ownerRecord = await manager.getRepository(User).findOne({
+                        where: { id: owner.id }
+                    })
+
+                    if (ownerRecord) {
+                        // Add to existing total earnings
+                        ownerRecord.totalEarnings = Number(ownerRecord.totalEarnings || 0) + revenueSplit.ownerEarnings
+                        await manager.getRepository(User).save(ownerRecord)
+                    }
+                }
+            }
+        })
+
+        // Emit purchase event
+        const ownerId = owner?.id
         if (buyer && ownerId) {
             eventBus.emit(EVENTS.ORDER, {
                 buyer,

@@ -11,4 +11,5 @@ export enum Resource {
   COMMENT = 'COMMENT',
   LIKE = 'LIKE',
   REPORT = 'REPORT',
+  WITHDRAWAL = 'WITHDRAWAL',
 }

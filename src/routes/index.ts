@@ -11,12 +11,14 @@ import adaptiveTestRouter from "./adaptiveTest.route";
 import postRouter from "./post.route";
 import commentRouter from "./comment.route";
 import likeRouter from "./like.route";
+import withdrawalRouter from "./withdrawal.route";
 import chatRouter from "./chat.route";
 import translateRouter from "./translate.route";
 import examRouter from "./exam.route";
 import uploadRouter from "./upload.route";
 import notificationRouter from "./notification.route";
 import reportRouter from "./report.route";
+import dashboardRouter from "./dashboard.route";
 
 const router = Router();
 
@@ -32,11 +34,13 @@ router.use("/adaptive-test", adaptiveTestRouter);
 router.use("/posts", postRouter);
 router.use("/comments", commentRouter);
 router.use("/likes", likeRouter);
+router.use("/withdrawals", withdrawalRouter);
 router.use("/chat", chatRouter);
 router.use("/translate", translateRouter);
 router.use("/uploads", uploadRouter);
 router.use("/", examRouter);
 router.use("/notifications", notificationRouter);
 router.use("/reports", reportRouter);
+router.use("/admin/dashboard", dashboardRouter);
 
 export default router;

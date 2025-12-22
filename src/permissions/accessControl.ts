@@ -33,6 +33,9 @@ ac.grant(RoleName.LEARNER)
   .createOwn(Resource.LIKE)
   .deleteOwn(Resource.LIKE)
   .createOwn(Resource.REPORT)
+  .createOwn(Resource.WITHDRAWAL)
+  .readOwn(Resource.WITHDRAWAL)
+  .deleteOwn(Resource.LIKE);
 
 // ========================
 // TEACHER (Giáo viên)
@@ -77,6 +80,9 @@ ac.grant(RoleName.ADMIN)
   .readAny(Resource.REPORT)
   .updateAny(Resource.REPORT)
   .deleteAny(Resource.REPORT)
+  .readAny(Resource.WITHDRAWAL)
+  .updateAny(Resource.WITHDRAWAL)
+  .deleteAny(Resource.WITHDRAWAL)
   .createAny(Resource.EXAM)
   .updateAny(Resource.EXAM)
   .deleteAny(Resource.EXAM);

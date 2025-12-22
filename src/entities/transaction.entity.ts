@@ -4,10 +4,12 @@ import {
     CreateDateColumn,
     Entity,
     ManyToOne,
+    OneToMany,
     PrimaryGeneratedColumn,
 } from 'typeorm'
 import { User } from './user.entity'
 import { StudySet } from './studySet.entity'
+import { RevenueSplit } from './revenueSplit.entity'
 import { TransactionStatus } from '~/enums/transactionStatus.enum'
 import { PaymentMethod } from '~/enums/paymentMethod.enum'
 
@@ -57,6 +59,12 @@ export class Transaction extends BaseEntity {
 
     @Column({ type: 'text', nullable: true })
     vnpResponseCode?: string
+
+    @OneToMany(() => RevenueSplit, (revenueSplit) => revenueSplit.transaction, {
+        cascade: true,
+        eager: false,
+    })
+    revenueSplits?: RevenueSplit[]
 
     @CreateDateColumn()
     createdAt!: Date

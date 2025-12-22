@@ -15,6 +15,7 @@ import { User } from './user.entity'
 import { Flashcard } from './flashcard.entity'
 import { Quiz } from './quiz.entity'
 import { UserStudySet } from './userStudySet.entity'
+import { RevenueSplit } from './revenueSplit.entity'
 
 @Entity()
 export class StudySet extends BaseEntity {
@@ -72,6 +73,12 @@ export class StudySet extends BaseEntity {
         eager: false,
     })
     purchasers?: UserStudySet[]
+
+    @OneToMany(() => RevenueSplit, (revenueSplit) => revenueSplit.studySet, {
+        cascade: true,
+        eager: false,
+    })
+    revenueSplits?: RevenueSplit[]
 
     @CreateDateColumn()
     createdAt!: Date
