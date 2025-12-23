@@ -7,6 +7,8 @@ import { UpdateWithdrawalBodyReq } from '~/dtos/req/withdrawal/updateWithdrawalB
 import { WithdrawalQueryReq } from '~/dtos/req/withdrawal/withdrawalQuery.req'
 import { WithdrawalStatus } from '~/enums/withdrawalStatus.enum'
 import { FindOptionsWhere, In } from 'typeorm'
+import eventBus from '~/events-handler/eventBus'
+import { EVENTS } from '~/events-handler/constants'
 
 const MIN_WITHDRAWAL_AMOUNT = 50000 // 50,000 VND
 const MAX_WITHDRAWAL_AMOUNT = 50000000 // 50,000,000 VND
@@ -362,6 +364,14 @@ class WithdrawalService {
             // }
         })
 
+        // Send notification to user via event (enables real-time socket notification)
+        eventBus.emit(EVENTS.WITHDRAWAL, {
+            userId: withdrawal.user.id,
+            withdrawalId: withdrawal.id,
+            amount: withdrawal.amount,
+            status: WithdrawalStatus.PROCESSING
+        })
+
         return this.sanitizeWithdrawal(withdrawal)
     }
 
@@ -415,8 +425,17 @@ class WithdrawalService {
 
             // Return pending amount to user
             const user = withdrawal.user
-            user.pendingWithdrawal = Number(user.pendingWithdrawal || 0) - withdrawal.amount
+            user.pendingWithdrawal = Number(user.pendingWithdrawal || 0) - Number(withdrawal.amount)
             await manager.save(user)
+        })
+
+        // Send notification to user via event (enables real-time socket notification)
+        eventBus.emit(EVENTS.WITHDRAWAL, {
+            userId: withdrawal.user.id,
+            withdrawalId: withdrawal.id,
+            amount: withdrawal.amount,
+            status: WithdrawalStatus.REJECTED,
+            reason
         })
 
         return this.sanitizeWithdrawal(withdrawal)
@@ -458,9 +477,18 @@ class WithdrawalService {
             const currentPending = Number(user.pendingWithdrawal || 0)
             const currentWithdrawn = Number(user.withdrawnAmount || 0)
             
-            user.pendingWithdrawal = Math.max(0, currentPending - withdrawal.amount)
-            user.withdrawnAmount = currentWithdrawn + withdrawal.amount
+            user.pendingWithdrawal = Math.max(0, currentPending - Number(withdrawal.amount))
+            user.withdrawnAmount = currentWithdrawn + Number(withdrawal.amount)
             await manager.save(user)
+        })
+
+        // Send notification to user via event (enables real-time socket notification)
+        eventBus.emit(EVENTS.WITHDRAWAL, {
+            userId: withdrawal.user.id,
+            withdrawalId: withdrawal.id,
+            amount: withdrawal.amount,
+            status: WithdrawalStatus.COMPLETED,
+            transactionReference
         })
 
         return this.sanitizeWithdrawal(withdrawal)
@@ -505,12 +533,21 @@ class WithdrawalService {
             if (currentStatus === WithdrawalStatus.PROCESSING) {
                 // Was processing but failed - unlock the pending amount
                 // Note: withdrawnAmount should not have been increased yet (only on COMPLETED)
-                user.pendingWithdrawal = Math.max(0, currentPending - withdrawal.amount)
+                user.pendingWithdrawal = Math.max(0, currentPending - Number(withdrawal.amount))
             } else if (currentStatus === WithdrawalStatus.PENDING) {
                 // Was pending, just remove from pendingWithdrawal
-                user.pendingWithdrawal = Math.max(0, currentPending - withdrawal.amount)
+                user.pendingWithdrawal = Math.max(0, currentPending - Number(withdrawal.amount))
             }
             await manager.save(user)
+        })
+
+        // Send notification to user via event (enables real-time socket notification)
+        eventBus.emit(EVENTS.WITHDRAWAL, {
+            userId: withdrawal.user.id,
+            withdrawalId: withdrawal.id,
+            amount: withdrawal.amount,
+            status: WithdrawalStatus.FAILED,
+            reason
         })
 
         return this.sanitizeWithdrawal(withdrawal)

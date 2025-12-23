@@ -4,7 +4,11 @@ export enum NotificationType {
   COMMENT = 'Comment',
   ORDER = 'Order',
   WARNING = 'Warning',
-  CONTENT_DELETED = 'CONTENT_DELETED'
+  CONTENT_DELETED = 'CONTENT_DELETED',
+  WITHDRAWAL_PROCESSING = 'Withdrawal processing',
+  WITHDRAWAL_COMPLETED = 'Withdrawal completed',
+  WITHDRAWAL_REJECTED = 'Withdrawal rejected',
+  WITHDRAWAL_FAILED = 'Withdrawal failed'
 }
 
 export enum NotificationTarget {
