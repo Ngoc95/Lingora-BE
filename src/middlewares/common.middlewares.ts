@@ -3,6 +3,7 @@ import { NextFunction, ParamsDictionary } from 'express-serve-static-core'
 import { Request, Response } from 'express'
 import { isValidNumber, toNumberWithDefaultValue } from "~/utils"
 import { isEmpty } from "lodash"
+import { PASSWORD_VALIDATION_OPTIONS } from "~/constants/auth"
 
 export const checkIdParamMiddleware = (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
     if (req.params?.id && !isValidNumber(req.params?.id)) {
@@ -101,13 +102,7 @@ export const isEmail = {
 export const isPassword = {
     notEmpty: true,
     isStrongPassword: {
-        options: {
-            minLength: 6,
-            minLowercase: 0,
-            minNumbers: 0,
-            minSymbols: 0,
-            minUppercase: 1
-        },
+        options: PASSWORD_VALIDATION_OPTIONS,
         errorMessage: 'Password must be at least 6 characters long and contain at least 1 uppercase letter!'
     }
 }

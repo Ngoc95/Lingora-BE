@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Xác minh tài khoản - Lingora</title>
+    <style>
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f9f9f9;
+        padding: 30px;
+        color: #333;
+      }
+      .container {
+        max-width: 600px;
+        margin: auto;
+        background-color: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+        text-align: center;
+      }
+      h1 {
+        color: #2c3e50;
+      }
+      .code-box {
+        font-size: 32px;
+        font-weight: bold;
+        background-color: #f1f1f1;
+        display: inline-block;
+        padding: 12px 24px;
+        border-radius: 8px;
+        margin-top: 20px;
+        letter-spacing: 4px;
+        color: #4caf50;
+      }
+      .footer {
+        margin-top: 30px;
+        font-size: 14px;
+        color: #888;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Xin chào <%= name %> 👋</h1>
+      <p>Cảm ơn bạn đã đăng ký tài khoản tại <strong>Lingora</strong>.</p>
+      <p>Để xác minh email, vui lòng nhập mã bên dưới vào ứng dụng:</p>
+
+      <div class="code-box"><%= code %></div>
+
+      <div class="footer">
+        Nếu bạn không yêu cầu xác minh, vui lòng bỏ qua email này.<br />
+        Cảm ơn bạn đã sử dụng <strong>Lingora</strong> 🌱
+      </div>
+    </div>
+  </body>
+</html>

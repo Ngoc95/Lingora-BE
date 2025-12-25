@@ -2,19 +2,8 @@ import axios, { AxiosInstance } from "axios"
 import { env } from "~/config/env"
 import { CefrLevel } from "~/enums/cefrLevel.enum"
 import { WordType } from "~/enums/wordType.enum"
-
-export interface DictionaryLookupResult {
-    word: string
-    phonetic?: string
-    meaning: string
-    example?: string
-    exampleTranslation?: string
-    vnMeaning?: string
-    audioUrl?: string
-    imageUrl?: string
-    type?: WordType
-    cefrLevel?: CefrLevel
-}
+import { DICTIONARY_DEFAULT_CEFR_LEVEL } from "~/constants/dictionary"
+import { DictionaryLookupRes } from "~/dtos/res/dictionaryLookup.res.dto"
 
 class DictionaryApiService {
     private http: AxiosInstance
@@ -26,11 +15,11 @@ class DictionaryApiService {
             timeout: env.DICTIONARY_TIMEOUT_MS
         })
 
-        const configLevel = env.DICTIONARY_DEFAULT_CEFR_LEVEL as CefrLevel
+        const configLevel = DICTIONARY_DEFAULT_CEFR_LEVEL as CefrLevel
         this.defaultCefrLevel = Object.values(CefrLevel).includes(configLevel) ? configLevel : CefrLevel.A1
     }
 
-    lookupWord = async (term: string): Promise<DictionaryLookupResult> => {
+    lookupWord = async (term: string): Promise<DictionaryLookupRes> => {
         try {
             const response = await this.http.get(`/${env.DICTIONARY_API_LANGUAGE}/${encodeURIComponent(term)}`)
             return this.mapDictionaryResponse(response.data, term)
@@ -49,7 +38,7 @@ class DictionaryApiService {
         }
     }
 
-    private mapDictionaryResponse = (rawData: any, fallbackWord: string): DictionaryLookupResult => {
+    private mapDictionaryResponse = (rawData: any, fallbackWord: string): DictionaryLookupRes => {
         if (!Array.isArray(rawData) || rawData.length === 0) {
             throw new Error('Dictionary provider returned empty result')
         }
