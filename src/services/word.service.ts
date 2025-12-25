@@ -8,7 +8,8 @@ import { FindOptionsWhere, IsNull, ILike, Not } from "typeorm"
 import validator from "validator"
 import { UpdateWordBodyReq } from "~/dtos/req/word/updateWordBody.req"
 import { LookupWordQueryReq } from "~/dtos/req/word/lookupWordQuery.req"
-import { dictionaryApiService, DictionaryLookupResult } from "./dictionaryApi.service"
+import { dictionaryApiService } from "./dictionaryApi.service"
+import { DictionaryLookupRes } from "~/dtos/res/dictionaryLookup.res.dto"
 import { CefrLevel } from "~/enums/cefrLevel.enum"
 import { WordType } from "~/enums/wordType.enum"
 
@@ -148,7 +149,7 @@ class WordService {
 
         // Lưu thay đổi
         await wordRepo.save(updatedWord)
-        
+
         const { topic, ...rest } = updatedWord
         return {
             ...rest,
@@ -184,7 +185,7 @@ class WordService {
             return this.getWordById(existingWord.id)
         }
 
-        let providerData: DictionaryLookupResult
+        let providerData: DictionaryLookupRes
         try {
             providerData = await dictionaryApiService.lookupWord(searchTerm)
         } catch (error: any) {

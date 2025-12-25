@@ -1,7 +1,8 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { authService } from '~/services/auth.service';
 import { CREATED, SuccessResponse } from '~/core/success.response';
 import { User } from '~/entities/user.entity';
+import { BadRequestError } from '~/core/error.response';
 
 const isProd = process.env.NODE_ENV === 'production';
 
@@ -82,5 +83,60 @@ class AuthController {
     }).send(res)
   }
 
+  sendVerifyAccountEmail = async (req: Request, res: Response) => {
+    const user = req.user as User
+    await authService
+      .sendVerifyAccountEmail({ email: user.email, name: user.username, userId: user.id as number })
+      .catch((err) => console.error('Error when send verify email', err))
+      .then((res) => {
+        console.log(`Send verification email successful with url = ${res}`)
+        return
+      })
+
+    return new SuccessResponse({ message: 'Send verification email successful!' }).send(res)
+  }
+
+  sendVerifyForgotPasswordEmail = async (req: Request, res: Response) => {
+    const { email } = req.body
+    await authService.sendVerifyForgotPasswordEmail({ email })
+
+    return new SuccessResponse({ message: 'Send change password code successful!' }).send(res)
+  }
+
+  verifyAccount = async (req: Request, res: Response) => {
+    const user = req.user as User
+
+    // đã check otp ở middleware, giờ chỉ có update status
+    return new SuccessResponse({
+      message: 'Verify email!',
+      metaData: await authService.verifyEmail({ userId: user.id as number })
+    }).send(res)
+  }
+
+  // đã check otp ở middleware
+  verifyForgotPasswordCode = async (req: Request, res: Response) => {
+    const { email } = req.body
+    const user = await User.findOneBy({ email })
+
+    if (!user) throw new BadRequestError({ message: 'Invalid email!' })
+
+    // Create temporary reset token (expires in 10 minutes)
+    const resetToken = await authService.createResetPasswordToken(user.id as number)
+
+    return new SuccessResponse({
+      message: 'Code verified successfully!',
+      metaData: { resetToken }
+    }).send(res)
+  }
+
+  resetPassword = async (req: Request, res: Response) => {
+    const user = req.user as User // From resetPasswordTokenValidation middleware
+    const { newPassword } = req.body
+
+    return new SuccessResponse({
+      message: 'Password reset successfully',
+      metaData: await authService.handleForgotPassword(user, newPassword)
+    }).send(res)
+  }
 }
 export const authController = new AuthController();

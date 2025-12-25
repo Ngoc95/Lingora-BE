@@ -15,6 +15,8 @@ import ac from "~/permissions/accessControl";
 import { checkDuplicateUser, checkRolesExistence, checkUserExistence } from "~/utils/validators";
 import { isEmail, isPassword, isRequired, isUsername } from "./common.middlewares";
 import validator from "validator";
+import { VerificationToken } from "~/entities/verificationToken.entity";
+import { TokenType } from "~/enums/tokenType.enum";
 
 // Helper function to validate user status (BANNED/SUSPENDED/DELETED)
 async function validateUserStatus(user: User): Promise<void> {
@@ -295,3 +297,114 @@ export const optionalAccessToken = async (req: Request, res: Response, next: Nex
         next(new AuthRequestError('Access token is invalid.'))
     }
 }
+
+export const verifyAccountEmailCodeValidation = validate(
+    checkSchema(
+        {
+            code: {
+                ...isRequired('code'),
+                isNumeric: true,
+                custom: {
+                    options: async (code, { req }) => {
+                        const user = (req as Request).user
+
+                        if (!user) throw new BadRequestError({ message: 'Please log in again!' })
+                        //check is equaly
+                        const tokenInDb = await VerificationToken.findOne({
+                            where: { user: { id: user?.id }, type: TokenType.emailVerifyToken }
+                        })
+
+                        if (!tokenInDb || tokenInDb.code != code) throw new AuthRequestError('Wrong code')
+                        return true
+                    }
+                }
+            }
+        },
+        ['body']
+    )
+)
+
+export const verifyForgotPasswordCodeValidation = validate(
+    checkSchema(
+        {
+            code: {
+                ...isRequired('code'),
+                in: ['query'],
+                isNumeric: true,
+                custom: {
+                    options: async (code, { req }) => {
+                        const { email } = (req as Request).body
+
+                        if (!email) {
+                            throw new BadRequestError({ message: 'Invalid email!' })
+                        }
+
+                        // Check if code matches with email
+                        const tokenInDb = await VerificationToken.findOne({
+                            where: {
+                                user: { email },
+                                type: TokenType.resetPasswordToken
+                            }
+                        })
+
+                        if (!tokenInDb || tokenInDb.code != code) {
+                            throw new AuthRequestError('Wrong code!')
+                        }
+
+                        return true
+                    }
+                }
+            },
+            email: {
+                ...isRequired('email'),
+                in: ['body'],
+                isEmail: {
+                    errorMessage: 'Email is invalid'
+                }
+            }
+        },
+        ['query', 'body']
+    )
+)
+
+export const resetPasswordTokenValidation = validate(
+    checkSchema(
+        {
+            newPassword: {
+                ...isRequired('newPassword'),
+                ...isPassword,
+                custom: {
+                    options: async (value, { req }) => {
+                        const authHeader = (req as Request).headers.authorization
+
+                        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+                            throw new AuthRequestError('Reset token is required')
+                        }
+
+                        const token = authHeader.split(' ')[1]
+                        const decoded = verifyToken(token, env.JWT_ACCESS_SECRET) as any
+
+                        if (!decoded || decoded.tokenType !== TokenType.resetPasswordToken) {
+                            throw new AuthRequestError('Invalid reset token')
+                        }
+
+                        // Get user from decoded token
+                        const user = await User.findOne({
+                            where: { id: decoded.userId },
+                            relations: ['roles']
+                        })
+
+                        if (!user) {
+                            throw new AuthRequestError('User not found')
+                        }
+
+                        // Attach user to request
+                        ; (req as Request).user = user
+                        return true
+                    }
+                }
+            }
+        },
+        ['body']
+    )
+)

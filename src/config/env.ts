@@ -27,16 +27,17 @@ export const env = {
   AI_SERVICE_TIMEOUT_MS: Number(process.env.AI_SERVICE_TIMEOUT_MS) || 15000,
 
   // Dictionary settings
-  DICTIONARY_API_BASE_URL:
-    process.env.DICTIONARY_API_BASE_URL ||
-    "https://api.dictionaryapi.dev/api/v2/entries",
+  DICTIONARY_API_BASE_URL: process.env.DICTIONARY_API_BASE_URL || "https://api.dictionaryapi.dev/api/v2/entries",
   DICTIONARY_API_LANGUAGE: process.env.DICTIONARY_API_LANGUAGE || "en",
   DICTIONARY_TIMEOUT_MS: Number(process.env.DICTIONARY_TIMEOUT_MS) || 8000,
-  DICTIONARY_DEFAULT_CEFR_LEVEL:
-    process.env.DICTIONARY_DEFAULT_CEFR_LEVEL || "A1",
 
   // Translation settings
   TRANSLATE_PROVIDER: process.env.TRANSLATE_PROVIDER || "auto",
   LIBRETRANSLATE_API_URL: process.env.LIBRETRANSLATE_API_URL || "",
   MYMEMORY_API_URL: process.env.MYMEMORY_API_URL || "",
+
+  // Email settings
+  FROM_EMAIL: process.env.FROM_EMAIL || "",
+  RESEND_API_KEY: process.env.RESEND_API_KEY || "",
+
 };

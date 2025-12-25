@@ -1,0 +1,1 @@
+export const DICTIONARY_DEFAULT_CEFR_LEVEL= "A1"
