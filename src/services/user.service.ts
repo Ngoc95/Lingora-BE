@@ -6,7 +6,7 @@ import { checkDuplicateUser, checkRolesExistence, checkUserExistence } from "~/u
 import { unGetData } from "~/utils";
 import { hashData } from "~/utils/jwt";
 import { UserQueryReq } from "~/dtos/req/user/userQuery.req";
-import { FindOptionsWhere, ILike } from "typeorm";
+import { FindOptionsWhere, ILike, Not } from "typeorm";
 import validator from "validator";
 import { UpdateUserBodyReq } from "~/dtos/req/user/updateUserBody.req";
 import { Role } from "~/entities/role.entity";
@@ -124,6 +124,21 @@ export class UserService {
             relations: ['roles']
         })
         if (!user) throw new BadRequestError({ message: 'User not found' })
+
+        // Kiểm tra email/username mới có trùng với user khác không
+        if (email && email !== user.email) {
+            const existingEmail = await userRepo.findOne({
+                where: { email, id: Not(id) }
+            })
+            if (existingEmail) throw new BadRequestError({ message: 'Email already exists' })
+        }
+
+        if (username && username !== user.username) {
+            const existingUsername = await userRepo.findOne({
+                where: { username, id: Not(id) }
+            })
+            if (existingUsername) throw new BadRequestError({ message: 'Username already exists' })
+        }
 
         // Cập nhật thông tin cơ bản
         if (username) user.username = username
