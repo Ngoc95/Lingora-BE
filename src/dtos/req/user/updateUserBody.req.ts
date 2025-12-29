@@ -9,5 +9,7 @@ export interface UpdateUserBodyReq {
   avatar?: string,
   roleIds?: number[],
   proficiency?: ProficiencyLevel | null,
-  status?: UserStatus
+  status?: UserStatus,
+  banReason?: string | null,
+  suspendedUntil?: Date | null
 }

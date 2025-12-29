@@ -113,7 +113,7 @@ export class UserService {
 
     updateUserById = async (
         id: number,
-        { username, email, newPassword, oldPassword, avatar, roleIds, proficiency, status }: UpdateUserBodyReq
+        { username, email, newPassword, oldPassword, avatar, roleIds, proficiency, status, banReason, suspendedUntil }: UpdateUserBodyReq
     ) => {
         const userRepo = await this.db.getRepository(User)
         const roleRepo = await this.db.getRepository(Role)
@@ -146,6 +146,10 @@ export class UserService {
         if (avatar) user.avatar = avatar
         if (proficiency !== undefined) user.proficiency = proficiency
         if (status) user.status = status
+
+        // Cập nhật thông tin ban/suspend
+        if (banReason !== undefined) user.banReason = banReason ?? undefined
+        if (suspendedUntil !== undefined) user.suspendedUntil = suspendedUntil ?? undefined
 
         // Nếu có đổi mật khẩu
         if (newPassword && oldPassword) {

@@ -100,6 +100,42 @@ export const updateUserByIdValidation = validate(
           return true
         }
       }
+    },
+
+    banReason: {
+      optional: {
+        options: {
+          nullable: true
+        }
+      },
+      isString: {
+        errorMessage: 'Ban reason must be a string'
+      },
+      isLength: {
+        options: { max: 500 },
+        errorMessage: 'Ban reason must be at most 500 characters'
+      }
+    },
+
+    suspendedUntil: {
+      optional: {
+        options: {
+          nullable: true
+        }
+      },
+      custom: {
+        options: (value) => {
+          if (value === null) return true
+          const date = new Date(value)
+          if (isNaN(date.getTime())) {
+            throw new BadRequestError({ message: 'suspendedUntil must be a valid date' })
+          }
+          if (date <= new Date()) {
+            throw new BadRequestError({ message: 'suspendedUntil must be a future date' })
+          }
+          return true
+        }
+      }
     }
   })
 )

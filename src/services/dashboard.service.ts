@@ -303,23 +303,25 @@ class DashboardService {
             .orderBy('date', 'ASC')
             .getRawMany()
 
-        // Merge trends by date
+        // Merge trends by date - convert Date objects to strings for Map keys and sorting
         const trendMap = new Map<string, { wordsLearned: number; topicsCompleted: number }>()
         learningTrend.forEach(item => {
-            trendMap.set(item.date, { 
+            const dateKey = item.date instanceof Date ? item.date.toISOString().split('T')[0] : String(item.date)
+            trendMap.set(dateKey, { 
                 wordsLearned: Number(item.words_learned), 
                 topicsCompleted: 0 
             })
         })
         topicsCompletedTrend.forEach(item => {
-            const existing = trendMap.get(item.date) || { wordsLearned: 0, topicsCompleted: 0 }
+            const dateKey = item.date instanceof Date ? item.date.toISOString().split('T')[0] : String(item.date)
+            const existing = trendMap.get(dateKey) || { wordsLearned: 0, topicsCompleted: 0 }
             existing.topicsCompleted = Number(item.topics_completed)
-            trendMap.set(item.date, existing)
+            trendMap.set(dateKey, existing)
         })
 
         const mergedTrend = Array.from(trendMap.entries())
             .map(([date, data]) => ({ date, ...data }))
-            .sort((a, b) => a.date.localeCompare(b.date))
+            .sort((a, b) => String(a.date).localeCompare(String(b.date)))
 
         return {
             categories: {

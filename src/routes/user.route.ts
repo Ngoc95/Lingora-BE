@@ -82,7 +82,9 @@ userRouter.get('/:id', checkIdParamMiddleware, wrapRequestHandler(userController
     avatar?: string,
     roleIds?: number[],
     proficiency?: ProficiencyLevel, (BEGINNER, INTERMEDIATE, ADVANCED)
-    status?: UserStatus (ACTIVE, INACTIVE, BANNED, DELETED)
+    status?: UserStatus (ACTIVE, INACTIVE, SUSPENDED, BANNED, DELETED)
+    banReason?: string | null, (Lý do ban/suspend, set null để xóa)
+    suspendedUntil?: Date | null (Thời gian hết hạn suspend, set null để xóa)
  * }
  */
 userRouter.patch(
