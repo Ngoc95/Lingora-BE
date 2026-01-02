@@ -40,6 +40,10 @@ services:
       context: ./ai-service
       dockerfile: Dockerfile.ai
       target: production
+      args:
+        OPENAI_API_KEY: ${OPENAI_API_KEY}
+        GRAMMAR_PDF_URL: ${GRAMMAR_PDF_URL}
+        VOCAB_PDF_URL: ${VOCAB_PDF_URL}
     container_name: lingora-ai-service
     env_file:
       - ./ai-service/.env

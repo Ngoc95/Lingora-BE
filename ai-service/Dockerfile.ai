@@ -49,6 +49,12 @@ RUN mkdir -p data
 ARG OPENAI_API_KEY
 ENV OPENAI_API_KEY=$OPENAI_API_KEY
 
+ARG GRAMMAR_PDF_URL
+ENV GRAMMAR_PDF_URL=$GRAMMAR_PDF_URL
+
+ARG VOCAB_PDF_URL
+ENV VOCAB_PDF_URL=$VOCAB_PDF_URL
+
 # Chạy ingest để tạo chroma_db_store ngay trong image
 # Lớp này sẽ được CACHED nếu scripts, ingest.py, config, và API Key không đổi
 RUN python3 -m src.ingest && \
