@@ -44,7 +44,6 @@ services:
     env_file:
       - ./ai-service/.env
     volumes:
-      - ./ai-service/chroma_db_store:/app/chroma_db_store
       - ./ai-service/data:/app/data
     ports:
       - "8000:8000"

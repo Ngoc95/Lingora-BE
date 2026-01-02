@@ -35,9 +35,13 @@ FROM base AS production
 # Copy installed dependencies
 COPY --from=builder /install /usr/local
 
-# Copy source code
-COPY src ./src
+# Copy minimal source for ingestion (Cache Layer)
 COPY scripts ./scripts
+COPY src/config ./src/config
+COPY src/ingest.py ./src/ingest.py
+COPY src/__init__.py ./src/__init__.py 
+# Note: src/__init__.py might duplicate if copied again later, but safe.
+
 # Tạo thư mục data để tránh lỗi
 RUN mkdir -p data
 
@@ -46,8 +50,15 @@ ARG OPENAI_API_KEY
 ENV OPENAI_API_KEY=$OPENAI_API_KEY
 
 # Chạy ingest để tạo chroma_db_store ngay trong image
-RUN python3 -m src.ingest
+# Lớp này sẽ được CACHED nếu scripts, ingest.py, config, và API Key không đổi
+RUN python3 -m src.ingest && \
+    echo "✅ Build-time Ingest Complete. Checking files:" && \
+    ls -laR chroma_db_store
 
+# Copy FULL source code (Layer thay đổi thường xuyên)
+# Các file đã copy ở trên sẽ bị overwrite, đè lên chính nó -> Không sao cả.
+COPY src ./src
+     
 # Entrypoint setup
 RUN chmod +x scripts/entrypoint.sh
 EXPOSE 8000

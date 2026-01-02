@@ -23,6 +23,10 @@ echo "   Working directory: $(pwd)"
 # ==================================================================================
 
 echo "🔍 Đang kiểm tra ChromaDB tại: $CHROMA_DB_DIR"
+echo "📂 Listing files in $CHROMA_DB_DIR:"
+ls -laR "$CHROMA_DB_DIR" || echo "❌ Cannot list directory"
+
+# Kiểm tra xem folder có tồn tại và có file bên trong không
 
 # Kiểm tra xem folder có tồn tại và có file bên trong không
 if [ -d "$CHROMA_DB_DIR" ] && [ "$(ls -A $CHROMA_DB_DIR)" ]; then
