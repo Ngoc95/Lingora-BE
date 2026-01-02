@@ -16,15 +16,22 @@ echo "   DATA_PATH=$DATA_PATH"
 echo "   CHROMA_DB_DIR=$CHROMA_DB_DIR"
 echo "   Working directory: $(pwd)"
 
-# Kiểm tra ChromaDB đã có chưa
-echo "🔍 Đang kiểm tra ChromaDB..."
+# ==================================================================================
+# LOGIC KIỂM TRA & NẠP DATA
+# - Production: Data đã được bake vào image -> Folder có data -> Skip.
+# - Development: Mount volume từ ngoài vào (thường là rỗng) -> Folder rỗng -> Run Ingest.
+# ==================================================================================
 
-if python3 -m scripts.check_db; then
-    echo "✅ ChromaDB đã tồn tại, bỏ qua ingestion"
-    echo "💡 Nếu muốn nạp lại data, xóa folder chroma_db_store và restart container"
+echo "🔍 Đang kiểm tra ChromaDB tại: $CHROMA_DB_DIR"
+
+# Kiểm tra xem folder có tồn tại và có file bên trong không
+if [ -d "$CHROMA_DB_DIR" ] && [ "$(ls -A $CHROMA_DB_DIR)" ]; then
+    echo "✅ ChromaDB đã tồn tại (Baked in Image or Mounted Volume with Data)."
+    echo "⏩ Skipping ingestion."
 else
-    echo "📥 ChromaDB chưa có, bắt đầu setup..."
+    echo "⚠️  ChromaDB chưa có hoặc rỗng. Bắt đầu quy trình nạp dữ liệu (Ingestion Flow)..."
     
+    # OLD LOGIC: Tải PDF & Ingest
     # Tải PDF files nếu chưa có
     missing_pdfs=false
     if [ ! -f "$DATA_PATH/english_grammar_in_use.pdf" ]; then
@@ -40,9 +47,6 @@ else
         echo "⬇️  Đang tải PDF files từ Google Drive..."
         if ! python3 -m scripts.download_data; then
             echo "❌ Lỗi khi tải PDF files."
-            echo "💡 Vui lòng kiểm tra:"
-            echo "   1. URLs trong file .env (GRAMMAR_PDF_URL, VOCAB_PDF_URL)"
-            echo "   2. Hoặc copy PDF files vào folder data/ và restart container"
             exit 1
         fi
     fi
