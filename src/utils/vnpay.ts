@@ -1,3 +1,4 @@
+import { env } from '../config/env';
 import { VNPay, ignoreLogger, VnpLocale, ProductCode, dateFormat, HashAlgorithm } from 'vnpay'
 
 const vnpay = new VNPay({
@@ -16,7 +17,7 @@ export function createVNPayPaymentUrl(params: {
 }): string {
     const { amount, orderId, orderInfo } = params;
 
-    const vnpayReturnUrl = 'https://9328fc966899.ngrok-free.app/vnpay/return';
+    const vnpayReturnUrl = `${env.BASE_URL}/vnpay/return`;
 
     const now = new Date();
     const createDate = dateFormat(now); // MM = minute

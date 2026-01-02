@@ -23,8 +23,11 @@ export const env = {
   JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || "refresh_secret",
   JWT_ACCESS_EXPIRE_TIME: process.env.JWT_ACCESS_EXPIRE_TIME || "15m",
   JWT_REFRESH_EXPIRE_TIME: process.env.JWT_REFRESH_EXPIRE_TIME || "7d",
+
   AI_SERVICE_URL: process.env.AI_SERVICE_URL || "http://localhost:8000",
   AI_SERVICE_TIMEOUT_MS: Number(process.env.AI_SERVICE_TIMEOUT_MS) || 15000,
+
+  BASE_URL: process.env.BASE_URL || "http://localhost:4000",
 
   // Dictionary settings
   DICTIONARY_API_BASE_URL: process.env.DICTIONARY_API_BASE_URL || "https://api.dictionaryapi.dev/api/v2/entries",
