@@ -3,11 +3,11 @@ import path from 'path'
 import axios from 'axios'
 import { parse } from 'csv-parse/sync'
 import { Between, DeepPartial } from 'typeorm'
-import { DatabaseService } from '~/services/database.service'
-import { Word } from '~/entities/word.entity'
-import { Topic } from '~/entities/topic.entity'
-import { CefrLevel } from '~/enums/cefrLevel.enum'
-import { WordType } from '~/enums/wordType.enum'
+import { DatabaseService } from '../services/database.service'
+import { Word } from '../entities/word.entity'
+import { Topic } from '../entities/topic.entity'
+import { CefrLevel } from '../enums/cefrLevel.enum'
+import { WordType } from '../enums/wordType.enum'
 const translate = require('@vitalets/google-translate-api')
 
 interface CachedWordData {
@@ -47,7 +47,9 @@ const metadataPath = path.join(cacheDir, 'cache_metadata.json')
 // =======================================================================
 export async function saveCachedWordsToDB() {
   console.log('💾 Saving cached words into database...')
-
+console.log('CWD:', process.cwd())
+console.log('CACHE PATH:', cachePath)
+console.log('CACHE EXISTS:', fs.existsSync(cachePath))
   if (!fs.existsSync(cachePath)) {
     throw new Error('❌ Cache file not found. Run caching phase first!')
   }

@@ -1,10 +1,10 @@
 import { faker } from "@faker-js/faker"
 import { hash } from "bcrypt"
-import { Role } from "~/entities/role.entity"
-import { User } from "~/entities/user.entity"
-import { ProficiencyLevel } from "~/enums/proficiency.enum"
-import { RoleName } from "~/enums/role.enum"
-import { UserStatus } from "~/enums/userStatus.enum"
+import { Role } from "../entities/role.entity"
+import { User } from "../entities/user.entity"
+import { ProficiencyLevel } from "../enums/proficiency.enum"
+import { RoleName } from "../enums/role.enum"
+import { UserStatus } from "../enums/userStatus.enum"
 
 export async function seedUsers() {
     const count = await User.count()

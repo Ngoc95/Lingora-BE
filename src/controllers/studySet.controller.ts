@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
-import { CREATED, SuccessResponse } from '~/core/success.response'
-import { studySetService } from '~/services/studySet.service'
+import { CREATED, SuccessResponse } from '../core/success.response'
+import { studySetService } from '../services/studySet.service'
 
 class StudySetController {
     createStudySet = async (req: Request, res: Response) => {

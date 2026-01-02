@@ -1,4 +1,4 @@
-import { Topic } from "~/entities/topic.entity"
+import { Topic } from "../../../entities/topic.entity"
 import { FindOptionsOrder } from "typeorm"
 
 export interface GetAllTopicsQueryReq {

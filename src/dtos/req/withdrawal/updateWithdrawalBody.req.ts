@@ -1,4 +1,4 @@
-import { WithdrawalStatus } from '~/enums/withdrawalStatus.enum'
+import { WithdrawalStatus } from '../../../enums/withdrawalStatus.enum'
 
 export interface UpdateWithdrawalBodyReq {
     status?: WithdrawalStatus

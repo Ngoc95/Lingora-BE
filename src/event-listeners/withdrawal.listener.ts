@@ -1,9 +1,9 @@
-import { sendMessage } from '~/sockets'
-import { EVENTS } from '~/events-handler/constants'
-import eventBus from '~/events-handler/eventBus'
-import { NotificationTarget, NotificationType } from '~/enums/notification.enum'
-import { notificationService } from '~/services/notification.service'
-import { WithdrawalStatus } from '~/enums/withdrawalStatus.enum'
+import { sendMessage } from '../sockets'
+import { EVENTS } from '../events-handler/constants'
+import eventBus from '../events-handler/eventBus'
+import { NotificationTarget, NotificationType } from '../enums/notification.enum'
+import { notificationService } from '../services/notification.service'
+import { WithdrawalStatus } from '../enums/withdrawalStatus.enum'
 
 interface WithdrawalEventPayload {
     userId: number

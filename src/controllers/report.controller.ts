@@ -1,13 +1,13 @@
 import { Request, Response } from 'express'
 import { ParamsDictionary } from 'express-serve-static-core'
-import { CREATED, SuccessResponse } from '~/core/success.response'
-import { CreateReportBodyReq } from '~/dtos/req/report/createReportBody.req'
-import { UpdateReportStatusBodyReq } from '~/dtos/req/report/updateReportStatusBody.req'
-import { User } from '~/entities/user.entity'
-import { reportService } from '~/services/report.service'
-import { GetAllReportsQueryReq } from '~/dtos/req/report/getAllReportsQuery.req'
-import { ReportStatus } from '~/enums/reportStatus.enum'
-import { TargetType } from '~/enums/targetType.enum'
+import { CREATED, SuccessResponse } from '../core/success.response'
+import { CreateReportBodyReq } from '../dtos/req/report/createReportBody.req'
+import { UpdateReportStatusBodyReq } from '../dtos/req/report/updateReportStatusBody.req'
+import { User } from '../entities/user.entity'
+import { reportService } from '../services/report.service'
+import { GetAllReportsQueryReq } from '../dtos/req/report/getAllReportsQuery.req'
+import { ReportStatus } from '../enums/reportStatus.enum'
+import { TargetType } from '../enums/targetType.enum'
 
 class ReportController {
     create = async (req: Request<ParamsDictionary, any, CreateReportBodyReq>, res: Response) => {

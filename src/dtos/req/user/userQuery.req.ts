@@ -1,7 +1,7 @@
 import { FindOptionsOrder } from "typeorm"
-import { User } from "~/entities/user.entity"
-import { ProficiencyLevel } from "~/enums/proficiency.enum"
-import { UserStatus } from "~/enums/userStatus.enum"
+import { User } from "../../../entities/user.entity"
+import { ProficiencyLevel } from "../../../enums/proficiency.enum"
+import { UserStatus } from "../../../enums/userStatus.enum"
 
 export interface UserQueryReq {
   page?: number

@@ -9,8 +9,8 @@ import {
     PrimaryGeneratedColumn,
     UpdateDateColumn,
 } from 'typeorm'
-import { StudySetVisibility } from '~/enums/studySetVisibility.enum'
-import { StudySetStatus } from '~/enums/studySetStatus.enum'
+import { StudySetVisibility } from '../enums/studySetVisibility.enum'
+import { StudySetStatus } from '../enums/studySetStatus.enum'
 import { User } from './user.entity'
 import { Flashcard } from './flashcard.entity'
 import { Quiz } from './quiz.entity'

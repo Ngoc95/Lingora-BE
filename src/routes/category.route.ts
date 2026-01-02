@@ -1,12 +1,12 @@
 import { Router } from "express";
-import { categoryController } from "~/controllers/category.controller";
-import { Resource } from "~/enums/resource.enum";
-import { accessTokenValidation, checkPermission } from "~/middlewares/auth.middlewares";
-import { updateCategoryValidation } from "~/middlewares/category/updateCategory.middlewares";
-import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from "~/middlewares/common.middlewares";
-import { createCategoryValidation } from "~/middlewares/category/createCategory.middlewares";
-import { wrapRequestHandler } from "~/utils/handler";
-import { Topic } from "~/entities/topic.entity";
+import { categoryController } from "../controllers/category.controller";
+import { Resource } from "../enums/resource.enum";
+import { accessTokenValidation, checkPermission } from "../middlewares/auth.middlewares";
+import { updateCategoryValidation } from "../middlewares/category/updateCategory.middlewares";
+import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from "../middlewares/common.middlewares";
+import { createCategoryValidation } from "../middlewares/category/createCategory.middlewares";
+import { wrapRequestHandler } from "../utils/handler";
+import { Topic } from "../entities/topic.entity";
 
 const categoryRouter = Router();
 

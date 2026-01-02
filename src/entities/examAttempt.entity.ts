@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm'
-import { ExamAttemptStatus, ExamMode } from '~/enums/exam.enum'
+import { ExamAttemptStatus, ExamMode } from '../enums/exam.enum'
 import { User } from './user.entity'
 import { Exam } from './exam.entity'
 import { ExamAttemptAnswer } from './examAttemptAnswer.entity'

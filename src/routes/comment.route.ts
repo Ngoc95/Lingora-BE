@@ -1,13 +1,13 @@
 import { Router } from "express";
-import { commentController } from "~/controllers/comment.controller";
-import { BadRequestError } from "~/core/error.response";
-import { Resource } from "~/enums/resource.enum";
-import { accessTokenValidation, checkPermission } from "~/middlewares/auth.middlewares";
-import { checkParamMiddleware } from "~/middlewares/common.middlewares";
-import { createCommentValidation } from "~/middlewares/comment/createComment.middlewares";
-import { updateCommentValidation } from "~/middlewares/comment/updateComment.middlewares";
-import { wrapRequestHandler } from "~/utils/handler";
-import { isValidNumber } from "~/utils";
+import { commentController } from "../controllers/comment.controller";
+import { BadRequestError } from "../core/error.response";
+import { Resource } from "../enums/resource.enum";
+import { accessTokenValidation, checkPermission } from "../middlewares/auth.middlewares";
+import { checkParamMiddleware } from "../middlewares/common.middlewares";
+import { createCommentValidation } from "../middlewares/comment/createComment.middlewares";
+import { updateCommentValidation } from "../middlewares/comment/updateComment.middlewares";
+import { wrapRequestHandler } from "../utils/handler";
+import { isValidNumber } from "../utils";
 
 const commentRouter = Router();
 

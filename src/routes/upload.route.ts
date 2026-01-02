@@ -1,7 +1,7 @@
 import { Router } from 'express'
-import { uploadController } from '~/controllers/upload.controller'
-import { accessTokenValidation } from '~/middlewares/auth.middlewares'
-import { wrapRequestHandler } from '~/utils/handler'
+import { uploadController } from '../controllers/upload.controller'
+import { accessTokenValidation } from '../middlewares/auth.middlewares'
+import { wrapRequestHandler } from '../utils/handler'
 import multer from 'multer'
 
 const uploadRouter = Router()

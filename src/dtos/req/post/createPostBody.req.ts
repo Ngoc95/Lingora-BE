@@ -1,4 +1,4 @@
-import { PostTopic } from '~/enums/postTopic.enum'
+import { PostTopic } from '../../../enums/postTopic.enum'
 
 export class CreatePostBodyReq {
     title: string

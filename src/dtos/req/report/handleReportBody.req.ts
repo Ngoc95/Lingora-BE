@@ -1,5 +1,5 @@
-import { ReportStatus } from '~/enums/reportStatus.enum'
-import { ReportActionType } from '~/enums/reportActionType.enum'
+import { ReportStatus } from '../../../enums/reportStatus.enum'
+import { ReportActionType } from '../../../enums/reportActionType.enum'
 
 export class ReportAction {
     type: ReportActionType

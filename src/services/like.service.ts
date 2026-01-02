@@ -1,8 +1,8 @@
-import { CreateLikeBodyReq } from '~/dtos/req/like/createLikeBody.req'
-import { Like } from '~/entities/like.entity'
-import { EVENTS } from '~/events-handler/constants'
-import eventBus from '~/events-handler/eventBus'
-import { unGetData } from '~/utils'
+import { CreateLikeBodyReq } from '../dtos/req/like/createLikeBody.req'
+import { Like } from '../entities/like.entity'
+import { EVENTS } from '../events-handler/constants'
+import eventBus from '../events-handler/eventBus'
+import { unGetData } from '../utils'
 
 class LikeService {
     like = async ({ targetId, targetType, user }: CreateLikeBodyReq) => {

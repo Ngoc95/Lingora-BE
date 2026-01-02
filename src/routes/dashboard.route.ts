@@ -1,8 +1,8 @@
 import { Router } from 'express'
-import { dashboardController } from '~/controllers/dashboard.controller'
-import { accessTokenValidation, checkPermission } from '~/middlewares/auth.middlewares'
-import { wrapRequestHandler } from '~/utils/handler'
-import { Resource } from '~/enums/resource.enum'
+import { dashboardController } from '../controllers/dashboard.controller'
+import { accessTokenValidation, checkPermission } from '../middlewares/auth.middlewares'
+import { wrapRequestHandler } from '../utils/handler'
+import { Resource } from '../enums/resource.enum'
 
 const dashboardRouter = Router()
 

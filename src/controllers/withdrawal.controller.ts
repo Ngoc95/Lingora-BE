@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
-import { CREATED, SuccessResponse } from '~/core/success.response'
-import { withdrawalService } from '~/services/withdrawal.service'
+import { CREATED, SuccessResponse } from '../core/success.response'
+import { withdrawalService } from '../services/withdrawal.service'
 
 class WithdrawalController {
     // User endpoints

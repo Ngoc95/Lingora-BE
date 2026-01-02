@@ -1,6 +1,6 @@
 import { RequestHandler, Request, Response, NextFunction, ErrorRequestHandler } from 'express'
 import { MulterError } from 'multer'
-import { ErrorResponse, NotFoundRequestError } from '~/core/error.response'
+import { ErrorResponse, NotFoundRequestError } from '../core/error.response'
 
 // Transform to async await for controller
 export const wrapRequestHandler = <P = any>(handler: RequestHandler<P>) => {

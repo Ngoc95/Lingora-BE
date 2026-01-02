@@ -1,5 +1,5 @@
-import { PostStatus } from "~/enums/postStatus.enum"
-import { PostTopic } from "~/enums/postTopic.enum"
+import { PostStatus } from "../../../enums/postStatus.enum"
+import { PostTopic } from "../../../enums/postTopic.enum"
 
 export class UpdatePostBodyReq {
     title?: string

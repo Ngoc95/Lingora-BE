@@ -1,7 +1,7 @@
-import { BadRequestError } from '~/core/error.response'
-import { Notification } from '~/entities/notification.entity'
-import { UserNotification } from '~/entities/userNotification.entity'
-import { NotificationTarget, NotificationType } from '~/enums/notification.enum'
+import { BadRequestError } from '../core/error.response'
+import { Notification } from '../entities/notification.entity'
+import { UserNotification } from '../entities/userNotification.entity'
+import { NotificationTarget, NotificationType } from '../enums/notification.enum'
 
 class NotificationService {
     createNotification = async (type: NotificationType, data: any, target: NotificationTarget, users: number[]) => {

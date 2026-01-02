@@ -1,7 +1,7 @@
-import { DatabaseService } from '~/services/database.service'
-import { seedInitialData } from '~/seeds/seed'
+import { DatabaseService } from './services/database.service'
+import { seedInitialData } from './seeds/seed'
 import app from './app'
-import { initSocket } from '~/sockets'
+import { initSocket } from './sockets'
 
 const PORT = process.env.PORT || 4000
 

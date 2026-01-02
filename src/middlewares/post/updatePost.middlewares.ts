@@ -1,8 +1,8 @@
 import { checkSchema } from "express-validator"
 import { validate } from "../validation.middlewares"
-import { BadRequestError } from "~/core/error.response"
-import { PostStatus } from "~/enums/postStatus.enum"
-import { PostTopic } from "~/enums/postTopic.enum"
+import { BadRequestError } from "../../core/error.response"
+import { PostStatus } from "../../enums/postStatus.enum"
+import { PostTopic } from "../../enums/postTopic.enum"
 import { isEnum } from "../common.middlewares"
 
 export const updatePostValidation = validate(

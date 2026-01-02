@@ -1,9 +1,9 @@
 import { Request, Response } from 'express'
-import { BadRequestError } from '~/core/error.response'
-import { SuccessResponse } from '~/core/success.response'
-import { User } from '~/entities/user.entity'
-import { TargetType } from '~/enums/targetType.enum'
-import { likeService } from '~/services/like.service'
+import { BadRequestError } from '../core/error.response'
+import { SuccessResponse } from '../core/success.response'
+import { User } from '../entities/user.entity'
+import { TargetType } from '../enums/targetType.enum'
+import { likeService } from '../services/like.service'
 
 class LikeController {
     like = async (req: Request, res: Response) => {

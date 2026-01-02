@@ -1,8 +1,8 @@
 import { In } from "typeorm"
-import { BadRequestError } from "~/core/error.response"
-import { Role } from "~/entities/role.entity"
-import { User } from "~/entities/user.entity"
-import { DatabaseService } from "~/services/database.service"
+import { BadRequestError } from "../core/error.response"
+import { Role } from "../entities/role.entity"
+import { User } from "../entities/user.entity"
+import { DatabaseService } from "../services/database.service"
 
 export async function checkUserExistence(userId: number) {
     const userRepository = await DatabaseService.getInstance().getRepository(User)

@@ -1,5 +1,5 @@
-import { CefrLevel } from "~/enums/cefrLevel.enum"
-import { WordType } from "~/enums/wordType.enum"
+import { CefrLevel } from "../../enums/cefrLevel.enum"
+import { WordType } from "../../enums/wordType.enum"
 
 export interface DictionaryLookupRes {
     word: string

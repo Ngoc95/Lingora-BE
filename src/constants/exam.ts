@@ -1,4 +1,4 @@
-import { ExamSectionType } from "~/enums/exam.enum";
+import { ExamSectionType } from "../enums/exam.enum";
 
 type BandRange = { min: number; max: number; band: number };
 

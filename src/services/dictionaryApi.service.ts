@@ -1,9 +1,9 @@
 import axios, { AxiosInstance } from "axios"
-import { env } from "~/config/env"
-import { CefrLevel } from "~/enums/cefrLevel.enum"
-import { WordType } from "~/enums/wordType.enum"
-import { DICTIONARY_DEFAULT_CEFR_LEVEL } from "~/constants/dictionary"
-import { DictionaryLookupRes } from "~/dtos/res/dictionaryLookup.res.dto"
+import { env } from "../config/env"
+import { CefrLevel } from "../enums/cefrLevel.enum"
+import { WordType } from "../enums/wordType.enum"
+import { DICTIONARY_DEFAULT_CEFR_LEVEL } from "../constants/dictionary"
+import { DictionaryLookupRes } from "../dtos/res/dictionaryLookup.res.dto"
 
 class DictionaryApiService {
     private http: AxiosInstance

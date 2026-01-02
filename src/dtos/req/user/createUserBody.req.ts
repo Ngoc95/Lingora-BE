@@ -1,4 +1,4 @@
-import { ProficiencyLevel } from "~/enums/proficiency.enum"
+import { ProficiencyLevel } from "../../../enums/proficiency.enum"
 
 export interface CreateUserBodyReq {
   username: string

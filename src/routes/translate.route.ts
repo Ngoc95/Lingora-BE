@@ -1,6 +1,6 @@
 import { Router } from "express"
-import { translateController } from "~/controllers/translate.controller"
-import { wrapRequestHandler } from "~/utils/handler"
+import { translateController } from "../controllers/translate.controller"
+import { wrapRequestHandler } from "../utils/handler"
 
 const translateRouter = Router()
 

@@ -1,0 +1,47 @@
+# =========================
+# 1️⃣ Base Stage
+# =========================
+FROM python:3.10-slim AS base
+WORKDIR /app
+ENV PYTHONUNBUFFERED=1
+
+# =========================
+# 2️⃣ Builder Stage
+# =========================
+FROM base AS builder
+WORKDIR /build
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+COPY requirements.txt .
+RUN pip install --no-cache-dir \
+    --prefix=/install \
+    -r requirements.txt
+
+# =========================
+# 3️⃣ Development Stage
+# =========================
+FROM base AS development
+# Copy installed dependencies
+COPY --from=builder /install /usr/local
+# Dev command with reload
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+# =========================
+# 4️⃣ Production Stage
+# =========================
+FROM base AS production
+# Copy installed dependencies
+COPY --from=builder /install /usr/local
+
+# Copy source code
+COPY src ./src
+COPY scripts ./scripts
+
+# Entrypoint setup
+RUN chmod +x scripts/entrypoint.sh
+EXPOSE 8000
+
+ENTRYPOINT ["./scripts/entrypoint.sh"]
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]

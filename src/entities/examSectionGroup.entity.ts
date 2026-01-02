@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm'
-import { ExamGroupType } from '~/enums/exam.enum'
+import { ExamGroupType } from '../enums/exam.enum'
 import { ExamSection } from './examSection.entity'
 import { ExamQuestionGroup } from './examQuestionGroup.entity'
 

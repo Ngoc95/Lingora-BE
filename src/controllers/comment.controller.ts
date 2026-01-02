@@ -1,11 +1,11 @@
 import { Request, Response } from 'express'
 import { ParamsDictionary } from 'express-serve-static-core'
-import { BadRequestError } from '~/core/error.response'
-import { CREATED, SuccessResponse } from '~/core/success.response'
-import { User } from '~/entities/user.entity'
-import { TargetType } from '~/enums/targetType.enum'
-import { commentService } from '~/services/comment.service'
-import { postService } from '~/services/post.service'
+import { BadRequestError } from '../core/error.response'
+import { CREATED, SuccessResponse } from '../core/success.response'
+import { User } from '../entities/user.entity'
+import { TargetType } from '../enums/targetType.enum'
+import { commentService } from '../services/comment.service'
+import { postService } from '../services/post.service'
 
 class CommentController {
     getChildComment = async (

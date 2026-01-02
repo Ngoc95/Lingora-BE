@@ -1,7 +1,7 @@
 import { checkSchema } from "express-validator"
 import { validate } from "../validation.middlewares"
 import { isRequired, isEnum } from "../common.middlewares"
-import { ReportStatus } from "~/enums/reportStatus.enum"
+import { ReportStatus } from "../../enums/reportStatus.enum"
 
 export const updateReportStatusValidation = validate(
     checkSchema(

@@ -1,6 +1,6 @@
 import { Router } from 'express'
-import { vnpayReturnController } from '~/controllers/vnpayReturn.controller'
-import { wrapRequestHandler } from '~/utils/handler'
+import { vnpayReturnController } from '../controllers/vnpayReturn.controller'
+import { wrapRequestHandler } from '../utils/handler'
 
 const vnpayReturnRouter = Router()
 

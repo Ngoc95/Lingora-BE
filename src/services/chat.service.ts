@@ -2,12 +2,12 @@ import {
   BadRequestError,
   ForbiddenRequestError,
   NotFoundRequestError,
-} from "~/core/error.response";
-import { SendChatMessageBodyReq } from "~/dtos/req/chat/sendChatMessageBody.req";
-import { ChatMessage } from "~/entities/chatMessage.entity";
-import { ChatSession } from "~/entities/chatSession.entity";
-import { User } from "~/entities/user.entity";
-import { ChatMessageSender } from "~/enums/chatMessageSender.enum";
+} from "../core/error.response";
+import { SendChatMessageBodyReq } from "../dtos/req/chat/sendChatMessageBody.req";
+import { ChatMessage } from "../entities/chatMessage.entity";
+import { ChatSession } from "../entities/chatSession.entity";
+import { User } from "../entities/user.entity";
+import { ChatMessageSender } from "../enums/chatMessageSender.enum";
 import { DatabaseService } from "./database.service";
 import { aiService } from "./ai.service";
 

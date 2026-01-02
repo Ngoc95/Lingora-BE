@@ -1,10 +1,10 @@
-import { sendMessage } from '~/sockets'
-import { EVENTS } from '~/events-handler/constants'
-import { User } from '~/entities/user.entity'
-import { TargetType } from '~/enums/targetType.enum'
-import eventBus from '~/events-handler/eventBus'
-import { NotificationTarget, NotificationType } from '~/enums/notification.enum'
-import { notificationService } from '~/services/notification.service'
+import { sendMessage } from '../sockets'
+import { EVENTS } from '../events-handler/constants'
+import { User } from '../entities/user.entity'
+import { TargetType } from '../enums/targetType.enum'
+import eventBus from '../events-handler/eventBus'
+import { NotificationTarget, NotificationType } from '../enums/notification.enum'
+import { notificationService } from '../services/notification.service'
 
 eventBus.on(
     EVENTS.COMMENT,

@@ -1,12 +1,12 @@
 import { Router } from "express";
-import { wordController } from "~/controllers/word.controller";
-import { Word } from "~/entities/word.entity";
-import { Resource } from "~/enums/resource.enum";
-import { accessTokenValidation, checkPermission } from "~/middlewares/auth.middlewares";
-import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from "~/middlewares/common.middlewares";
-import { createWordValidation } from "~/middlewares/word/createWord.middlewares";
-import { updateWordValidation } from "~/middlewares/word/updateWord.middlewares";
-import { wrapRequestHandler } from "~/utils/handler";
+import { wordController } from "../controllers/word.controller";
+import { Word } from "../entities/word.entity";
+import { Resource } from "../enums/resource.enum";
+import { accessTokenValidation, checkPermission } from "../middlewares/auth.middlewares";
+import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from "../middlewares/common.middlewares";
+import { createWordValidation } from "../middlewares/word/createWord.middlewares";
+import { updateWordValidation } from "../middlewares/word/updateWord.middlewares";
+import { wrapRequestHandler } from "../utils/handler";
 
 const wordRouter = Router();
 

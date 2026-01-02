@@ -1,11 +1,11 @@
 import { Router } from "express";
-import { examController } from "~/controllers/exam.controller";
+import { examController } from "../controllers/exam.controller";
 import {
   accessTokenValidation,
   checkPermission,
   optionalAccessToken,
-} from "~/middlewares/auth.middlewares";
-import { Resource } from "~/enums/resource.enum";
+} from "../middlewares/auth.middlewares";
+import { Resource } from "../enums/resource.enum";
 
 const examRouter = Router();
 
@@ -44,8 +44,8 @@ examRouter.get(
   examController.getExamAttemptDetail
 );
 
-import { dtoValidation } from "~/middlewares/dtoValidation.middleware";
-import { ImportExamBodyReq } from "~/dtos/req/exam/importExamBody.req";
+import { dtoValidation } from "../middlewares/dtoValidation.middleware";
+import { ImportExamBodyReq } from "../dtos/req/exam/importExamBody.req";
 
 // Admin import
 examRouter.post(

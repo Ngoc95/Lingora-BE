@@ -1,7 +1,7 @@
 import { FindOptionsOrder } from "typeorm"
-import { Word } from "~/entities/word.entity"
-import { CefrLevel } from "~/enums/cefrLevel.enum"
-import { WordType } from "~/enums/wordType.enum"
+import { Word } from "../../../entities/word.entity"
+import { CefrLevel } from "../../../enums/cefrLevel.enum"
+import { WordType } from "../../../enums/wordType.enum"
 
 export interface GetAllWordsQueryReq {
     page?: number

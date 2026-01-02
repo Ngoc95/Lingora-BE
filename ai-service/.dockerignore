@@ -1,9 +1,9 @@
-data/
-chroma_db_store/
-.git/
-.gitignore
+__pycache__
+venv
 .env
+.git
+.gitignore
 *.md
-venv/
-.venv/
-__pycache__/
+docker-compose*.yml
+chroma_db_store
+data

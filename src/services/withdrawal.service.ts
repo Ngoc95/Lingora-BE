@@ -1,14 +1,14 @@
 import { DatabaseService } from './database.service'
-import { WithdrawalRequest } from '~/entities/withdrawalRequest.entity'
-import { User } from '~/entities/user.entity'
-import { BadRequestError, NotFoundRequestError, ForbiddenRequestError } from '~/core/error.response'
-import { CreateWithdrawalBodyReq } from '~/dtos/req/withdrawal/createWithdrawalBody.req'
-import { UpdateWithdrawalBodyReq } from '~/dtos/req/withdrawal/updateWithdrawalBody.req'
-import { WithdrawalQueryReq } from '~/dtos/req/withdrawal/withdrawalQuery.req'
-import { WithdrawalStatus } from '~/enums/withdrawalStatus.enum'
+import { WithdrawalRequest } from '../entities/withdrawalRequest.entity'
+import { User } from '../entities/user.entity'
+import { BadRequestError, NotFoundRequestError, ForbiddenRequestError } from '../core/error.response'
+import { CreateWithdrawalBodyReq } from '../dtos/req/withdrawal/createWithdrawalBody.req'
+import { UpdateWithdrawalBodyReq } from '../dtos/req/withdrawal/updateWithdrawalBody.req'
+import { WithdrawalQueryReq } from '../dtos/req/withdrawal/withdrawalQuery.req'
+import { WithdrawalStatus } from '../enums/withdrawalStatus.enum'
 import { FindOptionsWhere, In } from 'typeorm'
-import eventBus from '~/events-handler/eventBus'
-import { EVENTS } from '~/events-handler/constants'
+import eventBus from '../events-handler/eventBus'
+import { EVENTS } from '../events-handler/constants'
 
 const MIN_WITHDRAWAL_AMOUNT = 50000 // 50,000 VND
 const MAX_WITHDRAWAL_AMOUNT = 50000000 // 50,000,000 VND

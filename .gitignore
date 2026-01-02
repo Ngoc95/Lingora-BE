@@ -53,6 +53,7 @@ tmp/
 temp/
 
 # Cache
+cache/*
 src/cache/*
 !src/cache/.gitkeep
 

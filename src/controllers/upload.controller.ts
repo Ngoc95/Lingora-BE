@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
-import { uploadService } from '~/services/upload.service'
-import { OK, CREATED } from '~/core/success.response'
+import { uploadService } from '../services/upload.service'
+import { OK, CREATED } from '../core/success.response'
 
 class UploadController {
     getSignedUrl = async (req: Request, res: Response) => {

@@ -1,6 +1,6 @@
 import { FindOptionsOrder } from 'typeorm'
-import { WithdrawalRequest } from '~/entities/withdrawalRequest.entity'
-import { WithdrawalStatus } from '~/enums/withdrawalStatus.enum'
+import { WithdrawalRequest } from '../../../entities/withdrawalRequest.entity'
+import { WithdrawalStatus } from '../../../enums/withdrawalStatus.enum'
 
 export interface WithdrawalQueryReq {
     page?: number

@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { ExamType } from "~/enums/exam.enum";
+import { ExamType } from "../enums/exam.enum";
 import { ExamSection } from "./examSection.entity";
 import { ExamAttempt } from "./examAttempt.entity";
 

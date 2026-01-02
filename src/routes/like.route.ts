@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { likeController } from "~/controllers/like.controller";
-import { Resource } from "~/enums/resource.enum";
-import { accessTokenValidation, checkPermission } from "~/middlewares/auth.middlewares";
-import { checkParamMiddleware } from "~/middlewares/common.middlewares";
-import { validateTargetType } from "~/middlewares/like/like.middlewares";
-import { wrapRequestHandler } from "~/utils/handler";
+import { likeController } from "../controllers/like.controller";
+import { Resource } from "../enums/resource.enum";
+import { accessTokenValidation, checkPermission } from "../middlewares/auth.middlewares";
+import { checkParamMiddleware } from "../middlewares/common.middlewares";
+import { validateTargetType } from "../middlewares/like/like.middlewares";
+import { wrapRequestHandler } from "../utils/handler";
 
 const likeRouter = Router();
 

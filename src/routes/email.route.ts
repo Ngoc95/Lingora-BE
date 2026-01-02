@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { wrapRequestHandler } from '~/utils/handler'
-import { accessTokenValidation } from '~/middlewares/auth.middlewares'
-import { authController } from '~/controllers/auth.controller'
-import { sendVerifyAccountEmailValidation } from '~/middlewares/email/sendVerifyAccountEmailValidation.middlewares'
+import { wrapRequestHandler } from '../utils/handler'
+import { accessTokenValidation } from '../middlewares/auth.middlewares'
+import { authController } from '../controllers/auth.controller'
+import { sendVerifyAccountEmailValidation } from '../middlewares/email/sendVerifyAccountEmailValidation.middlewares'
 
 const emailRouter = Router()
 

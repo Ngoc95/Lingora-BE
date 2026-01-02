@@ -1,7 +1,7 @@
 import { checkSchema } from 'express-validator'
 import { validate } from '../validation.middlewares'
-import { WithdrawalStatus } from '~/enums/withdrawalStatus.enum'
-import { BadRequestError } from '~/core/error.response'
+import { WithdrawalStatus } from '../../enums/withdrawalStatus.enum'
+import { BadRequestError } from '../../core/error.response'
 
 export const updateWithdrawalValidation = validate(
     checkSchema(

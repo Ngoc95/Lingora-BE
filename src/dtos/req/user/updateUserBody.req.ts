@@ -1,5 +1,5 @@
-import { ProficiencyLevel } from "~/enums/proficiency.enum"
-import { UserStatus } from "~/enums/userStatus.enum"
+import { ProficiencyLevel } from "../../../enums/proficiency.enum"
+import { UserStatus } from "../../../enums/userStatus.enum"
 
 export interface UpdateUserBodyReq {
   username?: string,

@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import { authService } from '~/services/auth.service';
-import { CREATED, SuccessResponse } from '~/core/success.response';
-import { User } from '~/entities/user.entity';
-import { BadRequestError } from '~/core/error.response';
+import { authService } from '../services/auth.service';
+import { CREATED, SuccessResponse } from '../core/success.response';
+import { User } from '../entities/user.entity';
+import { BadRequestError } from '../core/error.response';
 
 const isProd = process.env.NODE_ENV === 'production';
 

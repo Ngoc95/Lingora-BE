@@ -1,8 +1,8 @@
 import { checkSchema } from "express-validator"
 import { validate } from "../validation.middlewares"
 import { isRequired, isEnum } from "../common.middlewares"
-import { ReportStatus } from "~/enums/reportStatus.enum"
-import { ReportActionType } from "~/enums/reportActionType.enum"
+import { ReportStatus } from "../../enums/reportStatus.enum"
+import { ReportActionType } from "../../enums/reportActionType.enum"
 
 export const handleReportValidation = validate(
     checkSchema(

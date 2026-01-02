@@ -1,11 +1,11 @@
 import { checkSchema } from "express-validator"
 import { validate } from "../validation.middlewares"
 import { isEmail, isPassword, isUsername } from "../common.middlewares"
-import { User } from "~/entities/user.entity"
-import { UserStatus } from "~/enums/userStatus.enum"
-import { ProficiencyLevel } from "~/enums/proficiency.enum"
-import { Role } from "~/entities/role.entity"
-import { BadRequestError } from "~/core/error.response"
+import { User } from "../../entities/user.entity"
+import { UserStatus } from "../../enums/userStatus.enum"
+import { ProficiencyLevel } from "../../enums/proficiency.enum"
+import { Role } from "../../entities/role.entity"
+import { BadRequestError } from "../../core/error.response"
 import { toNumber } from "lodash"
 
 export const updateUserByIdValidation = validate(

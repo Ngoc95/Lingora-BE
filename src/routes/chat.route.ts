@@ -1,11 +1,11 @@
 import { Router } from "express";
-import { chatController } from "~/controllers/chat.controller";
+import { chatController } from "../controllers/chat.controller";
 import {
   accessTokenValidation,
   optionalAccessToken,
-} from "~/middlewares/auth.middlewares";
-import { sendChatMessageValidation } from "~/middlewares/chat/sendChatMessage.middlewares";
-import { wrapRequestHandler } from "~/utils/handler";
+} from "../middlewares/auth.middlewares";
+import { sendChatMessageValidation } from "../middlewares/chat/sendChatMessage.middlewares";
+import { wrapRequestHandler } from "../utils/handler";
 
 const chatRouter = Router();
 

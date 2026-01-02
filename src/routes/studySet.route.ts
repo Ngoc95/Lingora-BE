@@ -1,12 +1,12 @@
 import { Router } from 'express'
-import { studySetController } from '~/controllers/studySet.controller'
-import { accessTokenValidation, checkPermission } from '~/middlewares/auth.middlewares'
-import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from '~/middlewares/common.middlewares'
-import { createStudySetValidation } from '~/middlewares/studySet/createStudySet.middlewares'
-import { updateStudySetValidation } from '~/middlewares/studySet/updateStudySet.middlewares'
-import { wrapRequestHandler } from '~/utils/handler'
-import { StudySet } from '~/entities/studySet.entity'
-import { Resource } from '~/enums/resource.enum'
+import { studySetController } from '../controllers/studySet.controller'
+import { accessTokenValidation, checkPermission } from '../middlewares/auth.middlewares'
+import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from '../middlewares/common.middlewares'
+import { createStudySetValidation } from '../middlewares/studySet/createStudySet.middlewares'
+import { updateStudySetValidation } from '../middlewares/studySet/updateStudySet.middlewares'
+import { wrapRequestHandler } from '../utils/handler'
+import { StudySet } from '../entities/studySet.entity'
+import { Resource } from '../enums/resource.enum'
 
 const studySetRouter = Router()
 

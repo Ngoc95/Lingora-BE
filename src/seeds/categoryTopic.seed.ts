@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker'
-import { Category } from '~/entities/category.entity'
-import { Topic } from '~/entities/topic.entity'
-import { DatabaseService } from '~/services/database.service'
+import { Category } from '../entities/category.entity'
+import { Topic } from '../entities/topic.entity'
+import { DatabaseService } from '../services/database.service'
 
 export async function seedCategoriesAndTopics() {
   const db = DatabaseService.getInstance()

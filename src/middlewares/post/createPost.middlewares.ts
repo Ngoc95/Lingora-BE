@@ -1,7 +1,7 @@
 import { checkSchema } from "express-validator"
 import { validate } from "../validation.middlewares"
 import { isRequired, isEnum } from "../common.middlewares"
-import { PostTopic } from "~/enums/postTopic.enum"
+import { PostTopic } from "../../enums/postTopic.enum"
 
 export const createPostValidation = validate(
     checkSchema(

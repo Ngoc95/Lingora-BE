@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
-import { SuccessResponse } from '~/core/success.response'
-import { dashboardService } from '~/services/dashboard.service'
+import { SuccessResponse } from '../core/success.response'
+import { dashboardService } from '../services/dashboard.service'
 
 // P0: Extract date filter from query
 const getDateFilter = (req: Request) => ({

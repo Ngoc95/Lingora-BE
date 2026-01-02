@@ -1,6 +1,6 @@
 import { Repository, ObjectLiteral, DataSource } from 'typeorm'
 
-import { env } from '~/config/env';
+import { env } from '../config/env';
 
 export class DatabaseService {
   private static instance: DatabaseService
@@ -17,6 +17,9 @@ export class DatabaseService {
       entities: [__dirname + '/../entities/**/*.{ts,js}'],
       synchronize: false,
       logging: false,
+      ssl: env.DB_HOST !== 'localhost' && env.DB_HOST !== 'postgres'
+        ? { rejectUnauthorized: false }
+        : false,
     })
   }
 

@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from "axios";
-import { env } from "~/config/env";
-import { BadRequestError } from "~/core/error.response";
-import { ChatMessageSender } from "~/enums/chatMessageSender.enum";
+import { env } from "../config/env";
+import { BadRequestError } from "../core/error.response";
+import { ChatMessageSender } from "../enums/chatMessageSender.enum";
 
 class AiService {
   private client: AxiosInstance;

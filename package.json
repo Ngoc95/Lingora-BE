@@ -12,7 +12,7 @@
     "migration:revert": "npx typeorm migration:revert -d src/config/data-source.ts"
   },
   "_moduleAliases": {
-    "~": "dist"
+    ".": "dist"
   },
   "keywords": [],
   "author": "",

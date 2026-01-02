@@ -1,8 +1,8 @@
-import { env } from "~/config/env";
+import { env } from "../config/env";
 import { Resend } from "resend"
-import { SendMailOptions } from "~/dtos/internal/email/emailOption.dto"
-import { SendVerifyMailOptions } from "~/dtos/internal/email/verifyEmailOption.dto"
-import { generateVerificationCode, renderEmailTemplate } from "~/utils/email"
+import { SendMailOptions } from "../dtos/internal/email/emailOption.dto"
+import { SendVerifyMailOptions } from "../dtos/internal/email/verifyEmailOption.dto"
+import { generateVerificationCode, renderEmailTemplate } from "../utils/email"
 
 const resend = new Resend(env.RESEND_API_KEY)
 

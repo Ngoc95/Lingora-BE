@@ -1,14 +1,14 @@
-import { CreateCategoryBodyReq } from "~/dtos/req/category/createCategoryBody.req"
-import { UpdateCategoryBodyReq } from "~/dtos/req/category/updateCategoryBody.req"
+import { CreateCategoryBodyReq } from "../dtos/req/category/createCategoryBody.req"
+import { UpdateCategoryBodyReq } from "../dtos/req/category/updateCategoryBody.req"
 import { DatabaseService } from "./database.service"
-import { Category } from "~/entities/category.entity"
-import { BadRequestError } from "~/core/error.response"
-import { GetAllCategoriesQueryReq } from "~/dtos/req/category/getAllCategoriesQuery.req"
+import { Category } from "../entities/category.entity"
+import { BadRequestError } from "../core/error.response"
+import { GetAllCategoriesQueryReq } from "../dtos/req/category/getAllCategoriesQuery.req"
 import validator from "validator"
-import { GetCategoryQueryReq } from "~/dtos/req/category/getCategoryQuery.req"
-import { Topic } from "~/entities/topic.entity"
+import { GetCategoryQueryReq } from "../dtos/req/category/getCategoryQuery.req"
+import { Topic } from "../entities/topic.entity"
 import { FindOptionsWhere, ILike } from "typeorm"
-import { Word } from "~/entities/word.entity"
+import { Word } from "../entities/word.entity"
 
 class CategoryService {
     private db = DatabaseService.getInstance()

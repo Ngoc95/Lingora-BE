@@ -8,7 +8,7 @@ import {
     UpdateDateColumn,
 } from 'typeorm'
 import { User } from './user.entity'
-import { WithdrawalStatus } from '~/enums/withdrawalStatus.enum'
+import { WithdrawalStatus } from '../enums/withdrawalStatus.enum'
 
 @Entity()
 export class WithdrawalRequest extends BaseEntity {
