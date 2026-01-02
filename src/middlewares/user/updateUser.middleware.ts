@@ -93,9 +93,10 @@ export const updateUserByIdValidation = validate(
       optional: true,
       ...isPassword,
       custom: {
-        options: (_, { req }) => {
-          if (req.body.newPassword && !req.body.oldPassword) {
-            throw new BadRequestError({ message: 'Old password is required when setting a new password' })
+        options: async (_, { req }) => {
+          const user = await User.findOne({ where: { id: toNumber(req.params?.id) } })
+          if (user?.password && !req.body.oldPassword) {
+            throw new BadRequestError({ message: 'Old password is required' })
           }
           return true
         }

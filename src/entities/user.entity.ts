@@ -41,13 +41,18 @@ export class User extends BaseEntity {
     @IsNotEmpty()
     email!: string;
 
-    @Column({ type: "varchar" })
-    @IsNotEmpty()
+    @Column({ type: "varchar", nullable: true })
     @Matches(Regex.PASSWORD, { message: 'Password must contain at least 6 chars, 1 uppercase!' })
-    password!: string;
+    password?: string;
 
     @Column('varchar', { default: 'N/A' })
     avatar?: string
+
+    @Column({ type: 'varchar', nullable: true, unique: true })
+    googleId?: string
+
+    @Column({ type: 'varchar', default: 'local' })
+    authProvider?: 'local' | 'google' | 'both'
 
     @Column({
         type: 'enum',
