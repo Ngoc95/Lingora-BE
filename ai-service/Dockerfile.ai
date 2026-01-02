@@ -38,6 +38,15 @@ COPY --from=builder /install /usr/local
 # Copy source code
 COPY src ./src
 COPY scripts ./scripts
+# Tạo thư mục data để tránh lỗi
+RUN mkdir -p data
+
+# ⚠️ QUAN TRỌNG: Cần Build Argument cho OpenAI Key để chạy ingest
+ARG OPENAI_API_KEY
+ENV OPENAI_API_KEY=$OPENAI_API_KEY
+
+# Chạy ingest để tạo chroma_db_store ngay trong image
+RUN python3 -m src.ingest
 
 # Entrypoint setup
 RUN chmod +x scripts/entrypoint.sh
