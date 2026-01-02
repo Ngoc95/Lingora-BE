@@ -18,6 +18,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@faker-js/faker": "^10.1.0",
     "@lmstudio/sdk": "^1.5.0",
     "@vitalets/google-translate-api": "^9.2.1",
     "accesscontrol": "^2.2.1",
@@ -50,7 +51,6 @@
     "vnpay": "^2.4.4"
   },
   "devDependencies": {
-    "@faker-js/faker": "^10.1.0",
     "@types/bcrypt": "^6.0.0",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
