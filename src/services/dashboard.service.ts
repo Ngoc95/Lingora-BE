@@ -67,9 +67,10 @@ class DashboardService {
                 end: previousEnd 
             })
             .getCount()
+        console.log(newUsersThisPeriod, newUsersLastPeriod)
         const userGrowth = newUsersLastPeriod > 0 
             ? Math.round(((newUsersThisPeriod - newUsersLastPeriod) / newUsersLastPeriod) * 100) 
-            : 100
+            : (newUsersThisPeriod > 0 ? 100 : 0)
 
         // StudySets metrics
         const totalStudySets = await studySetRepo.count()
@@ -102,12 +103,12 @@ class DashboardService {
                 end: previousEnd
             })
             .getRawOne()
-        
+                    
         const thisPeriodRev = Number(revenueThisPeriod?.total || 0)
         const lastPeriodRev = Number(revenueLastPeriod?.total || 0)
         const revenueGrowth = lastPeriodRev > 0 
             ? Math.round(((thisPeriodRev - lastPeriodRev) / lastPeriodRev) * 100) 
-            : 100
+            : (thisPeriodRev > 0 ? 100 : 0)
 
         // Exams metrics
         const totalExams = await examRepo.count()
@@ -305,16 +306,24 @@ class DashboardService {
 
         // Merge trends by date
         const trendMap = new Map<string, { wordsLearned: number; topicsCompleted: number }>()
-        learningTrend.forEach((item: { date: string; words_learned: any }) => {
-            trendMap.set(item.date, { 
+
+        const normalizeDate = (d: any) => {
+             if (d instanceof Date) return d.toISOString().split('T')[0]
+             return String(d)
+        }
+
+        learningTrend.forEach((item: { date: any; words_learned: any }) => {
+            const dateKey = normalizeDate(item.date)
+            trendMap.set(dateKey, { 
                 wordsLearned: Number(item.words_learned), 
                 topicsCompleted: 0 
             })
         })
-        topicsCompletedTrend.forEach((item: { date: string; topics_completed: any }) => {
-            const existing = trendMap.get(item.date) || { wordsLearned: 0, topicsCompleted: 0 }
+        topicsCompletedTrend.forEach((item: { date: any; topics_completed: any }) => {
+            const dateKey = normalizeDate(item.date)
+            const existing = trendMap.get(dateKey) || { wordsLearned: 0, topicsCompleted: 0 }
             existing.topicsCompleted = Number(item.topics_completed)
-            trendMap.set(item.date, existing)
+            trendMap.set(dateKey, existing)
         })
 
         const mergedTrend = Array.from(trendMap.entries())

@@ -1,4 +1,7 @@
-import 'module-alias/register'
+if (process.env.NODE_ENV === 'production') {
+    require('module-alias/register')
+}
+
 import { DatabaseService } from './services/database.service'
 import { seedInitialData } from './seeds/seed'
 import app from './app'
