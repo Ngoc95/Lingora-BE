@@ -68,6 +68,13 @@ async function validateUserCredentials(identifier: string, password: string) {
 
     if (!user) throw new BadRequestError({ message: 'User not found' });
 
+    // Check if user has a password (Google users might not have password)
+    if (!user.password) {
+        throw new BadRequestError({
+            message: 'This account was created with Google. Please login with Google or set a password first.'
+        });
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) throw new BadRequestError({ message: 'Invalid credentials' });
 

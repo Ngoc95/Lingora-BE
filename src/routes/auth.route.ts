@@ -12,11 +12,26 @@ import {
 } from '../middlewares/auth.middlewares';
 import { sendVerifyAccountEmailValidation } from '../middlewares/email/sendVerifyAccountEmailValidation.middlewares'
 import { wrapRequestHandler } from '../utils/handler';
+} from '~/middlewares/auth.middlewares';
+import { googleAuthValidation } from '~/middlewares/googleAuth.middlewares';
+import { sendVerifyAccountEmailValidation } from '~/middlewares/email/sendVerifyAccountEmailValidation.middlewares'
+import { wrapRequestHandler } from '~/utils/handler';
 
 const authRouter = Router();
 
 authRouter.post('/register', registerValidation, wrapRequestHandler(authController.register));
 authRouter.post('/login', loginValidation, wrapRequestHandler(authController.login));
+
+/**
+ * Google OAuth Authentication
+ * @description : Authenticate with Google ID token
+ * @method : POST
+ * @path : /google
+ * @body : { idToken: string }
+ * @response : { user, accessToken } + refreshToken cookie
+ */
+authRouter.post('/google', googleAuthValidation, wrapRequestHandler(authController.googleAuth));
+
 authRouter.post('/refresh-token', refreshTokenValidation, wrapRequestHandler(authController.refreshToken));
 authRouter.post('/logout', logoutValidation, wrapRequestHandler(authController.logout));
 

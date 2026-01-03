@@ -43,6 +43,22 @@ class AuthController {
     }).send(res);
   };
 
+  googleAuth = async (req: Request, res: Response) => {
+    const googleProfile = (req as any).googleProfile
+
+    const result = await authService.googleLogin(googleProfile)
+
+    res.cookie('refreshToken', result.refreshToken, cookieOpts);
+
+    return new SuccessResponse({
+      message: "Google authentication successful",
+      metaData: {
+        user: result.user,
+        accessToken: result.accessToken
+      }
+    }).send(res);
+  };
+
   refreshToken = async (req: Request, res: Response) => {
     const { decodedRefreshToken, refreshTokenString: oldToken } = req as any;
 

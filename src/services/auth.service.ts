@@ -45,7 +45,10 @@ export class AuthService {
         await tokenRepo.save({ refreshToken, user: newUser })
 
         return {
-            user: unGetData({ fields: ['password'], object: newUser }),
+            user: {
+                ...unGetData({ fields: ['password'], object: newUser }),
+                hasPassword: !!newUser.password
+            },
             accessToken,
             refreshToken
         }
@@ -60,7 +63,10 @@ export class AuthService {
         ])
         await tokenRepo.save({ refreshToken, user })
         return {
-            user: unGetData({ fields: ['password'], object: user }),
+            user: {
+                ...unGetData({ fields: ['password'], object: user }),
+                hasPassword: !!user.password
+            },
             accessToken,
             refreshToken
         }
@@ -103,8 +109,93 @@ export class AuthService {
         const { password, ...rest } = user
         return {
             ...rest,
+            hasPassword: !!password
         }
     }
+
+    // Google Login/Register with Account Linking
+    async googleLogin(googleProfile: { id: string; email: string; name: string; picture?: string }) {
+        const userRepo = await this.db.getRepository(User)
+        const roleRepo = await this.db.getRepository(Role)
+
+        // Step 1: Try to find user by googleId
+        let user = await userRepo.findOne({
+            where: { googleId: googleProfile.id },
+            relations: ['roles']
+        })
+
+        if (user) {
+            // User already logged in with Google before
+            return this.login(user)
+        }
+
+        // Step 2: Try to find user by email (account linking case)
+        user = await userRepo.findOne({
+            where: { email: googleProfile.email },
+            relations: ['roles']
+        })
+
+        if (user) {
+            // User exists with this email (registered via email/password)
+            // Link Google account to existing user
+            user.googleId = googleProfile.id
+            user.authProvider = 'both'
+
+            // Update avatar if user doesn't have one
+            if (user.avatar === 'N/A' && googleProfile.picture) {
+                user.avatar = googleProfile.picture
+            }
+
+            // Auto-verify email if user was inactive (Google email is verified)
+            if (user.status === UserStatus.INACTIVE) {
+                user.status = UserStatus.ACTIVE
+                // Delete any pending email verification tokens
+                await VerificationToken.getRepository().softDelete({
+                    user: { id: user.id },
+                    type: TokenType.emailVerifyToken
+                })
+            }
+
+            await userRepo.save(user)
+            return this.login(user)
+        }
+
+        // Step 3: Create new user (first time Google login)
+        const userRole = await roleRepo.findOne({ where: { name: RoleName.LEARNER } })
+        if (!userRole) throw new BadRequestError({ message: 'Default role Learner not found' })
+
+        // Generate unique username from Google name or email
+        // Remove spaces and special chars, but preserve case (validation allows uppercase)
+        let username = googleProfile.name.replace(/[^a-zA-Z0-9]/g, '')
+
+        // Ensure minimum length of 6 characters
+        if (username.length < 6) {
+            // If too short, use email prefix instead
+            const emailPrefix = googleProfile.email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '')
+            username = emailPrefix.length >= 6 ? emailPrefix : `${emailPrefix}${Math.floor(Math.random() * 10000)}`
+        }
+
+        // Check if username already exists, append random number if needed
+        const existingUser = await userRepo.findOne({ where: { username } })
+        if (existingUser) {
+            username = `${username}${Math.floor(Math.random() * 10000)}`
+        }
+
+        const newUser = userRepo.create({
+            username,
+            email: googleProfile.email,
+            password: undefined, // No password for Google users
+            googleId: googleProfile.id,
+            authProvider: 'google',
+            avatar: googleProfile.picture || 'N/A',
+            status: UserStatus.ACTIVE, // Google email is already verified
+            roles: [userRole]
+        })
+
+        await userRepo.save(newUser)
+        return this.login(newUser)
+    }
+
 
     // Send verify account email
     sendVerifyAccountEmail = async ({ email, userId, name }: { email: string; userId: number; name: string }) => {

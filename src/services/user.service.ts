@@ -147,10 +147,20 @@ export class UserService {
         if (proficiency !== undefined) user.proficiency = proficiency
         if (status) user.status = status
 
-        // Nếu có đổi mật khẩu
-        if (newPassword && oldPassword) {
-            const match = await bcrypt.compare(oldPassword, user.password)
-            if (!match) throw new BadRequestError({ message: 'Old password incorrect' })
+        // Nếu có đổi mật khẩu (hoặc tạo mật khẩu mới)
+        if (newPassword) {
+            if (user.password) {
+                // Case 1: Đã có password -> Là hành động Đổi mật khẩu (Change Password)
+                // Bắt buộc phải có oldPassword và phải khớp
+                if (!oldPassword) throw new BadRequestError({ message: 'Old password is required' })
+
+                const match = await bcrypt.compare(oldPassword, user.password)
+                if (!match) throw new BadRequestError({ message: 'Old password incorrect' })
+            } else {
+                // Case 2: Chưa có password (Google user) -> Là hành động Tạo mật khẩu (Set Password)
+                // Không cần check oldPassword
+            }
+
             user.password = await hashData(newPassword)
         }
 
@@ -197,7 +207,7 @@ export class UserService {
             const user = await userRepo.findOne({ where: { id } })
             if (!user) throw new BadRequestError({ message: 'User not found' })
 
-                // cập nhật lại status
+            // cập nhật lại status
             user.status = UserStatus.DELETED
             await userRepo.save(user)
 
