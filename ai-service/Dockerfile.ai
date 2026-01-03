@@ -1,0 +1,73 @@
+# =========================
+# 1️⃣ Base Stage
+# =========================
+FROM python:3.10-slim AS base
+WORKDIR /app
+ENV PYTHONUNBUFFERED=1
+
+# =========================
+# 2️⃣ Builder Stage
+# =========================
+FROM base AS builder
+WORKDIR /build
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+COPY requirements.txt .
+RUN pip install --no-cache-dir \
+    --prefix=/install \
+    -r requirements.txt
+
+# =========================
+# 3️⃣ Development Stage
+# =========================
+FROM base AS development
+# Copy installed dependencies
+COPY --from=builder /install /usr/local
+# Dev command with reload
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+# =========================
+# 4️⃣ Production Stage
+# =========================
+FROM base AS production
+# Copy installed dependencies
+COPY --from=builder /install /usr/local
+
+# Copy minimal source for ingestion (Cache Layer)
+COPY scripts ./scripts
+COPY src/config ./src/config
+COPY src/ingest.py ./src/ingest.py
+COPY src/__init__.py ./src/__init__.py 
+# Note: src/__init__.py might duplicate if copied again later, but safe.
+
+# Tạo thư mục data để tránh lỗi
+RUN mkdir -p data
+
+# ⚠️ QUAN TRỌNG: Cần Build Argument cho OpenAI Key để chạy ingest
+ARG OPENAI_API_KEY
+ENV OPENAI_API_KEY=$OPENAI_API_KEY
+
+ARG GRAMMAR_PDF_URL
+ENV GRAMMAR_PDF_URL=$GRAMMAR_PDF_URL
+
+ARG VOCAB_PDF_URL
+ENV VOCAB_PDF_URL=$VOCAB_PDF_URL
+
+# Chạy ingest để tạo chroma_db_store ngay trong image
+# Lớp này sẽ được CACHED nếu scripts, ingest.py, config, và API Key không đổi
+RUN python3 -m src.ingest && \
+    echo "✅ Build-time Ingest Complete. Checking files:" && \
+    ls -laR chroma_db_store
+
+# Copy FULL source code (Layer thay đổi thường xuyên)
+# Các file đã copy ở trên sẽ bị overwrite, đè lên chính nó -> Không sao cả.
+COPY src ./src
+     
+# Entrypoint setup
+RUN chmod +x scripts/entrypoint.sh
+EXPOSE 8000
+
+ENTRYPOINT ["./scripts/entrypoint.sh"]
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]

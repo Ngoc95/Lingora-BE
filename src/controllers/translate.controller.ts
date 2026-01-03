@@ -1,6 +1,6 @@
-import { Request, Response } from "express"
-import { SuccessResponse } from "~/core/success.response"
-import { translateService } from "~/services/translate.service"
+import { Request, Response } from 'express'
+import { SuccessResponse } from '~/core/success.response'
+import { translateService } from '~/services/translate.service'
 
 class TranslateController {
     translatePhrase = async (req: Request, res: Response) => {

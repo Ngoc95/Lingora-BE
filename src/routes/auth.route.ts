@@ -10,9 +10,9 @@ import {
     verifyAccountEmailCodeValidation,
     verifyForgotPasswordCodeValidation
 } from '~/middlewares/auth.middlewares';
-import { googleAuthValidation } from '~/middlewares/googleAuth.middlewares';
 import { sendVerifyAccountEmailValidation } from '~/middlewares/email/sendVerifyAccountEmailValidation.middlewares'
 import { wrapRequestHandler } from '~/utils/handler';
+import { googleAuthValidation } from '~/middlewares/googleAuth.middlewares';
 
 const authRouter = Router();
 

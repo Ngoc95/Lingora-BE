@@ -2,7 +2,6 @@ import { checkSchema } from 'express-validator'
 import { validate } from '../validation.middlewares'
 import { isRequired } from '../common.middlewares'
 import { StudySetVisibility } from '~/enums/studySetVisibility.enum'
-import { StudySetStatus } from '~/enums/studySetStatus.enum'
 import { QuizType } from '~/enums/quizType.enum'
 import { BadRequestError } from '~/core/error.response'
 

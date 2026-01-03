@@ -159,7 +159,7 @@ const processFile = (inputFilename, outputFilename) => {
                 sectionType: "SPEAKING",
                 title: "Speaking",
                 displayOrder: 4,
-                durationSeconds: totalDuration > 0 ? totalDuration : 900, // ~15 mins
+                durationSeconds: totalDuration > 0 ? totalDuration : 900, // .15 mins
                 instructions: "This section contains 3 parts.",
                 groups: newSpeakingGroups
             });

@@ -47,7 +47,9 @@ const metadataPath = path.join(cacheDir, 'cache_metadata.json')
 // =======================================================================
 export async function saveCachedWordsToDB() {
   console.log('💾 Saving cached words into database...')
-
+console.log('CWD:', process.cwd())
+console.log('CACHE PATH:', cachePath)
+console.log('CACHE EXISTS:', fs.existsSync(cachePath))
   if (!fs.existsSync(cachePath)) {
     throw new Error('❌ Cache file not found. Run caching phase first!')
   }

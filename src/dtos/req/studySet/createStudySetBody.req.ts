@@ -1,4 +1,3 @@
-import { StudySetStatus } from '~/enums/studySetStatus.enum'
 import { StudySetVisibility } from '~/enums/studySetVisibility.enum'
 import { QuizType } from '~/enums/quizType.enum'
 

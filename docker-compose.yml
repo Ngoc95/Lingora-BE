@@ -1,0 +1,60 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: lingora-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: lingora
+      POSTGRES_USER: lingora
+      POSTGRES_PASSWORD: lingora
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lingora"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.express
+      target: development
+    container_name: lingora-backend
+    volumes:
+      - ./src:/app/src
+      - ./cache:/app/cache
+      - ./package.json:/app/package.json
+      - ./tsconfig.json:/app/tsconfig.json
+      - .env:/app/.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      - AI_SERVICE_URL=http://ai-service:8000
+    ports:
+      - "4000:4000"
+
+  ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile.ai
+      target: development
+    container_name: lingora-ai-service
+    env_file:
+      - ./ai-service/.env
+    volumes:
+      - ./ai-service/src:/app/src
+      - ./ai-service/chroma_db_store:/app/chroma_db_store
+      - ./ai-service/data:/app/data
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+volumes:
+  pgdata:

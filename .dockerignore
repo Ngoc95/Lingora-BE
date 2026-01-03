@@ -1,0 +1,12 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+tests
+*.md
+Dockerfile
+docker-compose*.yml
+.dockerignore
+# Huge directories that backend doesn't need
+ai-service
+docs

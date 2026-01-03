@@ -16,7 +16,7 @@ import {
   ExamQuestionType,
   ExamSectionType,
   ExamType,
-} from "~/enums/exam.enum";
+} from '~/enums/exam.enum';
 
 export class ImportExamQuestionReq {
   @IsEnum(ExamQuestionType)

@@ -12,7 +12,6 @@ import { RoleName } from '~/enums/role.enum'
 import { GetAllPostsQueryReq } from '~/dtos/req/post/getAllPostsQuery.req'
 import validator from 'validator'
 import { PostStatus } from '~/enums/postStatus.enum'
-import { PostTopic } from '~/enums/postTopic.enum'
 
 class PostService {
     getPostById = async (userId: number, id: number) => {

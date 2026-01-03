@@ -1,0 +1,57 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: lingora-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: lingora
+      POSTGRES_USER: lingora
+      POSTGRES_PASSWORD: lingora
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lingora"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.express
+      target: production
+    container_name: lingora-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      - AI_SERVICE_URL=http://ai-service:8000
+    ports:
+      - "4000:4000"
+    restart: always
+    volumes:
+      - ./cache:/app/cache
+
+  ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile.ai
+      target: production
+      args:
+        OPENAI_API_KEY: ${OPENAI_API_KEY}
+        GRAMMAR_PDF_URL: ${GRAMMAR_PDF_URL}
+        VOCAB_PDF_URL: ${VOCAB_PDF_URL}
+    container_name: lingora-ai-service
+    env_file:
+      - ./ai-service/.env
+    volumes:
+      - ./ai-service/data:/app/data
+    ports:
+      - "8000:8000"
+    restart: always
+
+volumes:
+  pgdata:

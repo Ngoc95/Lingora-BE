@@ -7,7 +7,7 @@ import { WordType } from "~/enums/wordType.enum"
 export const updateWordValidation = validate(
     checkSchema(
         {
-            word: {
+            word: { 
                 trim: true,
                 matches: {
                     options: /^[a-zA-Z\s]+$/,

@@ -203,15 +203,15 @@ class DashboardService {
             .getCount()
 
         return {
-            growth: growthData.map(d => ({
+            growth: growthData.map((d: { date: any; count: any }) => ({
                 date: d.date,
                 count: Number(d.count)
             })),
-            byProficiency: proficiencyData.map(d => ({
+            byProficiency: proficiencyData.map((d: { proficiency: any; count: any }) => ({
                 proficiency: d.proficiency || 'NOT_SET',
                 count: Number(d.count)
             })),
-            byStatus: statusData.map(d => ({
+            byStatus: statusData.map((d: { status: any; count: any }) => ({
                 status: d.status,
                 count: Number(d.count)
             })),
@@ -305,13 +305,13 @@ class DashboardService {
 
         // Merge trends by date
         const trendMap = new Map<string, { wordsLearned: number; topicsCompleted: number }>()
-        learningTrend.forEach(item => {
+        learningTrend.forEach((item: { date: string; words_learned: any }) => {
             trendMap.set(item.date, { 
                 wordsLearned: Number(item.words_learned), 
                 topicsCompleted: 0 
             })
         })
-        topicsCompletedTrend.forEach(item => {
+        topicsCompletedTrend.forEach((item: { date: string; topics_completed: any }) => {
             const existing = trendMap.get(item.date) || { wordsLearned: 0, topicsCompleted: 0 }
             existing.topicsCompleted = Number(item.topics_completed)
             trendMap.set(item.date, existing)
@@ -326,7 +326,7 @@ class DashboardService {
                 total: totalCategories,
                 completedByUsers: completedCategories,
                 avgProgress: Number(avgCategoryProgress?.avg || 0).toFixed(1),
-                popular: popularCategories.map(c => ({
+                popular: popularCategories.map((c: { id: any; name: any; users_count: any; avg_progress: any }) => ({
                     id: c.id,
                     name: c.name,
                     usersCount: Number(c.users_count),
@@ -336,7 +336,7 @@ class DashboardService {
             topics: {
                 total: totalTopics,
                 completedByUsers: completedTopics,
-                popular: popularTopics.map(t => ({
+                popular: popularTopics.map((t: { id: any; name: any; users_count: any }) => ({
                     id: t.id,
                     name: t.name,
                     usersCount: Number(t.users_count)
@@ -399,7 +399,7 @@ class DashboardService {
             .getRawMany()
 
         return {
-            trend: revenueTrend.map(r => ({
+            trend: revenueTrend.map((r: { month: any; revenue: any; transactions: any }) => ({
                 month: r.month,
                 revenue: Number(r.revenue || 0),
                 transactions: Number(r.transactions)
@@ -411,7 +411,7 @@ class DashboardService {
                 failed: failedTx,
                 successRate: totalTx > 0 ? Math.round((successTx / totalTx) * 100) : 0
             },
-            topSelling: topSelling.map(s => ({
+            topSelling: topSelling.map((s: { id: any; title: any; price: any; owner_username: any; sales: any; revenue: any }) => ({
                 id: s.id,
                 title: s.title,
                 price: Number(s.price),
@@ -487,7 +487,7 @@ class DashboardService {
         let totalTime = 0
         let scoreCount = 0
 
-        completedAttemptsWithScores.forEach(attempt => {
+        completedAttemptsWithScores.forEach((attempt: { score_summary: string }) => {
             try {
                 const summary = typeof attempt.score_summary === 'string' 
                     ? JSON.parse(attempt.score_summary) 
@@ -531,11 +531,11 @@ class DashboardService {
                     ? Math.round((completedAttempts / totalAttempts) * 100) 
                     : 0
             },
-            trend: attemptsTrend.map(t => ({
+            trend: attemptsTrend.map((t: { date: any; attempts: any }) => ({
                 date: t.date,
                 attempts: Number(t.attempts)
             })),
-            examPerformance: examPerformance.map(e => ({
+            examPerformance: examPerformance.map((e: { exam_id: any; title: any; code: any; attempts: any; completed: any }) => ({
                 examId: e.exam_id,
                 title: e.title,
                 code: e.code,
@@ -592,7 +592,7 @@ class DashboardService {
             .limit(5)
             .getMany()
 
-        recentPurchases.forEach(tx => {
+        recentPurchases.forEach(tx=> {
             activities.push({
                 type: 'PURCHASE',
                 timestamp: tx.createdAt,

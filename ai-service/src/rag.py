@@ -1,6 +1,5 @@
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_chroma import Chroma
-from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_tavily import TavilySearch
 from langchain_core.tools import tool
 from langchain_classic.agents import create_openai_tools_agent, AgentExecutor

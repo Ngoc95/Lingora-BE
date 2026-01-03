@@ -7,7 +7,6 @@ import { updateWithdrawalValidation } from '~/middlewares/withdrawal/updateWithd
 import { wrapRequestHandler } from '~/utils/handler'
 import { WithdrawalRequest } from '~/entities/withdrawalRequest.entity'
 import { Resource } from '~/enums/resource.enum'
-import { RoleName } from '~/enums/role.enum'
 
 const withdrawalRouter = Router()
 

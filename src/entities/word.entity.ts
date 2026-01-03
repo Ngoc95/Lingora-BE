@@ -1,4 +1,4 @@
-import { BaseEntity, Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { BaseEntity, Column, CreateDateColumn, DeleteDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Topic } from "./topic.entity";
 import { CefrLevel } from "~/enums/cefrLevel.enum";
 import { WordType } from "~/enums/wordType.enum";

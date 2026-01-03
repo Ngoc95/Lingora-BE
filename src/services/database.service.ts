@@ -17,6 +17,9 @@ export class DatabaseService {
       entities: [__dirname + '/../entities/**/*.{ts,js}'],
       synchronize: false,
       logging: false,
+      ssl: env.DB_HOST !== 'localhost' && env.DB_HOST !== 'postgres'
+        ? { rejectUnauthorized: false }
+        : false,
     })
   }
 
