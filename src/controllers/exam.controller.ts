@@ -1,13 +1,13 @@
 import { Request, Response } from "express";
-import { CREATED, SuccessResponse } from "../core/success.response";
-import { examService } from "../services/exam.service";
-import { ExamType } from "../enums/exam.enum";
-import { GetExamListQueryReq } from "../dtos/req/exam/getExamListQuery.req";
-import { StartExamAttemptBodyReq } from "../dtos/req/exam/startExamAttemptBody.req";
-import { SubmitExamSectionBodyReq } from "../dtos/req/exam/submitExamSectionBody.req";
-import { ImportExamBodyReq, ImportExamBulkBodyReq } from "../dtos/req/exam/importExamBody.req";
-import { UpdateExamBodyReq } from "../dtos/req/exam/updateExamBody.req";
-import { AdminGetExamAttemptsQueryReq } from "../dtos/req/exam/adminGetExamAttemptsQuery.req";
+import { CREATED, SuccessResponse } from "~/core/success.response";
+import { examService } from "~/services/exam.service";
+import { ExamType } from "~/enums/exam.enum";
+import { GetExamListQueryReq } from "~/dtos/req/exam/getExamListQuery.req";
+import { StartExamAttemptBodyReq } from "~/dtos/req/exam/startExamAttemptBody.req";
+import { SubmitExamSectionBodyReq } from "~/dtos/req/exam/submitExamSectionBody.req";
+import { ImportExamBodyReq, ImportExamBulkBodyReq } from "~/dtos/req/exam/importExamBody.req";
+import { UpdateExamBodyReq } from "~/dtos/req/exam/updateExamBody.req";
+import { AdminGetExamAttemptsQueryReq } from "~/dtos/req/exam/adminGetExamAttemptsQuery.req";
 
 class ExamController {
   listExams = async (req: Request, res: Response) => {

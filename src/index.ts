@@ -1,3 +1,4 @@
+import 'module-alias/register'
 import { DatabaseService } from './services/database.service'
 import { seedInitialData } from './seeds/seed'
 import app from './app'

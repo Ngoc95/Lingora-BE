@@ -1,22 +1,22 @@
 import jwt from "jsonwebtoken";
 import bcrypt from 'bcrypt';
-import { Regex } from "../constants/regex";
+import { Regex } from "~/constants/regex";
 import { validate } from "./validation.middlewares";
 import { checkSchema } from "express-validator";
-import { DatabaseService } from "../services/database.service";
-import { AuthRequestError, BadRequestError, ForbiddenRequestError } from "../core/error.response";
-import { User } from "../entities/user.entity";
-import { verifyToken } from "../utils/jwt";
-import { env } from "../config/env";
-import { RefreshToken } from "../entities/token.entity";
+import { DatabaseService } from "~/services/database.service";
+import { AuthRequestError, BadRequestError, ForbiddenRequestError } from "~/core/error.response";
+import { User } from "~/entities/user.entity";
+import { verifyToken } from "~/utils/jwt";
+import { env } from "~/config/env";
+import { RefreshToken } from "~/entities/token.entity";
 import { Permission, Query } from "accesscontrol";
 import { Request, Response, NextFunction } from 'express';
-import ac from "../permissions/accessControl";
-import { checkDuplicateUser, checkRolesExistence, checkUserExistence } from "../utils/validators";
+import ac from "~/permissions/accessControl";
+import { checkDuplicateUser, checkRolesExistence, checkUserExistence } from "~/utils/validators";
 import { isEmail, isPassword, isRequired, isUsername } from "./common.middlewares";
 import validator from "validator";
-import { VerificationToken } from "../entities/verificationToken.entity";
-import { TokenType } from "../enums/tokenType.enum";
+import { VerificationToken } from "~/entities/verificationToken.entity";
+import { TokenType } from "~/enums/tokenType.enum";
 
 // Helper function to validate user status (BANNED/SUSPENDED/DELETED)
 async function validateUserStatus(user: User): Promise<void> {

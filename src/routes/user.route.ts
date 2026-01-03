@@ -1,12 +1,12 @@
 import { Router } from "express";
-import { userController } from "../controllers/user.controller";
-import { User } from "../entities/user.entity";
-import { Resource } from "../enums/resource.enum";
-import { accessTokenValidation, checkPermission } from "../middlewares/auth.middlewares";
-import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from "../middlewares/common.middlewares";
-import { createUserValidation } from "../middlewares/user/createUser.middlewares";
-import { updateUserByIdValidation } from "../middlewares/user/updateUser.middleware";
-import { wrapRequestHandler } from "../utils/handler";
+import { userController } from "~/controllers/user.controller";
+import { User } from "~/entities/user.entity";
+import { Resource } from "~/enums/resource.enum";
+import { accessTokenValidation, checkPermission } from "~/middlewares/auth.middlewares";
+import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from "~/middlewares/common.middlewares";
+import { createUserValidation } from "~/middlewares/user/createUser.middlewares";
+import { updateUserByIdValidation } from "~/middlewares/user/updateUser.middleware";
+import { wrapRequestHandler } from "~/utils/handler";
 
 const userRouter = Router();
 

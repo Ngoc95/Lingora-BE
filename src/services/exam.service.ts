@@ -1,40 +1,40 @@
 import { DeepPartial, In, EntityManager } from "typeorm";
 import { DatabaseService } from "./database.service";
-import { Exam } from "../entities/exam.entity";
-import { ExamSection } from "../entities/examSection.entity";
-import { ExamSectionGroup } from "../entities/examSectionGroup.entity";
-import { ExamQuestionGroup } from "../entities/examQuestionGroup.entity";
-import { ExamQuestion } from "../entities/examQuestion.entity";
-import { ExamAttempt } from "../entities/examAttempt.entity";
-import { ExamAttemptAnswer } from "../entities/examAttemptAnswer.entity";
+import { Exam } from "~/entities/exam.entity";
+import { ExamSection } from "~/entities/examSection.entity";
+import { ExamSectionGroup } from "~/entities/examSectionGroup.entity";
+import { ExamQuestionGroup } from "~/entities/examQuestionGroup.entity";
+import { ExamQuestion } from "~/entities/examQuestion.entity";
+import { ExamAttempt } from "~/entities/examAttempt.entity";
+import { ExamAttemptAnswer } from "~/entities/examAttemptAnswer.entity";
 import {
   ExamAttemptStatus,
   ExamMode,
   ExamSectionType,
   ExamType,
   ExamQuestionType,
-} from "../enums/exam.enum";
-import { aiService } from "../services/ai.service";
-import { BadRequestError, NotFoundRequestError } from "../core/error.response";
-import { StartExamAttemptBodyReq } from "../dtos/req/exam/startExamAttemptBody.req";
-import { SubmitExamSectionBodyReq } from "../dtos/req/exam/submitExamSectionBody.req";
+} from "~/enums/exam.enum";
+import { aiService } from "~/services/ai.service";
+import { BadRequestError, NotFoundRequestError } from "~/core/error.response";
+import { StartExamAttemptBodyReq } from "~/dtos/req/exam/startExamAttemptBody.req";
+import { SubmitExamSectionBodyReq } from "~/dtos/req/exam/submitExamSectionBody.req";
 import {
   ImportExamBodyReq,
   ImportExamSectionGroupReq,
   ImportExamQuestionGroupReq,
   ImportExamSectionReq,
   ImportExamBulkBodyReq,
-} from "../dtos/req/exam/importExamBody.req";
-import { GetExamListQueryReq } from "../dtos/req/exam/getExamListQuery.req";
-import { UpdateExamBodyReq } from "../dtos/req/exam/updateExamBody.req";
-import { AdminGetExamAttemptsQueryReq } from "../dtos/req/exam/adminGetExamAttemptsQuery.req";
+} from "~/dtos/req/exam/importExamBody.req";
+import { GetExamListQueryReq } from "~/dtos/req/exam/getExamListQuery.req";
+import { UpdateExamBodyReq } from "~/dtos/req/exam/updateExamBody.req";
+import { AdminGetExamAttemptsQueryReq } from "~/dtos/req/exam/adminGetExamAttemptsQuery.req";
 import {
   DEFAULT_SECTION_SCORE_KEY,
   IELTS_LISTENING_BAND_TABLE,
   IELTS_READING_ACADEMIC_BAND_TABLE,
   IELTS_READING_GENERAL_BAND_TABLE,
   computeBandFromTable,
-} from "../constants/exam";
+} from "~/constants/exam";
 
 const DEFAULT_LIMIT = 10;
 

@@ -7,7 +7,7 @@ import {
     PrimaryGeneratedColumn,
     UpdateDateColumn
 } from 'typeorm'
-import { NotificationTarget, NotificationType } from '../enums/notification.enum'
+import { NotificationTarget, NotificationType } from '~/enums/notification.enum'
 
 @Entity()
 export class Notification extends BaseEntity {

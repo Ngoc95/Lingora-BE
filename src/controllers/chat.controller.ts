@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
 import { ParamsDictionary } from "express-serve-static-core";
-import { SuccessResponse } from "../core/success.response";
-import { SendChatMessageBodyReq } from "../dtos/req/chat/sendChatMessageBody.req";
-import { ChatMessage } from "../entities/chatMessage.entity";
-import { ChatSession } from "../entities/chatSession.entity";
-import { chatService } from "../services/chat.service";
-import { User } from "../entities/user.entity";
+import { SuccessResponse } from "~/core/success.response";
+import { SendChatMessageBodyReq } from "~/dtos/req/chat/sendChatMessageBody.req";
+import { ChatMessage } from "~/entities/chatMessage.entity";
+import { ChatSession } from "~/entities/chatSession.entity";
+import { chatService } from "~/services/chat.service";
+import { User } from "~/entities/user.entity";
 
 class ChatController {
   private serializeMessage(message: ChatMessage) {

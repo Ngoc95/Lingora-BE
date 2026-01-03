@@ -1,6 +1,6 @@
 import { checkSchema } from 'express-validator'
-import { Category } from '../../entities/category.entity'
-import { BadRequestError } from '../../core/error.response'
+import { Category } from '~/entities/category.entity'
+import { BadRequestError } from '~/core/error.response'
 import { validate } from '../validation.middlewares'
 
 export const getCategoryProgressValidation = validate(

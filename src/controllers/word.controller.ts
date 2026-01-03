@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
-import { CREATED, SuccessResponse } from '../core/success.response'
-import { wordService } from '../services/word.service'
-import { BadRequestError } from '../core/error.response'
+import { CREATED, SuccessResponse } from '~/core/success.response'
+import { wordService } from '~/services/word.service'
+import { BadRequestError } from '~/core/error.response'
 
 class WordController {
     createWord = async (req: Request, res: Response) => {

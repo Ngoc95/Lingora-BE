@@ -1,12 +1,12 @@
 import { Router } from "express";
-import { reportController } from "../controllers/report.controller";
-import { Resource } from "../enums/resource.enum";
-import { accessTokenValidation, checkPermission } from "../middlewares/auth.middlewares";
-import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from "../middlewares/common.middlewares";
-import { createReportValidation } from "../middlewares/report/createReport.middlewares";
-import { updateReportStatusValidation } from "../middlewares/report/updateReportStatus.middlewares";
-import { handleReportValidation } from "../middlewares/report/handleReport.middlewares";
-import { wrapRequestHandler } from "../utils/handler";
+import { reportController } from "~/controllers/report.controller";
+import { Resource } from "~/enums/resource.enum";
+import { accessTokenValidation, checkPermission } from "~/middlewares/auth.middlewares";
+import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from "~/middlewares/common.middlewares";
+import { createReportValidation } from "~/middlewares/report/createReport.middlewares";
+import { updateReportStatusValidation } from "~/middlewares/report/updateReportStatus.middlewares";
+import { handleReportValidation } from "~/middlewares/report/handleReport.middlewares";
+import { wrapRequestHandler } from "~/utils/handler";
 
 const reportRouter = Router();
 

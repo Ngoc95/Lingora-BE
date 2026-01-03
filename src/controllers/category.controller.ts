@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
-import { CREATED, SuccessResponse } from '../core/success.response'
-import { categoryService } from '../services/category.service'
+import { CREATED, SuccessResponse } from '~/core/success.response'
+import { categoryService } from '~/services/category.service'
 
 class CategoryController {
     createCategory = async (req: Request, res: Response) => {

@@ -1,7 +1,7 @@
 import { checkSchema } from "express-validator"
 import { validate } from "../validation.middlewares"
-import { BadRequestError } from "../../core/error.response"
-import { Topic } from "../../entities/topic.entity"
+import { BadRequestError } from "~/core/error.response"
+import { Topic } from "~/entities/topic.entity"
 import { isRequired } from "../common.middlewares"
 
 export const getWordsForStudyValidation = validate(

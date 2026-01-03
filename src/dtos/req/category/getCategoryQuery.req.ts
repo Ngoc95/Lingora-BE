@@ -1,5 +1,5 @@
 import { FindOptionsOrder } from "typeorm"
-import { Topic } from "../../../entities/topic.entity"
+import { Topic } from "~/entities/topic.entity"
 
 export interface GetCategoryQueryReq {
     page?: number

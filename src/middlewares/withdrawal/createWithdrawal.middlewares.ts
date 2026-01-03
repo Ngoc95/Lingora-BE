@@ -1,7 +1,7 @@
 import { checkSchema } from 'express-validator'
 import { validate } from '../validation.middlewares'
 import { isRequired } from '../common.middlewares'
-import { BadRequestError } from '../../core/error.response'
+import { BadRequestError } from '~/core/error.response'
 
 const MIN_WITHDRAWAL_AMOUNT = 50000 // 50,000 VND
 const MAX_WITHDRAWAL_AMOUNT = 50000000 // 50,000,000 VND

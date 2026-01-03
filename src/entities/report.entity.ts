@@ -1,8 +1,8 @@
 import { BaseEntity, Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "./user.entity";
-import { TargetType } from "../enums/targetType.enum";
-import { ReportStatus } from "../enums/reportStatus.enum";
-import { ReportType } from "../enums/reportType.enum";
+import { TargetType } from "~/enums/targetType.enum";
+import { ReportStatus } from "~/enums/reportStatus.enum";
+import { ReportType } from "~/enums/reportType.enum";
 
 @Entity()
 export class Report extends BaseEntity {

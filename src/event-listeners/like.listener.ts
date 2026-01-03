@@ -1,13 +1,13 @@
-import { sendMessage } from '../sockets'
-import { EVENTS } from '../events-handler/constants'
-import { User } from '../entities/user.entity'
-import { TargetType } from '../enums/targetType.enum'
-import eventBus from '../events-handler/eventBus'
-import { NotificationTarget, NotificationType } from '../enums/notification.enum'
-import { notificationService } from '../services/notification.service'
-import { Post } from '../entities/post.entity'
-import { Comment } from '../entities/comment.entity'
-import { StudySet } from '../entities/studySet.entity'
+import { sendMessage } from '~/sockets'
+import { EVENTS } from '~/events-handler/constants'
+import { User } from '~/entities/user.entity'
+import { TargetType } from '~/enums/targetType.enum'
+import eventBus from '~/events-handler/eventBus'
+import { NotificationTarget, NotificationType } from '~/enums/notification.enum'
+import { notificationService } from '~/services/notification.service'
+import { Post } from '~/entities/post.entity'
+import { Comment } from '~/entities/comment.entity'
+import { StudySet } from '~/entities/studySet.entity'
 
 eventBus.on(
     EVENTS.LIKE,

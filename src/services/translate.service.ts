@@ -1,6 +1,6 @@
-import { TranslatePhraseBodyReq } from "../dtos/req/translate/translatePhraseBody.req"
-import { BadRequestError } from "../core/error.response"
-import { env } from "../config/env"
+import { TranslatePhraseBodyReq } from "~/dtos/req/translate/translatePhraseBody.req"
+import { BadRequestError } from "~/core/error.response"
+import { env } from "~/config/env"
 import axios from "axios"
 
 // Google Translate API loader

@@ -10,8 +10,8 @@ import {
 import { User } from './user.entity'
 import { StudySet } from './studySet.entity'
 import { RevenueSplit } from './revenueSplit.entity'
-import { TransactionStatus } from '../enums/transactionStatus.enum'
-import { PaymentMethod } from '../enums/paymentMethod.enum'
+import { TransactionStatus } from '~/enums/transactionStatus.enum'
+import { PaymentMethod } from '~/enums/paymentMethod.enum'
 
 @Entity()
 export class Transaction extends BaseEntity {

@@ -1,9 +1,9 @@
-import adaptiveQuestions from '../data/adaptiveTestQuestions.json'
-import { BadRequestError } from '../core/error.response'
-import { ProficiencyLevel } from '../enums/proficiency.enum'
+import adaptiveQuestions from '~/data/adaptiveTestQuestions.json'
+import { BadRequestError } from '~/core/error.response'
+import { ProficiencyLevel } from '~/enums/proficiency.enum'
 import { DatabaseService } from './database.service'
-import { User } from '../entities/user.entity'
-import { DEFAULT_LEVEL, MAX_QUESTIONS } from '../constants/adaptiveTest'
+import { User } from '~/entities/user.entity'
+import { DEFAULT_LEVEL, MAX_QUESTIONS } from '~/constants/adaptiveTest'
 
 export interface AdaptiveQuestion {
   id: number

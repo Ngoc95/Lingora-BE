@@ -1,6 +1,6 @@
-import { Role } from "../entities/role.entity"
-import { RoleName } from "../enums/role.enum"
-import { DatabaseService } from "../services/database.service"
+import { Role } from "~/entities/role.entity"
+import { RoleName } from "~/enums/role.enum"
+import { DatabaseService } from "~/services/database.service"
 
 export async function seedRole() {
     const roleRepository = await DatabaseService.getInstance().getRepository(Role)

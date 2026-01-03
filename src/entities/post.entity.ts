@@ -9,8 +9,8 @@ import {
     UpdateDateColumn
 } from 'typeorm'
 import { User } from './user.entity'
-import { PostStatus } from '../enums/postStatus.enum'
-import { PostTopic } from '../enums/postTopic.enum'
+import { PostStatus } from '~/enums/postStatus.enum'
+import { PostTopic } from '~/enums/postTopic.enum'
 
 @Entity()
 export class Post extends BaseEntity {

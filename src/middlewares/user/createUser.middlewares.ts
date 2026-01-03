@@ -1,9 +1,9 @@
 import { isEmail, isPassword, isRequired, isUsername } from "../common.middlewares"
-import { BadRequestError } from "../../core/error.response"
-import { ProficiencyLevel } from "../../enums/proficiency.enum"
+import { BadRequestError } from "~/core/error.response"
+import { ProficiencyLevel } from "~/enums/proficiency.enum"
 import { checkSchema } from "express-validator"
 import { validate } from "../validation.middlewares"
-import { checkDuplicateUser, checkRolesExistence } from "../../utils/validators"
+import { checkDuplicateUser, checkRolesExistence } from "~/utils/validators"
 
 export const createUserValidation = validate(
     checkSchema(

@@ -28,6 +28,7 @@ export const env = {
   AI_SERVICE_TIMEOUT_MS: Number(process.env.AI_SERVICE_TIMEOUT_MS) || 15000,
 
   BASE_URL: process.env.BASE_URL || "http://localhost:4000",
+  FRONTEND_URL: process.env.FRONTEND_URL || "http://localhost:5173",
 
   // Dictionary settings
   DICTIONARY_API_BASE_URL: process.env.DICTIONARY_API_BASE_URL || "https://api.dictionaryapi.dev/api/v2/entries",

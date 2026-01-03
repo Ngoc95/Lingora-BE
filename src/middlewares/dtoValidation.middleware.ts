@@ -1,7 +1,7 @@
 import { plainToInstance } from "class-transformer";
 import { validate, ValidationError } from "class-validator";
 import { Request, Response, NextFunction } from "express";
-import { BadRequestError } from "../core/error.response";
+import { BadRequestError } from "~/core/error.response";
 
 export const dtoValidation = (
   type: any,

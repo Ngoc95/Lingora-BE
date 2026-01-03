@@ -1,12 +1,12 @@
 import { Router } from 'express'
-import { withdrawalController } from '../controllers/withdrawal.controller'
-import { accessTokenValidation, checkPermission } from '../middlewares/auth.middlewares'
-import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from '../middlewares/common.middlewares'
-import { createWithdrawalValidation } from '../middlewares/withdrawal/createWithdrawal.middlewares'
-import { updateWithdrawalValidation } from '../middlewares/withdrawal/updateWithdrawal.middlewares'
-import { wrapRequestHandler } from '../utils/handler'
-import { WithdrawalRequest } from '../entities/withdrawalRequest.entity'
-import { Resource } from '../enums/resource.enum'
+import { withdrawalController } from '~/controllers/withdrawal.controller'
+import { accessTokenValidation, checkPermission } from '~/middlewares/auth.middlewares'
+import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from '~/middlewares/common.middlewares'
+import { createWithdrawalValidation } from '~/middlewares/withdrawal/createWithdrawal.middlewares'
+import { updateWithdrawalValidation } from '~/middlewares/withdrawal/updateWithdrawal.middlewares'
+import { wrapRequestHandler } from '~/utils/handler'
+import { WithdrawalRequest } from '~/entities/withdrawalRequest.entity'
+import { Resource } from '~/enums/resource.enum'
 
 const withdrawalRouter = Router()
 

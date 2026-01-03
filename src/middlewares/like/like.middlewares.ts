@@ -1,6 +1,6 @@
-import { BadRequestError } from "../../core/error.response"
+import { BadRequestError } from "~/core/error.response"
 import { NextFunction, Request, Response } from 'express'
-import { TargetType } from "../../enums/targetType.enum"
+import { TargetType } from "~/enums/targetType.enum"
 
 export const validateTargetType = (req: Request, res: Response, next: NextFunction) => {
     const targetType = req.query?.targetType as TargetType

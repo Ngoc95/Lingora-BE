@@ -1,6 +1,6 @@
 import { Repository, ObjectLiteral, DataSource } from 'typeorm'
 
-import { env } from '../config/env';
+import { env } from '~/config/env';
 
 export class DatabaseService {
   private static instance: DatabaseService

@@ -1,13 +1,13 @@
 import { Request, Response } from 'express'
 import { ParamsDictionary } from 'express-serve-static-core'
-import { CREATED, SuccessResponse } from '../core/success.response'
-import { CreatePostBodyReq } from '../dtos/req/post/createPostBody.req'
-import { UpdatePostBodyReq } from '../dtos/req/post/updatePostBody.req'
-import { User } from '../entities/user.entity'
-import { postService } from '../services/post.service'
-import { GetAllPostsQueryReq } from '../dtos/req/post/getAllPostsQuery.req'
-import { PostTopic } from '../enums/postTopic.enum'
-import { PostStatus } from '../enums/postStatus.enum'
+import { CREATED, SuccessResponse } from '~/core/success.response'
+import { CreatePostBodyReq } from '~/dtos/req/post/createPostBody.req'
+import { UpdatePostBodyReq } from '~/dtos/req/post/updatePostBody.req'
+import { User } from '~/entities/user.entity'
+import { postService } from '~/services/post.service'
+import { GetAllPostsQueryReq } from '~/dtos/req/post/getAllPostsQuery.req'
+import { PostTopic } from '~/enums/postTopic.enum'
+import { PostStatus } from '~/enums/postStatus.enum'
 
 class PostController {
     getById = async (req: Request, res: Response) => {

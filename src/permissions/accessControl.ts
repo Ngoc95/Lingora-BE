@@ -1,6 +1,6 @@
 import { AccessControl } from "accesscontrol";
-import { Resource } from "../enums/resource.enum";
-import { RoleName } from "../enums/role.enum";
+import { Resource } from "~/enums/resource.enum";
+import { RoleName } from "~/enums/role.enum";
 
 const ac = new AccessControl();
 

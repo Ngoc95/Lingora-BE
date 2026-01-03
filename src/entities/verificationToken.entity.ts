@@ -9,7 +9,7 @@ import {
 } from 'typeorm'
 import { User } from './user.entity'
 import { IsNotEmpty } from 'class-validator'
-import { TokenType } from '../enums/tokenType.enum'
+import { TokenType } from '~/enums/tokenType.enum'
 
 @Entity()
 export class VerificationToken extends BaseEntity {

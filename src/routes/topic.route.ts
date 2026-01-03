@@ -1,14 +1,14 @@
 import { Router } from "express";
-import { topicController } from "../controllers/topic.controller";
-import { Topic } from "../entities/topic.entity";
-import { Word } from "../entities/word.entity";
-import { Resource } from "../enums/resource.enum";
-import { accessTokenValidation, checkPermission } from "../middlewares/auth.middlewares";
-import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from "../middlewares/common.middlewares";
-import { createTopicValidation } from "../middlewares/topic/createTopic.middlewares";
-import { updateTopicValidation } from "../middlewares/topic/updateTopic.middlewares";
+import { topicController } from "~/controllers/topic.controller";
+import { Topic } from "~/entities/topic.entity";
+import { Word } from "~/entities/word.entity";
+import { Resource } from "~/enums/resource.enum";
+import { accessTokenValidation, checkPermission } from "~/middlewares/auth.middlewares";
+import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from "~/middlewares/common.middlewares";
+import { createTopicValidation } from "~/middlewares/topic/createTopic.middlewares";
+import { updateTopicValidation } from "~/middlewares/topic/updateTopic.middlewares";
 
-import { wrapRequestHandler } from "../utils/handler";
+import { wrapRequestHandler } from "~/utils/handler";
 
 const topicRouter = Router();
 

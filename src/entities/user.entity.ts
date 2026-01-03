@@ -12,9 +12,9 @@ import {
 import { Role } from "./role.entity";
 import { RefreshToken } from "./token.entity";
 import { IsEmail, IsNotEmpty, Length, Matches } from "class-validator";
-import { Regex } from "../constants/regex";
-import { UserStatus } from "../enums/userStatus.enum";
-import { ProficiencyLevel } from "../enums/proficiency.enum";
+import { Regex } from "~/constants/regex";
+import { UserStatus } from "~/enums/userStatus.enum";
+import { ProficiencyLevel } from "~/enums/proficiency.enum";
 import { UserCategoryProgress } from "./userCategoryProgress.entity";
 import { UserTopicProgress } from "./userTopicProgress.entity";
 import { UserWordProgress } from "./userWordProgress.entity";

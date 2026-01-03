@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
-import { CREATED } from '../core/success.response'
-import { User } from '../entities/user.entity'
-import { notificationService } from '../services/notification.service'
+import { CREATED } from '~/core/success.response'
+import { User } from '~/entities/user.entity'
+import { notificationService } from '~/services/notification.service'
 
 class NotificationController {
   getAllNotifications = async (req: Request, res: Response) => {

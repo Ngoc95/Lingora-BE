@@ -1,6 +1,6 @@
 import { BaseEntity, Column, CreateDateColumn, DeleteDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { User } from "./user.entity";
-import { TargetType } from "../enums/targetType.enum";
+import { TargetType } from "~/enums/targetType.enum";
 
 @Entity()
 @Index(['createdBy', 'targetId', 'targetType'], { unique: true })

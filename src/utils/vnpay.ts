@@ -1,4 +1,4 @@
-import { env } from '../config/env';
+import { env } from '~/config/env';
 import { VNPay, ignoreLogger, VnpLocale, ProductCode, dateFormat, HashAlgorithm } from 'vnpay'
 
 const vnpay = new VNPay({

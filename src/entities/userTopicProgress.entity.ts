@@ -1,7 +1,7 @@
 import { BaseEntity, Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm";
 import { User } from "./user.entity";
 import { Topic } from "./topic.entity";
-import { ProficiencyLevel } from "../enums/proficiency.enum";
+import { ProficiencyLevel } from "~/enums/proficiency.enum";
 
 @Entity()
 @Unique(['topic', 'user', 'proficiency'])

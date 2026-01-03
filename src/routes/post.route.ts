@@ -1,12 +1,12 @@
 import { Router } from "express";
-import { postController } from "../controllers/post.controller";
-import { Post } from "../entities/post.entity";
-import { Resource } from "../enums/resource.enum";
-import { accessTokenValidation, checkPermission } from "../middlewares/auth.middlewares";
-import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from "../middlewares/common.middlewares";
-import { createPostValidation } from "../middlewares/post/createPost.middlewares";
-import { updatePostValidation } from "../middlewares/post/updatePost.middlewares";
-import { wrapRequestHandler } from "../utils/handler";
+import { postController } from "~/controllers/post.controller";
+import { Post } from "~/entities/post.entity";
+import { Resource } from "~/enums/resource.enum";
+import { accessTokenValidation, checkPermission } from "~/middlewares/auth.middlewares";
+import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from "~/middlewares/common.middlewares";
+import { createPostValidation } from "~/middlewares/post/createPost.middlewares";
+import { updatePostValidation } from "~/middlewares/post/updatePost.middlewares";
+import { wrapRequestHandler } from "~/utils/handler";
 
 const postRouter = Router();
 

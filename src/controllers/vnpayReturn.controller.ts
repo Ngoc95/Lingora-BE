@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
-import { SuccessResponse } from '../core/success.response'
-import { BadRequestError } from '../core/error.response'
-import { vnpayReturnService } from '../services/vnpayReturn.service'
+import { SuccessResponse } from '~/core/success.response'
+import { BadRequestError } from '~/core/error.response'
+import { vnpayReturnService } from '~/services/vnpayReturn.service'
 
 class VNPayReturnController {
     /**

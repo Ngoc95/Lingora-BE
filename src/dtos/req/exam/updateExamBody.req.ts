@@ -1,4 +1,4 @@
-import { ExamType } from "../../../enums/exam.enum";
+import { ExamType } from '~/enums/exam.enum';
 
 export interface UpdateExamBodyReq {
   title?: string;

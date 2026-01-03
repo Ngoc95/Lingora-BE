@@ -1,6 +1,6 @@
 import { checkSchema } from "express-validator"
 import { validate } from "../validation.middlewares"
-import { BadRequestError } from "../../core/error.response"
+import { BadRequestError } from "~/core/error.response"
 
 export const updateTopicValidation = validate(
     checkSchema(

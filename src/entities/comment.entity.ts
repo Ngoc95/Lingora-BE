@@ -10,7 +10,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm'
-import { TargetType } from '../enums/targetType.enum'
+import { TargetType } from '~/enums/targetType.enum'
 
 @Entity()
 export class Comment extends BaseEntity {

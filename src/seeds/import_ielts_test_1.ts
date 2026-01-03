@@ -1,8 +1,8 @@
-import { DatabaseService } from '../services/database.service';
-import { examService } from '../services/exam.service';
-import { Exam } from '../entities/exam.entity';
-import ieltsTest1_data from '../data/IELTS_Test_1.json';
-import { ImportExamBodyReq } from '../dtos/req/exam/importExamBody.req';
+import { DatabaseService } from '~/services/database.service';
+import { examService } from '~/services/exam.service';
+import { Exam } from '~/entities/exam.entity';
+import ieltsTest1_data from '~/data/IELTS_Test_1.json';
+import { ImportExamBodyReq } from '~/dtos/req/exam/importExamBody.req';
 
 export async function seedIeltsTest1() {
   const db = DatabaseService.getInstance();

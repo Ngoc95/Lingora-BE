@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
-import { SuccessResponse } from '../core/success.response'
-import { AdaptiveTestProgressBodyReq } from '../dtos/req/adaptiveTest/getNextQuestionBody.req'
-import { adaptiveTestService } from '../services/adaptiveTest.service'
+import { SuccessResponse } from '~/core/success.response'
+import { AdaptiveTestProgressBodyReq } from '~/dtos/req/adaptiveTest/getNextQuestionBody.req'
+import { adaptiveTestService } from '~/services/adaptiveTest.service'
 
 class AdaptiveTestController {
   getQuestionBank = async (_req: Request, res: Response) => {

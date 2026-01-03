@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm'
-import { QuizType } from '../enums/quizType.enum'
+import { QuizType } from '~/enums/quizType.enum'
 import { StudySet } from './studySet.entity'
 
 @Entity()

@@ -12,7 +12,7 @@
     "migration:revert": "npx typeorm migration:revert -d src/config/data-source.ts"
   },
   "_moduleAliases": {
-    ".": "dist"
+    "~": "dist"
   },
   "keywords": [],
   "author": "",
@@ -39,6 +39,7 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
+    "module-alias": "^2.2.3",
     "morgan": "^1.10.1",
     "multer": "^2.0.2",
     "pg": "^8.16.3",

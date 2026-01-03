@@ -1,8 +1,8 @@
 import { Request, Response } from 'express'
-import { CREATED, SuccessResponse } from '../core/success.response'
-import { categoryProgressService } from '../services/userCategoryProgress.service'
-import { topicProgressService } from '../services/userTopicProgress.service'
-import { wordProgressService } from '../services/userWordProgress.service'
+import { CREATED, SuccessResponse } from '~/core/success.response'
+import { categoryProgressService } from '~/services/userCategoryProgress.service'
+import { topicProgressService } from '~/services/userTopicProgress.service'
+import { wordProgressService } from '~/services/userWordProgress.service'
 
 class UserProgressController {
     createManyWordProgress = async (req: Request, res: Response) => {

@@ -1,5 +1,5 @@
 import _, { toNumber } from 'lodash'
-import { User } from '../entities/user.entity'
+import { User } from '~/entities/user.entity'
 
 export const isValidNumber = (num: string) => !Number.isNaN(parseInt(num))
 

@@ -1,5 +1,5 @@
-import { User } from '../../../entities/user.entity'
-import { TargetType } from '../../../enums/targetType.enum'
+import { User } from '~/entities/user.entity'
+import { TargetType } from '~/enums/targetType.enum'
 
 export class CreateLikeBodyReq {
   user: User

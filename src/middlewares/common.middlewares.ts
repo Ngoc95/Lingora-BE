@@ -1,9 +1,9 @@
-import { BadRequestError } from "../core/error.response"
+import { BadRequestError } from "~/core/error.response"
 import { NextFunction, ParamsDictionary } from 'express-serve-static-core'
 import { Request, Response } from 'express'
-import { isValidNumber, toNumberWithDefaultValue } from "../utils"
+import { isValidNumber, toNumberWithDefaultValue } from "~/utils"
 import { isEmpty } from "lodash"
-import { PASSWORD_VALIDATION_OPTIONS } from "../constants/auth"
+import { PASSWORD_VALIDATION_OPTIONS } from "~/constants/auth"
 
 export const checkIdParamMiddleware = (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
     if (req.params?.id && !isValidNumber(req.params?.id)) {

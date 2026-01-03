@@ -1,7 +1,7 @@
 import { BaseEntity, Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm";
 import { User } from "./user.entity";
 import { Word } from "./word.entity";
-import { WordStatus } from "../enums/wordStatus.enum";
+import { WordStatus } from "~/enums/wordStatus.enum";
 
 @Entity()
 @Unique(['word', 'user'])

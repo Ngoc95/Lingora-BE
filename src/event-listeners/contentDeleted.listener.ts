@@ -1,9 +1,9 @@
-import { sendMessage } from '../sockets'
-import { EVENTS } from '../events-handler/constants'
-import eventBus from '../events-handler/eventBus'
-import { NotificationTarget, NotificationType } from '../enums/notification.enum'
-import { notificationService } from '../services/notification.service'
-import { TargetType } from '../enums/targetType.enum'
+import { sendMessage } from '~/sockets'
+import { EVENTS } from '~/events-handler/constants'
+import eventBus from '~/events-handler/eventBus'
+import { NotificationTarget, NotificationType } from '~/enums/notification.enum'
+import { notificationService } from '~/services/notification.service'
+import { TargetType } from '~/enums/targetType.enum'
 
 eventBus.on(
     EVENTS.CONTENT_DELETED,

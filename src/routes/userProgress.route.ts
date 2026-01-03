@@ -1,14 +1,14 @@
 import { Router } from "express";
-import { userProgressController } from "../controllers/userProgress.controller"
-import { accessTokenValidation, checkPermission } from "../middlewares/auth.middlewares";
-import { getTopicProgressValidation } from "../middlewares/userProgress/getTopicProgress.middlewares";
-import { createWordProgressValidation } from "../middlewares/userProgress/createWordProgress.middlewares"
-import { updateWordProgressValidation } from "../middlewares/userProgress/updateWordProgress.middlewares"
-import { wrapRequestHandler } from "../utils/handler"
-import { getCategoryProgressValidation } from "../middlewares/userProgress/getCategoryProgress.middlewares";
-import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from "../middlewares/common.middlewares";
-import { Topic } from "../entities/topic.entity";
-import { getWordsForStudyValidation } from "../middlewares/userProgress/getWordsForStudy.middlewares";
+import { userProgressController } from "~/controllers/userProgress.controller"
+import { accessTokenValidation, checkPermission } from "~/middlewares/auth.middlewares";
+import { getTopicProgressValidation } from "~/middlewares/userProgress/getTopicProgress.middlewares";
+import { createWordProgressValidation } from "~/middlewares/userProgress/createWordProgress.middlewares"
+import { updateWordProgressValidation } from "~/middlewares/userProgress/updateWordProgress.middlewares"
+import { wrapRequestHandler } from "~/utils/handler"
+import { getCategoryProgressValidation } from "~/middlewares/userProgress/getCategoryProgress.middlewares";
+import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from "~/middlewares/common.middlewares";
+import { Topic } from "~/entities/topic.entity";
+import { getWordsForStudyValidation } from "~/middlewares/userProgress/getWordsForStudy.middlewares";
 
 const userProgressRouter = Router()
 

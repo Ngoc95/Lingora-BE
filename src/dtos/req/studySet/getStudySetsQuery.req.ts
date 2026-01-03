@@ -1,5 +1,5 @@
-import { StudySetStatus } from '../../../enums/studySetStatus.enum'
-import { StudySetVisibility } from '../../../enums/studySetVisibility.enum'
+import { StudySetStatus } from '~/enums/studySetStatus.enum'
+import { StudySetVisibility } from '~/enums/studySetVisibility.enum'
 
 export interface GetStudySetsQueryReq {
     page?: number

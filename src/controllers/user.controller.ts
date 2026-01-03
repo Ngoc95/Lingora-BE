@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
-import { CREATED, SuccessResponse } from '../core/success.response'
-import { userService } from '../services/user.service'
+import { CREATED, SuccessResponse } from '~/core/success.response'
+import { userService } from '~/services/user.service'
 
 class UserController {
     createUser = async (req: Request, res: Response) => {

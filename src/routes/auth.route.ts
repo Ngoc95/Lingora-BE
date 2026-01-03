@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authController } from '../controllers/auth.controller'
+import { authController } from '~/controllers/auth.controller'
 import {
     accessTokenValidation,
     loginValidation,
@@ -9,13 +9,10 @@ import {
     resetPasswordTokenValidation,
     verifyAccountEmailCodeValidation,
     verifyForgotPasswordCodeValidation
-} from '../middlewares/auth.middlewares';
-import { sendVerifyAccountEmailValidation } from '../middlewares/email/sendVerifyAccountEmailValidation.middlewares'
-import { wrapRequestHandler } from '../utils/handler';
 } from '~/middlewares/auth.middlewares';
-import { googleAuthValidation } from '~/middlewares/googleAuth.middlewares';
 import { sendVerifyAccountEmailValidation } from '~/middlewares/email/sendVerifyAccountEmailValidation.middlewares'
 import { wrapRequestHandler } from '~/utils/handler';
+import { googleAuthValidation } from '~/middlewares/googleAuth.middlewares';
 
 const authRouter = Router();
 

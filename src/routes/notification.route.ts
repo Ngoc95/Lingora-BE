@@ -1,8 +1,8 @@
 import { Router } from 'express'
-import { notificationController } from '../controllers/notification.controller'
-import { accessTokenValidation } from '../middlewares/auth.middlewares';
-import { checkIdParamMiddleware, checkQueryMiddleware } from '../middlewares/common.middlewares';
-import { wrapRequestHandler } from '../utils/handler';
+import { notificationController } from '~/controllers/notification.controller'
+import { accessTokenValidation } from '~/middlewares/auth.middlewares';
+import { checkIdParamMiddleware, checkQueryMiddleware } from '~/middlewares/common.middlewares';
+import { wrapRequestHandler } from '~/utils/handler';
 
 const notificationRouter = Router()
 

@@ -1,8 +1,8 @@
 import { checkSchema } from 'express-validator'
-import { BadRequestError } from '../../core/error.response'
+import { BadRequestError } from '~/core/error.response'
 import { validate } from '../validation.middlewares'
-import { DatabaseService } from '../../services/database.service'
-import { Word } from '../../entities/word.entity'
+import { DatabaseService } from '~/services/database.service'
+import { Word } from '~/entities/word.entity'
 import { isRequired } from '../common.middlewares'
 
 export const updateWordProgressValidation = validate(

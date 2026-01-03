@@ -1,9 +1,9 @@
 import { checkSchema } from "express-validator"
 import { validate } from "../validation.middlewares"
 import { isRequired } from "../common.middlewares"
-import { BadRequestError } from "../../core/error.response"
-import { CefrLevel } from "../../enums/cefrLevel.enum"
-import { WordType } from "../../enums/wordType.enum"
+import { BadRequestError } from "~/core/error.response"
+import { CefrLevel } from "~/enums/cefrLevel.enum"
+import { WordType } from "~/enums/wordType.enum"
 
 export const createWordValidation = validate(
     checkSchema(
