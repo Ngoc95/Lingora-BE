@@ -176,8 +176,8 @@ class CommentService {
             targetType,
             ownerId: fullComment.createdBy.id,
             createdBy: user,
-            parentId,
-            parentCommentOwnerId: fullComment.parentComment?.createdBy.id
+            parentCommentOwnerId: fullComment.parentComment?.createdBy.id,
+            parentCommentId: parentId,
         })
 
         return fullComment

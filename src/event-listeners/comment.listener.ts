@@ -33,11 +33,12 @@ eventBus.on(
             parentCommentOwnerId
         )
 
-        // Don't send notification if user is commenting on their own content
-        if (ownerNotification && ownerId !== createdBy.id) {
+        // Gửi notification cho chủ bài viết (nếu có)
+        if (ownerNotification) {
             sendMessage({ event: 'notification', userId: ownerId, data: ownerNotification })
         }
 
+        // Gửi notification cho chủ comment cha (nếu đang reply)
         if (parentCommentOwnerNotification)
             sendMessage({
                 event: 'notification',
@@ -55,26 +56,42 @@ const createCommentNotification = async (
     parentCommentId: number,
     parentCommentOwnerId?: number
 ) => {
-    //notification for owner
-    const ownerNotification = await notificationService.createNotification(
-        NotificationType.COMMENT,
-        {
-            message: `${targetType} của bạn đã được ${createdBy.username} bình luận`,
-            data: {
-                targetId,
-                targetType,
-                ownerId,
-                createdBy: {
-                    id: createdBy.id,
-                    email: createdBy.email,
-                    username: createdBy.username,
-                    avatar: createdBy.avatar
+    // Chuyển targetType thành label tiếng Việt
+    const targetTypeLabel = targetType === TargetType.POST
+        ? 'Bài viết'
+        : targetType === TargetType.STUDY_SET
+            ? 'Học liệu'
+            : 'Bình luận'
+
+    // Kiểm tra xem có đang reply comment của chủ bài viết không
+    const isReplyingToOwner = parentCommentOwnerId && parentCommentOwnerId === ownerId
+
+    // Chỉ tạo notification cho chủ bài viết nếu:
+    // 1. Không phải chính họ comment
+    // 2. Không phải đang reply comment của chính họ (tránh duplicate)
+    let ownerNotification = null
+    if (ownerId !== createdBy.id && !isReplyingToOwner) {
+        ownerNotification = await notificationService.createNotification(
+            NotificationType.COMMENT,
+            {
+                message: `${targetTypeLabel} của bạn đã được ${createdBy.username} bình luận`,
+                data: {
+                    targetId,
+                    targetType,
+                    ownerId,
+                    ...(targetType === TargetType.POST && { postId: targetId }), // Thêm postId nếu là POST
+                    createdBy: {
+                        id: createdBy.id,
+                        email: createdBy.email,
+                        username: createdBy.username,
+                        avatar: createdBy.avatar
+                    }
                 }
-            }
-        },
-        NotificationTarget.ONLY_USER,
-        [ownerId]
-    )
+            },
+            NotificationTarget.ONLY_USER,
+            [ownerId]
+        )
+    }
 
     //send notification for parent comment owner
     let parentCommentOwnerNotification = null
@@ -82,7 +99,7 @@ const createCommentNotification = async (
         parentCommentOwnerNotification = await notificationService.createNotification(
             NotificationType.COMMENT,
             {
-                message: `${createdBy.username} đã trả lời bình luận của bạn ở ${targetType} `,
+                message: `${createdBy.username} đã trả lời bình luận của bạn ở ${targetTypeLabel.toLowerCase()}`,
                 data: {
                     targetId,
                     targetType,
