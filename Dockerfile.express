@@ -35,6 +35,8 @@ FROM node:22-alpine AS production
 WORKDIR /app
 ENV NODE_ENV=production
 
+RUN apk add --no-cache curl
+
 # Copy built artifacts and production dependencies
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/src/cache ./dist/cache

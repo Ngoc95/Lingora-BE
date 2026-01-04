@@ -34,7 +34,7 @@ const wakeUpAIService = async () => {
     console.log(`🔄 Attempting to wake up AI Service at [${aiUrl}] using curl...`)
     
     // Retry configuration
-    const maxRetries = 20
+    const maxRetries = 1
     const retryDelay = 5000 // 5 seconds
 
     for (let i = 0; i < maxRetries; i++) {
