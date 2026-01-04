@@ -5,7 +5,7 @@ import { BadRequestError, NotFoundRequestError, ForbiddenRequestError } from '~/
 import { CreateWithdrawalBodyReq } from '~/dtos/req/withdrawal/createWithdrawalBody.req'
 import { WithdrawalQueryReq } from '~/dtos/req/withdrawal/withdrawalQuery.req'
 import { WithdrawalStatus } from '~/enums/withdrawalStatus.enum'
-import { FindOptionsWhere, In } from 'typeorm'
+import { FindOptionsWhere, In, ILike } from 'typeorm'
 import eventBus from '~/events-handler/eventBus'
 import { EVENTS } from '~/events-handler/constants'
 
@@ -236,8 +236,30 @@ class WithdrawalService {
             where.user = { id: userId }
         }
 
+        // Search condition
+        const searchConditions: FindOptionsWhere<WithdrawalRequest>[] = []
+        if (query.search) {
+            const searchTerm = `%${query.search}%`
+            const searchFields = [
+                { bankName: ILike(searchTerm) },
+                { bankAccountNumber: ILike(searchTerm) },
+                { bankAccountName: ILike(searchTerm) },
+                { user: { email: ILike(searchTerm) } },
+                { user: { username: ILike(searchTerm) } }
+            ]
+            
+            // Allow combining status/userId with search
+            // If we have filters (status/userId), we need to AND them with the OR search conditions
+            searchFields.forEach(field => {
+                searchConditions.push({
+                    ...where,
+                    ...field
+                })
+            })
+        }
+
         const [withdrawals, total] = await WithdrawalRequest.findAndCount({
-            where,
+            where: searchConditions.length > 0 ? searchConditions : where,
             skip,
             take: limit,
             order: sort || { createdAt: 'DESC' },

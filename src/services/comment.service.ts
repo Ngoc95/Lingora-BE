@@ -170,15 +170,35 @@ class CommentService {
         })
         if (!fullComment) throw new BadRequestError({ message: 'Unauthorize for this comment' })
 
+        // Get owner of the target (Post or StudySet)
+        let ownerId: number | undefined
+        if (targetType === TargetType.POST) {
+            const post = await Post.findOne({
+                where: { id: targetId },
+                relations: ['createdBy'],
+                select: { createdBy: { id: true } }
+            })
+            ownerId = post?.createdBy?.id
+        } else if (targetType === TargetType.STUDY_SET) {
+            const studySet = await StudySet.findOne({
+                where: { id: targetId },
+                relations: ['owner'],
+                select: { owner: { id: true } }
+            })
+            ownerId = studySet?.owner?.id
+        }
+
         //emit event
-        eventBus.emit(EVENTS.COMMENT, {
-            targetId,
-            targetType,
-            ownerId: fullComment.createdBy.id,
-            createdBy: user,
-            parentCommentOwnerId: fullComment.parentComment?.createdBy.id,
-            parentCommentId: parentId,
-        })
+        if (ownerId) {
+            eventBus.emit(EVENTS.COMMENT, {
+                targetId,
+                targetType,
+                ownerId,
+                createdBy: user,
+                parentCommentOwnerId: fullComment.parentComment?.createdBy.id,
+                parentCommentId: parentId,
+            })
+        }
 
         return fullComment
     }

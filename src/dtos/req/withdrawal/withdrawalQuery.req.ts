@@ -8,5 +8,6 @@ export interface WithdrawalQueryReq {
     status?: WithdrawalStatus
     userId?: number
     sort?: FindOptionsOrder<WithdrawalRequest>
+    search?: string
 }
 

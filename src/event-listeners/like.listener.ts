@@ -100,8 +100,10 @@ const createLikeNotification = async (
                 ? 'bình luận'
                 : 'học liệu'
 
-    // Nếu like comment, lấy thông tin post mà comment thuộc về
+    // Nếu like comment, lấy thông tin post hoặc studySet mà comment thuộc về
     let postId: number | undefined = undefined
+    let studySetId: number | undefined = undefined
+
     if (targetType === TargetType.COMMENT) {
         const comment = await Comment.findOne({
             where: { id: targetId },
@@ -111,9 +113,14 @@ const createLikeNotification = async (
                 targetId: true
             }
         })
+        
         // Nếu comment thuộc về POST, lưu postId
         if (comment?.targetType === TargetType.POST) {
             postId = comment.targetId
+        }
+        // Nếu comment thuộc về STUDY_SET, lưu studySetId
+        else if (comment?.targetType === TargetType.STUDY_SET) {
+            studySetId = comment.targetId
         }
     }
 
@@ -126,6 +133,7 @@ const createLikeNotification = async (
                 targetType,
                 ownerId,
                 ...(postId && { postId }), // Thêm postId nếu có
+                ...(studySetId && { studySetId }), // Thêm studySetId nếu có
                 createdBy: {
                     id: createdBy.id,
                     email: createdBy.email,
