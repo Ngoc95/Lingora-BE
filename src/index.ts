@@ -34,13 +34,18 @@ const wakeUpAIService = async () => {
     console.log(`🔄 Attempting to wake up AI Service at [${aiUrl}]...`)
     
     // Retry configuration
-    const maxRetries = 5
+    const maxRetries = 20 // Increase to cover ~100s (Render takes time)
     const retryDelay = 5000 // 5 seconds
 
     for (let i = 0; i < maxRetries; i++) {
         try {
             // Set a short timeout for the ping itself
-            await axios.get(aiUrl, { timeout: 10000 }) 
+            await axios.get(aiUrl, { 
+                timeout: 10000,
+                headers: {
+                    'User-Agent': 'Lingora-Backend-WakeUp/1.0'
+                }
+            }) 
             console.log('✅ AI Service is awake and responding!')
             return
         } catch (error: any) {
