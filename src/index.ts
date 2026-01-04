@@ -6,7 +6,7 @@ import { DatabaseService } from './services/database.service'
 import { seedInitialData } from './seeds/seed'
 import app from './app'
 import { initSocket } from './sockets'
-import axios from 'axios'
+import { exec } from 'child_process'
 import { env } from './config/env'
 
 const PORT = process.env.PORT || 4000
@@ -31,27 +31,30 @@ const wakeUpAIService = async () => {
         return
     }
 
-    console.log(`🔄 Attempting to wake up AI Service at [${aiUrl}]...`)
+    console.log(`🔄 Attempting to wake up AI Service at [${aiUrl}] using curl...`)
     
     // Retry configuration
-    const maxRetries = 20 // Increase to cover ~100s (Render takes time)
+    const maxRetries = 20
     const retryDelay = 5000 // 5 seconds
 
     for (let i = 0; i < maxRetries; i++) {
         try {
-            // Set a short timeout for the ping itself
-            await axios.get(aiUrl, { 
-                timeout: 10000,
-                headers: {
-                    'User-Agent': 'Lingora-Backend-WakeUp/1.0'
-                }
-            }) 
-            console.log('✅ AI Service is awake and responding!')
+            await new Promise((resolve, reject) => {
+                exec(`curl -I ${aiUrl}`, { timeout: 10000 }, (error, stdout, stderr) => {
+                    if (error) {
+                        reject(error)
+                        return
+                    }
+                    if (stdout) console.log(stdout)
+                    resolve(true)
+                })
+            })
+            
+            console.log('✅ AI Service pinged successfully via curl!')
             return
         } catch (error: any) {
             console.error(`❌ Attempt ${i + 1}/${maxRetries} failed.`)
             console.error(`   Error: ${error.message}`)
-            if (error.code) console.error(`   Code: ${error.code}`)
             
             if (i < maxRetries - 1) {
                 console.log(`   Waiting ${retryDelay/1000}s before retry...`)
@@ -62,6 +65,5 @@ const wakeUpAIService = async () => {
         }
     }
 }
-
 
 startServer()
