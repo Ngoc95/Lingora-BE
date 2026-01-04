@@ -71,7 +71,7 @@ const createPurchaseNotification = async (
         ? `${buyer.username} đã tải xuống study set "${studySetTitle}" của bạn`
         : `${buyer.username} đã mua study set "${studySetTitle}" của bạn với giá ${amount.toLocaleString('vi-VN')}đ`
 
-    const notification = await notificationService.createNotification(
+    const { notification, userNotifications } = await notificationService.createNotification(
         NotificationType.ORDER,
         {
             message,
@@ -92,6 +92,22 @@ const createPurchaseNotification = async (
         [ownerId]
     )
 
-    return notification
+    if (userNotifications && userNotifications.length > 0) {
+        return formatNotificationPayload(notification, userNotifications[0])
+    }
+    return null
+}
+
+const formatNotificationPayload = (notification: any, userNotification: any) => {
+    return {
+        id: userNotification.id,
+        isRead: userNotification.isRead,
+        readAt: userNotification.readAt,
+        type: notification.type,
+        message: notification.data?.message,
+        data: notification.data?.data,
+        target: notification.target,
+        createdAt: userNotification.createdAt
+    }
 }
 

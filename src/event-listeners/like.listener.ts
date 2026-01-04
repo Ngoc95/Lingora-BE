@@ -124,7 +124,7 @@ const createLikeNotification = async (
         }
     }
 
-    const notification = await notificationService.createNotification(
+    const { notification, userNotifications } = await notificationService.createNotification(
         NotificationType.LIKE,
         {
             message: `${createdBy.username} đã thích ${targetTypeLabel} của bạn`,
@@ -146,5 +146,22 @@ const createLikeNotification = async (
         [ownerId]
     )
 
-    return notification
+    if (userNotifications && userNotifications.length > 0) {
+        return formatNotificationPayload(notification, userNotifications[0])
+    }
+
+    return null
+}
+
+const formatNotificationPayload = (notification: any, userNotification: any) => {
+    return {
+        id: userNotification.id,
+        isRead: userNotification.isRead,
+        readAt: userNotification.readAt,
+        type: notification.type,
+        message: notification.data?.message,
+        data: notification.data?.data,
+        target: notification.target,
+        createdAt: userNotification.createdAt
+    }
 }

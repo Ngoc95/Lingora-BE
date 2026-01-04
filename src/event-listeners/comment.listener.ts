@@ -48,6 +48,19 @@ eventBus.on(
     }
 )
 
+const formatNotificationPayload = (notification: any, userNotification: any) => {
+    return {
+        id: userNotification.id,
+        isRead: userNotification.isRead,
+        readAt: userNotification.readAt,
+        type: notification.type,
+        message: notification.data?.message,
+        data: notification.data?.data,
+        target: notification.target,
+        createdAt: userNotification.createdAt
+    }
+}
+
 const createCommentNotification = async (
     targetId: number,
     targetType: TargetType,
@@ -71,7 +84,7 @@ const createCommentNotification = async (
     // 2. Không phải đang reply comment của chính họ (tránh duplicate)
     let ownerNotification = null
     if (ownerId !== createdBy.id && !isReplyingToOwner) {
-        ownerNotification = await notificationService.createNotification(
+        const { notification, userNotifications } = await notificationService.createNotification(
             NotificationType.COMMENT,
             {
                 message: `${targetTypeLabel} của bạn đã được ${createdBy.username} bình luận`,
@@ -91,12 +104,15 @@ const createCommentNotification = async (
             NotificationTarget.ONLY_USER,
             [ownerId]
         )
+        if (userNotifications && userNotifications.length > 0) {
+            ownerNotification = formatNotificationPayload(notification, userNotifications[0])
+        }
     }
 
     //send notification for parent comment owner
     let parentCommentOwnerNotification = null
     if (parentCommentOwnerId && createdBy.id != parentCommentOwnerId) {
-        parentCommentOwnerNotification = await notificationService.createNotification(
+        const { notification, userNotifications } = await notificationService.createNotification(
             NotificationType.COMMENT,
             {
                 message: `${createdBy.username} đã trả lời bình luận của bạn ở ${targetTypeLabel.toLowerCase()}`,
@@ -116,6 +132,9 @@ const createCommentNotification = async (
             NotificationTarget.ONLY_USER,
             [parentCommentOwnerId]
         )
+        if (userNotifications && userNotifications.length > 0) {
+            parentCommentOwnerNotification = formatNotificationPayload(notification, userNotifications[0])
+        }
     }
 
     return {

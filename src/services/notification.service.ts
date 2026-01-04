@@ -14,11 +14,15 @@ class NotificationService {
         const newNotification = await notification.save()
 
         //target notification != all ==> create notification for each user
+        let userNotifications: UserNotification[] = []
         if (target != NotificationTarget.ALL) {
-            this.createUserNotification(newNotification.id, users)
+            userNotifications = await this.createUserNotification(newNotification.id, users)
         }
 
-        return newNotification
+        return {
+            notification: newNotification,
+            userNotifications
+        }
     }
 
     createUserNotification = async (notificationId: number, users: number[]) => {

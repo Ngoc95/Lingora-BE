@@ -52,7 +52,7 @@ const createWarningNotification = async (
                 ? 'bình luận'
                 : 'học liệu'
 
-    const notification = await notificationService.createNotification(
+    const { notification, userNotifications } = await notificationService.createNotification(
         NotificationType.WARNING,
         {
             title: '⚠️ Cảnh cáo vi phạm',
@@ -67,5 +67,21 @@ const createWarningNotification = async (
         [userId]
     )
 
-    return notification
+    if (userNotifications && userNotifications.length > 0) {
+        return formatNotificationPayload(notification, userNotifications[0])
+    }
+    return null
+}
+
+const formatNotificationPayload = (notification: any, userNotification: any) => {
+    return {
+        id: userNotification.id,
+        isRead: userNotification.isRead,
+        readAt: userNotification.readAt,
+        type: notification.type,
+        message: notification.data?.message,
+        data: notification.data?.data,
+        target: notification.target,
+        createdAt: userNotification.createdAt
+    }
 }
