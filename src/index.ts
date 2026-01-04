@@ -21,17 +21,42 @@ async function startServer() {
     initSocket(server)
 
     // Wake up AI Service if on Render
-    if (env.AI_SERVICE_URL) {
+    wakeUpAIService()
+}
+
+const wakeUpAIService = async () => {
+    const aiUrl = env.AI_SERVICE_URL
+    if (!aiUrl) {
+        console.log('⚠️ AI_SERVICE_URL is not set. Skipping wake-up.')
+        return
+    }
+
+    console.log(`🔄 Attempting to wake up AI Service at [${aiUrl}]...`)
+    
+    // Retry configuration
+    const maxRetries = 5
+    const retryDelay = 5000 // 5 seconds
+
+    for (let i = 0; i < maxRetries; i++) {
         try {
-            console.log('Pinging AI Service to wake it up...')
-            axios.get(env.AI_SERVICE_URL).catch((err) => {
-                // Ignore error, just need to send request
-                console.log('AI Service ping sent')
-            })
-        } catch (error) {
-            console.error('Error pinging AI Service:', error)
+            // Set a short timeout for the ping itself
+            await axios.get(aiUrl, { timeout: 10000 }) 
+            console.log('✅ AI Service is awake and responding!')
+            return
+        } catch (error: any) {
+            console.error(`❌ Attempt ${i + 1}/${maxRetries} failed.`)
+            console.error(`   Error: ${error.message}`)
+            if (error.code) console.error(`   Code: ${error.code}`)
+            
+            if (i < maxRetries - 1) {
+                console.log(`   Waiting ${retryDelay/1000}s before retry...`)
+                await new Promise(resolve => setTimeout(resolve, retryDelay))
+            } else {
+                 console.error('⚠️ AI Service wake-up failed after multiple attempts.')
+            }
         }
     }
 }
+
 
 startServer()
