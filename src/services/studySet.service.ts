@@ -318,7 +318,7 @@ class StudySetService {
              throw new BadRequestError({ message: 'Study set not found' }) // Hide private sets
         }
 
-        const canViewContent = isOwner || isPurchased
+        const canViewContent = isOwner || isPurchased || Number(studySet.price) === 0
 
         // Calculate likeCount and isAlreadyLike
         const [likeCount, isAlreadyLike, comments, commentCount] = await Promise.all([
@@ -353,6 +353,8 @@ class StudySetService {
             // Include flashcards/quizzes only if allowed
             flashcards: canViewContent ? studySet.flashcards : [],
             quizzes: canViewContent ? studySet.quizzes : [],
+            totalFlashcards: studySet.flashcards ? studySet.flashcards.length : 0,
+            totalQuizzes: studySet.quizzes ? studySet.quizzes.length : 0,
         }
 
         return baseResponse

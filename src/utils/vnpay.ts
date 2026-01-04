@@ -1,5 +1,5 @@
 import { env } from '~/config/env';
-import { VNPay, ignoreLogger, VnpLocale, ProductCode, dateFormat, HashAlgorithm } from 'vnpay'
+import { VNPay, ignoreLogger, VnpLocale, ProductCode, HashAlgorithm } from 'vnpay'
 
 const vnpay = new VNPay({
     tmnCode: 'Q9WPGFN9',
@@ -10,6 +10,20 @@ const vnpay = new VNPay({
     enableLog: true, // Bật/tắt log
     loggerFn: ignoreLogger, // Custom logger
 })
+
+function formatDate(date: Date): number {
+    const tzOffset = 7 * 60 * 60 * 1000;
+    const vnTime = new Date(date.getTime() + tzOffset); 
+    
+    const yyyy = vnTime.getUTCFullYear();
+    const MM = String(vnTime.getUTCMonth() + 1).padStart(2, '0');
+    const dd = String(vnTime.getUTCDate()).padStart(2, '0');
+    const HH = String(vnTime.getUTCHours()).padStart(2, '0');
+    const mm = String(vnTime.getUTCMinutes()).padStart(2, '0');
+    const ss = String(vnTime.getUTCSeconds()).padStart(2, '0');
+    
+    return Number(`${yyyy}${MM}${dd}${HH}${mm}${ss}`);
+}
 export function createVNPayPaymentUrl(params: {
     amount: number;
     orderId: string;
@@ -20,8 +34,8 @@ export function createVNPayPaymentUrl(params: {
     const vnpayReturnUrl = `${env.BASE_URL}/vnpay/return`;
 
     const now = new Date();
-    const createDate = dateFormat(now); // MM = minute
-    const expireDate = dateFormat(new Date(now.getTime() + 15 * 60 * 1000));
+    const createDate = formatDate(now);
+    const expireDate = formatDate(new Date(now.getTime() + 15 * 60 * 1000));
 
     const paymentUrl = vnpay.buildPaymentUrl({
         vnp_Amount: amount,
