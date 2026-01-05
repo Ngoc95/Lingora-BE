@@ -3,6 +3,7 @@ import { CREATED, SuccessResponse } from '~/core/success.response'
 import { categoryProgressService } from '~/services/userCategoryProgress.service'
 import { topicProgressService } from '~/services/userTopicProgress.service'
 import { wordProgressService } from '~/services/userWordProgress.service'
+import { streakService } from '~/services/streak.service'
 
 class UserProgressController {
     createManyWordProgress = async (req: Request, res: Response) => {
@@ -82,6 +83,14 @@ class UserProgressController {
         return new SuccessResponse({
             message: 'Get word statistics for user successfully',
             metaData: await wordProgressService.getWordStatisticsByUser(user)
+        }).send(res)
+    }
+
+    getStreakInfo = async (req: Request, res: Response) => {
+        const user = req.user!
+        return new SuccessResponse({
+            message: 'Get streak info successfully',
+            metaData: await streakService.getStreakInfo(user.id)
         }).send(res)
     }
 }

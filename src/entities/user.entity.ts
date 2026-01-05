@@ -136,6 +136,16 @@ export class User extends BaseEntity {
     @OneToMany(() => ExamAttempt, (attempt) => attempt.user)
     examAttempts?: ExamAttempt[]
 
+    // Streak tracking
+    @Column({ type: 'int', default: 0 })
+    currentStreak!: number
+
+    @Column({ type: 'int', default: 0 })
+    longestStreak!: number
+
+    @Column({ type: 'date', nullable: true })
+    lastActivityDate?: Date
+
     @CreateDateColumn()
     createdAt!: Date;
 

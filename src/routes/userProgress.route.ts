@@ -147,4 +147,16 @@ userProgressRouter.get(
   wrapRequestHandler(userProgressController.getWordStatisticsByUser)
 )
 
+// GET
+/**
+ * @description : Get streak info of user
+ * @method : GET
+ * @path : /streak
+ * @header : Authorization
+ */
+userProgressRouter.get(
+  '/streak',
+  wrapRequestHandler(userProgressController.getStreakInfo)
+)
+
 export default userProgressRouter;

@@ -23,6 +23,7 @@ import { Like } from '~/entities/like.entity'
 import { Comment } from '~/entities/comment.entity'
 import { TargetType } from '~/enums/targetType.enum'
 import { commentService } from './comment.service'
+import { streakService } from './streak.service'
 
 class StudySetService {
     private db = DatabaseService.getInstance()
@@ -537,6 +538,9 @@ class StudySetService {
                     isFree: true
                 })
             }
+
+            // Record activity for streak tracking
+            await streakService.recordActivity(userId)
 
             return {
                 paymentUrl: null,

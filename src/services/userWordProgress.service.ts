@@ -12,6 +12,7 @@ import { In, LessThanOrEqual, Not } from 'typeorm'
 import { DEFAULT_LIMIT, DEFAULT_PAGE } from '~/constants/pagination'
 import { getCefrByLevel } from '~/utils/mappers/cefrLevel.mapper'
 import { Topic } from '~/entities/topic.entity'
+import { streakService } from './streak.service'
 
 class WordProgressService {
     private db = DatabaseService.getInstance()
@@ -68,6 +69,9 @@ class WordProgressService {
             for (const topicId of updatedTopicIds) {
                 await topicProgressService.createAndUpdateTopicProgress(user, topicId)
             }
+
+            // Record activity for streak tracking
+            await streakService.recordActivity(userId)
 
             return {
                 userId,
@@ -145,6 +149,9 @@ class WordProgressService {
             for (const topicId of updatedTopicIds) {
                 await topicProgressService.createAndUpdateTopicProgress(user, topicId)
             }
+
+            // Record activity for streak tracking
+            await streakService.recordActivity(userId)
 
             return {
                 userId,

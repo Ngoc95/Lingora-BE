@@ -35,6 +35,7 @@ import {
   IELTS_READING_GENERAL_BAND_TABLE,
   computeBandFromTable,
 } from "~/constants/exam";
+import { streakService } from "./streak.service";
 
 const DEFAULT_LIMIT = 10;
 
@@ -416,6 +417,9 @@ class ExamService {
     attempt.sectionProgress = updatedProgress;
 
     await attemptRepo.save(attempt);
+
+    // Record activity for streak tracking
+    await streakService.recordActivity(userId);
 
     return {
       sectionId: section.id,
