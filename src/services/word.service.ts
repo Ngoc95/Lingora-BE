@@ -212,7 +212,7 @@ class WordService {
 
     suggestWords = async (term: string, limit: number = 10) => {
         const normalized = validator.trim(term || '')
-        if (!normalized || normalized.length < 2) {
+        if (!normalized) {
             return []
         }
 
