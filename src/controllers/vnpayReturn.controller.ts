@@ -28,10 +28,10 @@ class VNPayReturnController {
                 }).send(res)
             } else {
                 console.log('web app redirect')
-                const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173'
+                const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000'
                 const redirectUrl = result.success
-                    ? `${frontendUrl}/studysets/${result.studySetId}?payment=success`
-                    : `${frontendUrl}/studysets?payment=failed`
+                    ? `${frontendUrl}/study-sets/${result.studySetId}?payment=success`
+                    : `${frontendUrl}/study-sets?payment=failed`
 
                 res.redirect(redirectUrl)
             }
@@ -55,7 +55,7 @@ class VNPayReturnController {
                 })
             } else {
                 // Redirect to error page for webapp
-                res.redirect(`${frontendUrl}/studysets?payment=error`)
+                res.redirect(`${frontendUrl}/study-sets?payment=error`)
             }
         }
     }
