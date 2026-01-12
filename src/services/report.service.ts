@@ -310,6 +310,7 @@ class ReportService {
                                     id: true,
                                     title: true,
                                     content: true,
+                                    createdAt: true,
                                     createdBy: {
                                         id: true,
                                         username: true,
@@ -326,6 +327,7 @@ class ReportService {
                                     id: true,
                                     title: true,
                                     description: true,
+                                    createdAt: true,
                                     owner: {
                                         id: true,
                                         username: true,
