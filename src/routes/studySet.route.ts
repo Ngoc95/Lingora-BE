@@ -36,6 +36,26 @@ studySetRouter.post(
     wrapRequestHandler(studySetController.createStudySet)
 )
 
+// POST
+/**
+ * @description : Add flashcard to study set
+ * @method : POST
+ * @path : /studysets/:id/flashcards
+ * @header : Authorization
+ * @body : {
+ *   frontText: string
+ *   backText: string
+ *   example?: string
+ *   audioUrl?: string
+ *   imageUrl?: string
+ * }
+ */
+studySetRouter.post(
+    '/:id/flashcards',
+    checkIdParamMiddleware,
+    wrapRequestHandler(studySetController.addFlashcard)
+)
+
 // GET
 /**
  * @description : Get all study sets (public and published)

@@ -100,6 +100,35 @@ class StudySetService {
         return studySetWithOwner
     }
 
+    addFlashcard = async (studySetId: number, userId: number, data: FlashcardInputReq) => {
+        const studySetRepo = await this.db.getRepository(StudySet)
+        const flashcardRepo = await this.db.getRepository(Flashcard)
+
+        const studySet = await studySetRepo.findOne({
+            where: { id: studySetId },
+            relations: ['owner']
+        })
+
+        if (!studySet) {
+            throw new BadRequestError({message: 'Study set not found'})
+        }
+
+        if (studySet.owner.id !== userId) {
+            throw new BadRequestError({message: 'You do not have permission to add flashcards to this study set'})
+        }
+
+        const flashcard = flashcardRepo.create({
+            studySet: studySet,
+            frontText: data.frontText,
+            backText: data.backText,
+            example: data.example,
+            audioUrl: data.audioUrl,
+            imageUrl: data.imageUrl,
+        })
+
+        return await flashcardRepo.save(flashcard)
+    }
+
     getAllStudySets = async (userId: number, query: GetStudySetsQueryReq) => {
         const studySetRepo = await this.db.getRepository(StudySet)
         const userStudySetRepo = await this.db.getRepository(UserStudySet)

@@ -12,6 +12,16 @@ class StudySetController {
         }).send(res)
     }
 
+    addFlashcard = async (req: Request, res: Response) => {
+        const studySetId = parseInt(req.params?.id)
+        const userId = req.user!.id
+        const result = await studySetService.addFlashcard(studySetId, userId, req.body)
+        return new CREATED({
+            message: 'Add flashcard successfully',
+            metaData: result || {},
+        }).send(res)
+    }
+
     getAllStudySets = async (req: Request, res: Response) => {
         const userId = req.user!.id
         return new SuccessResponse({
