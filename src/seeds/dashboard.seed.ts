@@ -13,6 +13,8 @@ import { PaymentMethod } from "~/enums/paymentMethod.enum"
 import { ExamAttemptStatus, ExamMode } from "~/enums/exam.enum"
 import { ProficiencyLevel } from "~/enums/proficiency.enum"
 import { WordStatus } from "~/enums/wordStatus.enum"
+import { UserTopicProgress } from "~/entities/userTopicProgress.entity"
+import { UserCategoryProgress } from "~/entities/userCategoryProgress.entity"
 
 export async function seedDashboardData() {
     console.log('📊 Seeding dashboard data (History)...')
@@ -96,27 +98,67 @@ export async function seedDashboardData() {
     await ExamAttempt.save(attempts)
     console.log(`   - Created ${attempts.length} historical exam attempts.`)
 
-    // 4. Create Learning Progress (Words)
-    const wordProgress: UserWordProgress[] = []
-    for (let i = 0; i < 200; i++) {
-        const user = faker.helpers.arrayElement(savedUsers)
-        const word = faker.helpers.arrayElement(words)
+    // preload relations
+const words1 = await Word.find({
+    relations: ['topic', 'topic.category'],
+    take: 200
+})
+
+const wordProgresses: UserWordProgress[] = []
+const topicProgressMap = new Map<string, UserTopicProgress>()
+const categoryProgressMap = new Map<string, UserCategoryProgress>()
+
+for (const user of savedUsers) {
+    const proficiency = faker.helpers.arrayElement(Object.values(ProficiencyLevel))
+
+    // user học 15–30 từ
+    const learnedWords = faker.helpers
+        .shuffle(words1)
+        .slice(0, faker.number.int({ min: 15, max: 30 }))
+
+    for (const word of learnedWords) {
         const learnedAt = faker.date.recent({ days: 30 })
 
-        const exists = wordProgress.find(wp => wp.user === user && wp.word === word)
-        if (!exists) {
-            const progress = new UserWordProgress()
-            progress.user = user
-            progress.word = word
-            progress.status = WordStatus.MASTERED
-            progress.srsLevel = faker.number.int({ min: 1, max: 5 })
-            progress.learnedAt = learnedAt
-            progress.updatedAt = learnedAt
-            wordProgress.push(progress)
+        // 1️⃣ Word progress
+        const wp = new UserWordProgress()
+        wp.user = user
+        wp.word = word
+        wp.status = WordStatus.MASTERED
+        wp.srsLevel = faker.number.int({ min: 2, max: 5 })
+        wp.learnedAt = learnedAt
+        wp.updatedAt = learnedAt
+        wordProgresses.push(wp)
+
+        // 2️⃣ Topic progress (unique: user + topic + proficiency)
+        const topicKey = `${user.id}-${word.topic?.id}-${proficiency}`
+        if (!topicProgressMap.has(topicKey)) {
+            const tp = new UserTopicProgress()
+            tp.user = user
+            tp.topic = word.topic!
+            tp.proficiency = proficiency
+            tp.completed = false // cập nhật sau
+            tp.createdAt = learnedAt
+            tp.updatedAt = learnedAt
+            topicProgressMap.set(topicKey, tp)
+        }
+
+        // 3️⃣ Category progress
+        const categoryKey = `${user.id}-${word.topic?.category?.id}-${proficiency}`
+        if (!categoryProgressMap.has(categoryKey)) {
+            const cp = new UserCategoryProgress()
+            cp.user = user
+            cp.category = word.topic?.category!
+            cp.proficiency = proficiency
+            cp.progressPercent = 0 // cập nhật sau
+            cp.completed = false
+            cp.createdAt = learnedAt
+            cp.updatedAt = learnedAt
+            categoryProgressMap.set(categoryKey, cp)
         }
     }
-    await UserWordProgress.save(wordProgress)
-    console.log(`   - Created ${wordProgress.length} word progress records.`)
+}
+
+
     
     console.log('✅ Dashboard data seeded successfully.')
 }

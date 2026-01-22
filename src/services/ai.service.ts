@@ -106,6 +106,21 @@ class AiService {
       return null;
     }
   }
+
+  async moderateContent(text: string): Promise<{
+    is_safe: boolean;
+    reason?: string;
+    detected_word?: string;
+    confidence_score?: number;
+  } | null> {
+    try {
+      const { data } = await this.client.post("/moderate", { text });
+      return data;
+    } catch (error) {
+      console.error("AI Moderation Error:", error);
+      return null;
+    }
+  }
 }
 
 export const aiService = new AiService();

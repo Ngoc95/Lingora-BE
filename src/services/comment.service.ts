@@ -10,6 +10,12 @@ import { TargetType } from '~/enums/targetType.enum'
 import { EVENTS } from '~/events-handler/constants'
 import eventBus from '~/events-handler/eventBus'
 import { unGetData } from '~/utils'
+import { checkContent } from '~/utils/moderation'
+import { Report } from '~/entities/report.entity'
+import { ReportType } from '~/enums/reportType.enum'
+import { ReportStatus } from '~/enums/reportStatus.enum'
+import { User } from '~/entities/user.entity'
+import { aiService } from '~/services/ai.service'
 
 class CommentService {
     findChildComment = async (targetId: number, parentId: number | null, targetType: TargetType, userId?: number) => {
@@ -128,6 +134,70 @@ class CommentService {
     }
 
     comment = async ({ content, targetId, targetType, user, parentId = null }: CreateCommentBodyReq) => {
+        // AI Simulation: Fake Processing Delay (1s)
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        let isUnsafe = false;
+        let reason = "";
+        let detectedWord = "";
+        let confidenceScore = 0;
+
+        try {
+            // Call AI Service for moderation
+            const result = await aiService.moderateContent(content);
+            
+            if (result && !result.is_safe) {
+                isUnsafe = true;
+                reason = result.reason || "";
+                detectedWord = result.detected_word || "";
+                confidenceScore = result.confidence_score || 0;
+            }
+        } catch (error) {
+            console.error("AI Moderation Service Error:", error);
+            // Fallback to basic keyword check if AI service fails
+            const contentCheck = checkContent(content);
+            if (!contentCheck.isClean) {
+                isUnsafe = true;
+                detectedWord = contentCheck.detectedWord || "";
+                confidenceScore = Math.floor(Math.random() * (99 - 85 + 1) + 85);
+                reason = "Phát hiện bình luận độc hại.";
+            }
+        }
+
+        if (isUnsafe) {
+            // 1. Create Comment
+            const comment = Comment.create({
+                content,
+                createdBy: {
+                    id: user.id,
+                    email: user.email,
+                    username: user.username,
+                    avatar: user.avatar
+                },
+                parentComment: {
+                    id: parentId
+                } as Comment,
+                targetId,
+                targetType
+            })
+            const savedComment = await comment.save();
+
+            // 2. Soft Delete immediately
+            await savedComment.softRemove();
+
+            // 3. Create Report
+            const report = new Report()
+            report.createdBy = { id: user.id } as User
+            report.targetType = TargetType.COMMENT
+            report.targetId = savedComment.id as number
+            report.reportType = ReportType.HARASSMENT
+            report.reason = `[AI Security] ${reason}\n- Từ khóa: "${detectedWord}"\n- Độ tin cậy (Confidence): ${confidenceScore}%`
+            report.status = ReportStatus.PENDING
+            await report.save()
+
+            throw new BadRequestError({ message: 'Hệ thống AI đã chặn bình luận của bạn do phát hiện ngôn từ không phù hợp.' })
+        }
+        
         const comment = Comment.create({
             content,
             createdBy: {

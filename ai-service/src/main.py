@@ -91,3 +91,12 @@ def score_speaking_endpoint(request: GradeSpeakingRequest):
         "corrected_version": result.corrected_version,
         "transcript": transcript
     }
+
+class ModerationRequest(BaseModel):
+    text: str
+
+@app.post("/moderate")
+def moderate_endpoint(request: ModerationRequest):
+    from src.moderation import moderate_content
+    result = moderate_content(request.text)
+    return result

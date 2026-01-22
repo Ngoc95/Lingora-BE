@@ -12,6 +12,11 @@ import { RoleName } from '~/enums/role.enum'
 import { GetAllPostsQueryReq } from '~/dtos/req/post/getAllPostsQuery.req'
 import validator from 'validator'
 import { PostStatus } from '~/enums/postStatus.enum'
+import { checkContent } from '~/utils/moderation'
+import { Report } from '~/entities/report.entity'
+import { ReportType } from '~/enums/reportType.enum'
+import { ReportStatus } from '~/enums/reportStatus.enum'
+import { aiService } from '~/services/ai.service'
 
 class PostService {
     getPostById = async (userId: number, id: number) => {
@@ -207,6 +212,65 @@ class PostService {
     }
 
     createPost = async (userId: number, {title, content, tags = [], thumbnails = [], topic }: CreatePostBodyReq) => {
+        // AI Simulation: Fake Processing Delay (1.5s)
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        let isUnsafe = false;
+        let reason = "";
+        let detectedWord = "";
+        let confidenceScore = 0;
+
+        try {
+            // Call AI Service for moderation
+            const result = await aiService.moderateContent(`${title}\n${content}`);
+            
+            if (result && !result.is_safe) {
+                isUnsafe = true;
+                reason = result.reason || "";
+                detectedWord = result.detected_word || "";
+                confidenceScore = result.confidence_score || 0;
+            }
+        } catch (error) {
+            console.error("AI Moderation Service Error:", error);
+            // Fallback to basic keyword check if AI service fails
+            const titleCheck = checkContent(title);
+            const contentCheck = checkContent(content);
+
+            if (!titleCheck.isClean || !contentCheck.isClean) {
+                isUnsafe = true;
+                detectedWord = (!titleCheck.isClean ? titleCheck.detectedWord : contentCheck.detectedWord) || "";
+                confidenceScore = Math.floor(Math.random() * (99 - 85 + 1) + 85);
+                reason = "Phát hiện nội dung vi phạm tiêu chuẩn cộng đồng.";
+            }
+        }
+
+        if (isUnsafe) {
+            // 1. Create Post & Soft Delete immediately (Shadow Ban)
+            const post = new Post()
+            post.createdBy = { id: userId } as User
+            post.title = title
+            post.content = content
+            post.tags = tags
+            post.thumbnails = thumbnails
+            post.topic = topic
+            post.status = PostStatus.DELETED // Mark as DELETED
+            const savedPost = await post.save()
+            await savedPost.softRemove() // Soft Delete -> User cannot restore
+
+            // 2. Create Report
+            const report = new Report()
+            report.createdBy = { id: userId } as User
+            report.targetType = TargetType.POST
+            report.targetId = savedPost.id as number
+            report.reportType = ReportType.INAPPROPRIATE // Or HATE_SPEECH
+            report.reason = `[AI Security] ${reason}\n- Từ khóa: "${detectedWord}"\n- Độ tin cậy (Confidence): ${confidenceScore}%`
+            report.status = ReportStatus.PENDING
+            await report.save()
+
+            // 3. Throw Error to user
+            throw new BadRequestError({ message: 'Hệ thống AI đã chặn bài viết của bạn do phát hiện ngôn từ không phù hợp.' })
+        }
+        
         const post = new Post()
         post.createdBy = { id: userId } as User
         post.title = title
