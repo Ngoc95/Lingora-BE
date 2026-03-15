@@ -3,6 +3,7 @@ import { seedRole } from "./role.seed";
 import { seedUsers } from "./user.seed";
 import { saveCachedWordsToDB } from "./word.seed";
 import { seedIeltsTest1 } from "./import_ielts_test_1";
+import { seedConversationContexts } from "./conversationContext.seed";
 
 import { seedPostAndStudySetForUser001 } from "./post_studyset.seed";
 
@@ -13,6 +14,8 @@ export async function seedInitialData() {
   await seedPostAndStudySetForUser001();
   await saveCachedWordsToDB();
   await seedIeltsTest1();
+
+  await seedConversationContexts();
 
   console.log("🌱 Initial data setup complete!");
 }

@@ -24,6 +24,7 @@ import { RevenueSplit } from "./revenueSplit.entity";
 import { WithdrawalRequest } from "./withdrawalRequest.entity";
 import { ChatSession } from "./chatSession.entity";
 import { ExamAttempt } from "./examAttempt.entity";
+import { ConversationSession } from "./conversationSession.entity";
 
 @Entity()
 export class User extends BaseEntity {
@@ -145,6 +146,9 @@ export class User extends BaseEntity {
 
     @Column({ type: 'date', nullable: true })
     lastActivityDate?: Date
+
+    @OneToMany(() => ConversationSession, (session) => session.user)
+    conversationSessions?: ConversationSession[]
 
     @CreateDateColumn()
     createdAt!: Date;
