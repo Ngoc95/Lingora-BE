@@ -67,7 +67,7 @@ export class ConversationService {
 
         if (aiOpeningResult) {
             const aiMessage = messageRepo.create({
-                session,
+                session: { id: session.id },
                 sender: ChatSender.AI,
                 content: aiOpeningResult.response,
                 suggestions: aiOpeningResult.suggestions
@@ -120,7 +120,7 @@ export class ConversationService {
 
         // Save User Message
         const userMessage = messageRepo.create({
-            session,
+            session: { id: session.id },
             sender: ChatSender.USER,
             content: question
         });
@@ -128,7 +128,7 @@ export class ConversationService {
 
         // Save AI Message with corrections and suggestions
         const aiMessage = messageRepo.create({
-            session,
+            session: { id: session.id },
             sender: ChatSender.AI,
             content: aiResult.response,
             corrections: aiResult.correction?.has_error ? aiResult.correction : null,
@@ -145,6 +145,10 @@ export class ConversationService {
         if (aiResult.next_phase && aiResult.next_phase !== session.currentPhase) {
             session.currentPhase = aiResult.next_phase;
         }
+
+        // Prevent TypeORM from attempting to sync the 'messages' array
+        // which would orphan the newly created messages by setting sessionId to null
+        delete session.messages;
 
         // Auto end session if AI marks it as completed
         if (session.currentPhase === 'completed') {
@@ -208,6 +212,11 @@ export class ConversationService {
                     fluencyScore: scores.fluency_score,
                     overallScore: scores.overall_score
                 });
+
+                // Update in-memory session object so that the caller can return the latest scores immediately
+                session.grammarScore = scores.grammar_score;
+                session.fluencyScore = scores.fluency_score;
+                session.overallScore = scores.overall_score;
             }
         } catch (error) {
             console.error("Failed to calculate session scores:", error);
