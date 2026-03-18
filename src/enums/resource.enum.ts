@@ -12,4 +12,5 @@ export enum Resource {
   LIKE = 'LIKE',
   REPORT = 'REPORT',
   WITHDRAWAL = 'WITHDRAWAL',
+  CLASSROOM = 'CLASSROOM',
 }

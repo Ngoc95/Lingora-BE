@@ -35,20 +35,11 @@ ac.grant(RoleName.LEARNER)
   .createOwn(Resource.REPORT)
   .createOwn(Resource.WITHDRAWAL)
   .readOwn(Resource.WITHDRAWAL)
-  .deleteOwn(Resource.LIKE);
-
-// ========================
-// TEACHER (Giáo viên)
-// ========================
-// ac.grant(RoleName.TEACHER)
-//   .extend(RoleName.LEARNER)
-//   .createAny(Resource.COURSE)
-//   .updateOwn(Resource.COURSE)
-//   .deleteOwn(Resource.COURSE)
-//   .createAny(Resource.LESSON)
-//   .updateOwn(Resource.LESSON)
-//   .deleteOwn(Resource.LESSON)
-//   .readAny(Resource.USER)
+  .deleteOwn(Resource.LIKE)
+  .readOwn(Resource.CLASSROOM)
+  .createOwn(Resource.CLASSROOM)
+  .updateOwn(Resource.CLASSROOM)
+  .deleteOwn(Resource.CLASSROOM);
 
 // ========================
 // ADMIN (Quản trị viên)
@@ -85,6 +76,9 @@ ac.grant(RoleName.ADMIN)
   .deleteAny(Resource.WITHDRAWAL)
   .createAny(Resource.EXAM)
   .updateAny(Resource.EXAM)
-  .deleteAny(Resource.EXAM);
+  .deleteAny(Resource.EXAM)
+  .createAny(Resource.CLASSROOM)
+  .updateAny(Resource.CLASSROOM)
+  .deleteAny(Resource.CLASSROOM);
 
 export default ac;

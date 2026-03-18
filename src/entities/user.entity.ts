@@ -24,6 +24,7 @@ import { RevenueSplit } from "./revenueSplit.entity";
 import { WithdrawalRequest } from "./withdrawalRequest.entity";
 import { ChatSession } from "./chatSession.entity";
 import { ExamAttempt } from "./examAttempt.entity";
+import { ClassroomMember } from './classroomMember.entity'
 
 @Entity()
 export class User extends BaseEntity {
@@ -135,6 +136,9 @@ export class User extends BaseEntity {
 
     @OneToMany(() => ExamAttempt, (attempt) => attempt.user)
     examAttempts?: ExamAttempt[]
+
+    @OneToMany(() => ClassroomMember, (classroomMember) => classroomMember.user)
+    classrooms?: ClassroomMember[]
 
     // Streak tracking
     @Column({ type: 'int', default: 0 })

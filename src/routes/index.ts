@@ -19,6 +19,7 @@ import uploadRouter from "./upload.route";
 import notificationRouter from "./notification.route";
 import reportRouter from "./report.route";
 import dashboardRouter from "./dashboard.route";
+import classroomRouter from "./classroom.route";
 
 const router = Router();
 
@@ -42,5 +43,6 @@ router.use("/", examRouter);
 router.use("/notifications", notificationRouter);
 router.use("/reports", reportRouter);
 router.use("/admin/dashboard", dashboardRouter);
+router.use("/classrooms", classroomRouter);
 
 export default router;
