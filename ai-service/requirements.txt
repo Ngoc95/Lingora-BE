@@ -1,16 +1,19 @@
+# === Core Server ===
 fastapi
 uvicorn
 python-dotenv
-pypdf
-langchain
-langchain-community
-langchain-text-splitters
-langchain-chroma
+requests
+
+# === LangChain (chỉ các sub-packages thực sự dùng) ===
 langchain-core
 langchain-openai
-chromadb
 langchain-classic
-tavily-python
+langchain-community
+langchain-chroma
 langchain-tavily
-requests
+langchain-text-splitters
+
+# === AI / DB ===
 openai
+chromadb
+pypdf
