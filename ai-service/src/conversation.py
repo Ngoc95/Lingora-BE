@@ -180,11 +180,11 @@ response_generation_prompt = ChatPromptTemplate.from_messages([
      "- Vary your style: sometimes ask, sometimes share, sometimes react.\n"
      "- If the learner says multiple things, respond to what's interesting.\n"
      "- Use natural reactions: 'Oh nice!', 'No way!', 'Haha yeah'\n"
-     "- Keep responses SHORT (1-3 sentences). Sound like texting a friend.\n\n"
+     "- Keep responses MEDIUM (2-4 sentences). Sound like texting a friend.\n\n"
      "=== VOCABULARY HIGHLIGHT ===\n"
-     "Pick 1 useful word/phrase from YOUR response that the learner should learn.\n"
+     "Pick 1-3 useful words/phrases from YOUR response that the learner should learn.\n"
      "Examples: 'check in', 'reservation', 'nearby', 'available'\n"
-     "Set vocabulary_meaning to its Vietnamese meaning (short, 1-3 words).\n"
+     "Set vocabulary_meaning to its Vietnamese meaning and example sentences.\n"
      "If no interesting vocabulary, leave both empty."),
     # Chat history — các tin nhắn trước đó
     MessagesPlaceholder("history"),
