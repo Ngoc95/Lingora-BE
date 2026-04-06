@@ -7,6 +7,7 @@ import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from "~/middl
 import { createClassroomValidation } from "~/middlewares/classroom/createClassroom.middlewares";
 import { updateClassroomValidation } from "~/middlewares/classroom/updateClassroom.middlewares";
 import { isClassroomTeacher } from "~/middlewares/classroom/isClassroomTeacher.middlewares";
+import { isClassroomMember } from "~/middlewares/classroom/isClassroomMember.middlewares";
 import { createLessonValidation, updateLessonValidation } from "~/middlewares/classroom/lesson.middlewares";
 import { createFlashcardValidation, updateFlashcardValidation } from "~/middlewares/classroom/flashcard.middlewares";
 import {
@@ -43,6 +44,7 @@ classroomRouter.get(
 classroomRouter.get(
     '/:id',
     checkIdParamMiddleware,
+    isClassroomMember,
     wrapRequestHandler(classroomController.getById)
 )
 
@@ -76,12 +78,14 @@ classroomRouter.post(
 classroomRouter.get(
     '/:id/lessons',
     checkIdParamMiddleware,
+    isClassroomMember,
     wrapRequestHandler(classroomController.getLessons)
 )
 
 classroomRouter.get(
     '/:id/lessons/:lessonId',
     checkIdParamMiddleware,
+    isClassroomMember,
     wrapRequestHandler(classroomController.getLessonById)
 )
 
@@ -150,12 +154,14 @@ classroomRouter.post(
 classroomRouter.get(
     '/:id/quizzes',
     checkIdParamMiddleware,
+    isClassroomMember,
     wrapRequestHandler(classroomController.getQuizzes)
 )
 
 classroomRouter.get(
     '/:id/quizzes/:quizId',
     checkIdParamMiddleware,
+    isClassroomMember,
     wrapRequestHandler(classroomController.getQuizById)
 )
 
@@ -206,6 +212,18 @@ classroomRouter.delete(
     checkIdParamMiddleware,
     isClassroomTeacher,
     wrapRequestHandler(classroomController.deleteQuestion)
+)
+
+// ══════════════════════════════════════════════════
+// CHAT  GET /classrooms/:id/messages
+// ══════════════════════════════════════════════════
+// ?limit=50&beforeId=123  (cursor-based — load more)
+
+classroomRouter.get(
+    '/:id/messages',
+    checkIdParamMiddleware,
+    isClassroomMember,
+    wrapRequestHandler(classroomController.getChatHistory)
 )
 
 export default classroomRouter;

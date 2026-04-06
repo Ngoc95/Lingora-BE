@@ -1,7 +1,9 @@
 import { Request, Response } from 'express'
 import { CREATED, SuccessResponse } from '~/core/success.response'
+import { ForbiddenRequestError } from '~/core/error.response'
 import { RoleName } from '~/enums/role.enum'
 import { classroomService } from '~/services/classroom.service'
+import { classroomChatService } from '~/services/classroomChat.service'
 
 class ClassroomController {
     create = async (req: Request, res: Response) => {
@@ -215,6 +217,20 @@ class ClassroomController {
         return new SuccessResponse({
             message: 'Import flashcards successfully',
             metaData: await classroomService.importFlashcardsFromStudySet(classroomId, lessonId, studySetId, teacherId)
+        }).send(res)
+    }
+
+    // ─────────────────────────────────────────────────
+    // CHAT
+    // ─────────────────────────────────────────────────
+
+    getChatHistory = async (req: Request, res: Response) => {
+        const classroomId = parseInt(req.params.id)
+        const limit = parseInt(req.query.limit as string) || 50
+        const beforeId = req.query.beforeId ? parseInt(req.query.beforeId as string) : undefined
+        return new SuccessResponse({
+            message: 'Get chat history successfully',
+            metaData: await classroomChatService.getChatHistory(classroomId, limit, beforeId)
         }).send(res)
     }
 }
