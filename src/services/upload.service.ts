@@ -62,6 +62,29 @@ class UploadService {
             uploadStream.end(file.buffer)
         })
     }
+    
+    uploadFile = async (file: Express.Multer.File, folderName: string = 'lingora/files') => {
+        return new Promise<{ url: string; name: string; size: number; mimeType: string }>((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+                {
+                    folder: folderName,
+                    resource_type: 'raw',
+                    use_filename: true,
+                    unique_filename: true,
+                },
+                (error, result) => {
+                    if (error || !result) return reject(error)
+                    resolve({
+                        url: result.secure_url,
+                        name: file.originalname,
+                        size: file.size,
+                        mimeType: file.mimetype,
+                    })
+                }
+            )
+            uploadStream.end(file.buffer)
+        })
+    }
 }
 
 export const uploadService = new UploadService()
