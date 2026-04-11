@@ -16,6 +16,8 @@ import {
     createQuestionValidation,
     updateQuestionValidation
 } from "~/middlewares/classroom/classroomQuiz.middlewares";
+import { joinClassroomValidation } from "~/middlewares/classroom/joinClassroom.middlewares";
+import { submitQuizAttemptValidation } from "~/middlewares/classroom/submitQuizAttempt.middlewares";
 import { wrapRequestHandler } from "~/utils/handler";
 
 const classroomRouter = Router();
@@ -69,7 +71,7 @@ classroomRouter.delete(
 
 classroomRouter.post(
     '/join',
-    // code validation could go here
+    joinClassroomValidation,
     wrapRequestHandler(classroomController.joinByCode)
 )
 
@@ -200,6 +202,7 @@ classroomRouter.post(
     '/:id/quizzes/:quizId/attempt',
     checkIdParamMiddleware,
     isClassroomMember,
+    submitQuizAttemptValidation,
     wrapRequestHandler(classroomController.submitQuizAttempt)
 )
 

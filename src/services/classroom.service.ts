@@ -10,7 +10,6 @@ import { Quiz } from "~/entities/quiz.entity"
 import { Flashcard } from "~/entities/flashcard.entity"
 import { StudySet } from "~/entities/studySet.entity"
 import { ClassroomMemberStatus } from "~/enums/classroomMemberStatus.enum"
-import { sendMessage } from "~/sockets"
 import { StudySetVisibility } from "~/enums/studySetVisibility.enum"
 import { CreateClassroomBodyReq } from "~/dtos/req/classroom/createClassroomBody.req"
 import { UpdateClassroomBodyReq } from "~/dtos/req/classroom/updateClassroomBody.req"
@@ -165,12 +164,13 @@ class ClassroomService {
                 })
                 
                 const membershipMap = new Map(myMemberships.map(m => [m.classroom.id, m.status]))
-                classrooms.forEach((c: any) => {
-                    const isTeacher = c.teacher?.id === userId
+                classrooms.forEach((c) => {
+                    const classroom = c as Classroom & { myStatus?: string | null }
+                    const isTeacher = classroom.teacher?.id === userId
                     if (isTeacher) {
-                        c.myStatus = 'ACTIVE'
+                        classroom.myStatus = 'ACTIVE'
                     } else {
-                        c.myStatus = membershipMap.get(c.id) || null
+                        classroom.myStatus = membershipMap.get(classroom.id) || null
                     }
                 })
             }
@@ -359,8 +359,15 @@ class ClassroomService {
             throw new ForbiddenRequestError('Only the teacher can remove members')
         }
 
-        const member = await memberRepo.findOne({ where: { id: memberId, classroom: { id: classroomId } } })
+        const member = await memberRepo.findOne({ 
+            where: { id: memberId, classroom: { id: classroomId } },
+            relations: ['user']
+        })
         if (!member) throw new BadRequestError({ message: 'Member not found' })
+
+        if (member.user.id === classroom.teacher.id) {
+            throw new BadRequestError({ message: 'Cannot remove the teacher from the classroom' })
+        }
 
         member.status = ClassroomMemberStatus.REMOVED
         await memberRepo.save(member)
@@ -368,52 +375,58 @@ class ClassroomService {
     }
 
     submitQuizAttempt = async (userId: number, classroomId: number, quizId: number, answers: Record<string, string>) => {
-        const quizRepo = await this.db.getRepository(ClassroomQuiz)
-        const attemptRepo = await this.db.getRepository(ClassroomQuizAttempt)
+        return await this.db.dataSource.transaction(async (transactionalEntityManager) => {
+            const quizRepo = transactionalEntityManager.getRepository(ClassroomQuiz)
+            const attemptRepo = transactionalEntityManager.getRepository(ClassroomQuizAttempt)
 
-        const quiz = await quizRepo.findOne({
-            where: { id: quizId, classroom: { id: classroomId } },
-            relations: ['questions']
-        })
-        if (!quiz) throw new BadRequestError({ message: 'Quiz not found' })
+            // Lock the quiz row to prevent concurrent attempt count races if necessary, 
+            // but usually a transaction with SERIALIZABLE or a lock on the attempt count is enough.
+            // For simplicity and effectiveness, we count within the transaction.
+            const quiz = await quizRepo.findOne({
+                where: { id: quizId, classroom: { id: classroomId } },
+                relations: ['questions']
+            })
+            if (!quiz) throw new BadRequestError({ message: 'Quiz not found' })
 
-        let correctCount = 0
-        const total = quiz.questions?.length || 0
+            const previousAttempts = await attemptRepo.count({
+                where: { user: { id: userId }, quiz: { id: quizId } }
+            })
+            
+            if (previousAttempts >= quiz.maxAttempts) {
+                throw new BadRequestError({ message: 'Maximum attempts reached for this quiz' })
+            }
 
-        quiz.questions?.forEach(q => {
-            const userChoice = answers[q.id.toString()]
-            if (userChoice && userChoice.trim().toLowerCase() === q.correctAnswer.trim().toLowerCase()) {
-                correctCount++
+            let correctCount = 0
+            const total = quiz.questions?.length || 0
+
+            quiz.questions?.forEach((q: any) => {
+                const userChoice = answers[q.id.toString()]
+                if (userChoice && userChoice.trim().toLowerCase() === q.correctAnswer.trim().toLowerCase()) {
+                    correctCount++
+                }
+            })
+
+            const score = total > 0 ? parseFloat((correctCount / total).toFixed(2)) : 0
+
+            const attempt = attemptRepo.create({
+                quiz: { id: quizId } as any,
+                user: { id: userId } as any,
+                attemptNumber: previousAttempts + 1,
+                score,
+                answers,
+                startedAt: new Date(),
+                submittedAt: new Date()
+            })
+            await attemptRepo.save(attempt)
+
+            return { 
+                attempt: {
+                    ...attempt,
+                    correctCount
+                }, 
+                isPassing: score >= quiz.passingScore 
             }
         })
-
-        const score = total > 0 ? parseFloat((correctCount / total).toFixed(2)) : 0
-
-        const previousAttempts = await attemptRepo.count({
-            where: { user: { id: userId }, quiz: { id: quizId } }
-        })
-        if (previousAttempts >= quiz.maxAttempts) {
-            throw new BadRequestError({ message: 'Maximum attempts reached for this quiz' })
-        }
-
-        const attempt = attemptRepo.create({
-            quiz: { id: quizId } as any,
-            user: { id: userId } as any,
-            attemptNumber: previousAttempts + 1,
-            score,
-            answers,
-            startedAt: new Date(),
-            submittedAt: new Date()
-        })
-        await attemptRepo.save(attempt)
-
-        return { 
-            attempt: {
-                ...attempt,
-                correctCount
-            }, 
-            isPassing: score >= quiz.passingScore 
-        }
     }
 
     // ─────────────────────────────────────────────────
@@ -432,38 +445,51 @@ class ClassroomService {
     }
 
     getLessons = async (classroomId: number, userId?: number) => {
-        const classroomRepo = await this.db.getRepository(Classroom)
-        const classroom = await classroomRepo.findOne({ where: { id: classroomId }, relations: ['teacher'] })
-        const isTeacher = classroom?.teacher?.id === userId
-        
         const lessonRepo = await this.db.getRepository(ClassroomLesson)
-        const where: any = { classroom: { id: classroomId } }
-        if (!isTeacher) {
-            where.isPublished = true
+        
+        const qb = lessonRepo.createQueryBuilder('lesson')
+            .leftJoin('lesson.classroom', 'classroom')
+            .leftJoin('classroom.teacher', 'teacher')
+            .leftJoinAndSelect('lesson.attachments', 'attachment')
+            .where('classroom.id = :classroomId', { classroomId })
+
+        if (userId !== undefined) {
+            qb.andWhere(new Brackets(qb => {
+                qb.where('lesson.isPublished = true')
+                  .orWhere('teacher.id = :userId', { userId })
+            }))
+        } else {
+            qb.andWhere('lesson.isPublished = true')
         }
         
-        return lessonRepo.find({
-            where,
-            relations: ['attachments'],
-            order: { sortOrder: 'ASC', createdAt: 'ASC' },
-        })
+        qb.orderBy('lesson.sortOrder', 'ASC')
+          .addOrderBy('lesson.createdAt', 'ASC')
+
+        return qb.getMany()
     }
 
     getLessonById = async (classroomId: number, lessonId: number, userId?: number) => {
-        const classroomRepo = await this.db.getRepository(Classroom)
-        const classroom = await classroomRepo.findOne({ where: { id: classroomId }, relations: ['teacher'] })
-        const isTeacher = classroom?.teacher?.id === userId
-
         const lessonRepo = await this.db.getRepository(ClassroomLesson)
-        const where: any = { id: lessonId, classroom: { id: classroomId } }
-        if (!isTeacher) {
-            where.isPublished = true
+        
+        const qb = lessonRepo.createQueryBuilder('lesson')
+            .leftJoin('lesson.classroom', 'classroom')
+            .leftJoin('classroom.teacher', 'teacher')
+            .leftJoinAndSelect('lesson.attachments', 'attachment')
+            .leftJoinAndSelect('lesson.quizzes', 'quiz')
+            .leftJoinAndSelect('lesson.flashcards', 'flashcard')
+            .where('lesson.id = :lessonId', { lessonId })
+            .andWhere('classroom.id = :classroomId', { classroomId })
+
+        if (userId !== undefined) {
+            qb.andWhere(new Brackets(qb => {
+                qb.where('lesson.isPublished = true')
+                  .orWhere('teacher.id = :userId', { userId })
+            }))
+        } else {
+            qb.andWhere('lesson.isPublished = true')
         }
 
-        const lesson = await lessonRepo.findOne({
-            where,
-            relations: ['attachments', 'quizzes', 'flashcards'],
-        })
+        const lesson = await qb.getOne()
         if (!lesson) throw new BadRequestError({ message: 'Lesson not found' })
         return lesson
     }
@@ -499,9 +525,11 @@ class ClassroomService {
         const classroom = await classroomRepo.findOne({ where: { id: classroomId } })
         if (!classroom) throw new BadRequestError({ message: 'Classroom not found' })
 
-        // Clamp passingScore between 0 and 1
+        // Validate passingScore between 0 and 1
         if (data.passingScore !== undefined) {
-            data.passingScore = Math.max(0, Math.min(1, data.passingScore))
+            if (data.passingScore < 0 || data.passingScore > 1) {
+                throw new BadRequestError({ message: 'Passing score must be between 0 and 1' })
+            }
         }
 
         const quizRepo = await this.db.getRepository(ClassroomQuiz)
@@ -515,50 +543,61 @@ class ClassroomService {
     }
 
     getQuizzes = async (classroomId: number, userId?: number) => {
-        const classroomRepo = await this.db.getRepository(Classroom)
-        const classroom = await classroomRepo.findOne({ where: { id: classroomId }, relations: ['teacher'] })
-        const isTeacher = classroom?.teacher?.id === userId
-
         const quizRepo = await this.db.getRepository(ClassroomQuiz)
-        const where: any = { classroom: { id: classroomId } }
-        if (!isTeacher) {
-            where.isPublished = true
+        
+        const qb = quizRepo.createQueryBuilder('quiz')
+            .leftJoin('quiz.classroom', 'classroom')
+            .leftJoin('classroom.teacher', 'teacher')
+            .leftJoinAndSelect('quiz.lesson', 'lesson')
+            .where('classroom.id = :classroomId', { classroomId })
+
+        if (userId !== undefined) {
+            qb.andWhere(new Brackets(qb => {
+                qb.where('quiz.isPublished = true')
+                  .orWhere('teacher.id = :userId', { userId })
+            }))
+        } else {
+            qb.andWhere('quiz.isPublished = true')
         }
 
-        return quizRepo.find({
-            where,
-            relations: ['lesson'],
-            order: { createdAt: 'ASC' },
-        })
+        return qb.orderBy('quiz.createdAt', 'ASC').getMany()
     }
 
     getQuizById = async (classroomId: number, quizId: number, userId?: number) => {
-        const classroomRepo = await this.db.getRepository(Classroom)
-        const classroom = await classroomRepo.findOne({ where: { id: classroomId }, relations: ['teacher'] })
-        const isTeacher = classroom?.teacher?.id === userId
-
         const quizRepo = await this.db.getRepository(ClassroomQuiz)
-        const where: any = { id: quizId, classroom: { id: classroomId } }
-        if (!isTeacher) {
-            where.isPublished = true
+
+        const qb = quizRepo.createQueryBuilder('quiz')
+            .leftJoin('quiz.classroom', 'classroom')
+            .leftJoin('classroom.teacher', 'teacher')
+            .addSelect(['teacher.id'])
+            .leftJoinAndSelect('quiz.lesson', 'lesson')
+            .leftJoinAndSelect('quiz.questions', 'question')
+            .where('quiz.id = :quizId', { quizId })
+            .andWhere('classroom.id = :classroomId', { classroomId })
+
+        if (userId !== undefined) {
+            qb.andWhere(new Brackets(qb => {
+                qb.where('quiz.isPublished = true')
+                  .orWhere('teacher.id = :userId', { userId })
+            }))
+        } else {
+            qb.andWhere('quiz.isPublished = true')
         }
 
-        const quiz = await quizRepo.findOne({
-            where,
-            relations: ['lesson', 'questions'],
-        })
-        if (!quiz) throw new BadRequestError({ message: 'Quiz not found' })
+        const result = await qb.getOne()
+        if (!result) throw new BadRequestError({ message: 'Quiz not found' })
+        
+        const isUserTeacher = userId !== undefined && (result as any).classroom?.teacher?.id === userId
 
-        // Count attempts for student
-        if (userId !== undefined && !isTeacher) {
+        if (userId !== undefined && !isUserTeacher) {
             const attemptRepo = await this.db.getRepository(ClassroomQuizAttempt)
             const userAttempts = await attemptRepo.count({
                 where: { user: { id: userId }, quiz: { id: quizId } }
             });
-            (quiz as any).userAttempts = userAttempts
+            (result as any).userAttempts = userAttempts
         }
 
-        return quiz
+        return result
     }
 
     updateQuiz = async (classroomId: number, quizId: number, data: UpdateClassroomQuizBodyReq) => {
@@ -568,9 +607,11 @@ class ClassroomService {
         })
         if (!quiz) throw new BadRequestError({ message: 'Quiz not found' })
 
-        // Clamp passingScore between 0 and 1
+        // Validate passingScore between 0 and 1
         if (data.passingScore !== undefined) {
-            data.passingScore = Math.max(0, Math.min(1, data.passingScore))
+             if (data.passingScore < 0 || data.passingScore > 1) {
+                throw new BadRequestError({ message: 'Passing score must be between 0 and 1' })
+            }
         }
 
         const { lessonId, ...rest } = data
