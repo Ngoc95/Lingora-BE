@@ -56,6 +56,48 @@ class ClassroomController {
     }
 
     // ─────────────────────────────────────────────────
+    // MEMBER MANAGEMENT
+    // ─────────────────────────────────────────────────
+
+    joinByCode = async (req: Request, res: Response) => {
+        const userId = req.user!.id
+        const { code } = req.body
+        return new SuccessResponse({
+            message: 'Requested to join classroom',
+            metaData: await classroomService.joinByCode(userId, code)
+        }).send(res)
+    }
+
+    getMembers = async (req: Request, res: Response) => {
+        const classroomId = parseInt(req.params.id)
+        const status = req.query.status as string | undefined
+        return new SuccessResponse({
+            message: 'Get members successfully',
+            metaData: await classroomService.getMembers(classroomId, status)
+        }).send(res)
+    }
+
+    approveMember = async (req: Request, res: Response) => {
+        const classroomId = parseInt(req.params.id)
+        const memberId = parseInt(req.params.memberId)
+        const teacherId = req.user!.id
+        return new SuccessResponse({
+            message: 'Approve member successfully',
+            metaData: await classroomService.approveMember(classroomId, memberId, teacherId)
+        }).send(res)
+    }
+
+    kickMember = async (req: Request, res: Response) => {
+        const classroomId = parseInt(req.params.id)
+        const memberId = parseInt(req.params.memberId)
+        const teacherId = req.user!.id
+        return new SuccessResponse({
+            message: 'Kick member successfully',
+            metaData: await classroomService.kickMember(classroomId, memberId, teacherId)
+        }).send(res)
+    }
+
+    // ─────────────────────────────────────────────────
     // LESSON
     // ─────────────────────────────────────────────────
 
@@ -69,18 +111,20 @@ class ClassroomController {
 
     getLessons = async (req: Request, res: Response) => {
         const classroomId = parseInt(req.params.id)
+        const userId = req.user!.id
         return new SuccessResponse({
             message: 'Get lessons successfully',
-            metaData: await classroomService.getLessons(classroomId)
+            metaData: await classroomService.getLessons(classroomId, userId)
         }).send(res)
     }
 
     getLessonById = async (req: Request, res: Response) => {
         const classroomId = parseInt(req.params.id)
         const lessonId = parseInt(req.params.lessonId)
+        const userId = req.user!.id
         return new SuccessResponse({
             message: 'Get lesson successfully',
-            metaData: await classroomService.getLessonById(classroomId, lessonId)
+            metaData: await classroomService.getLessonById(classroomId, lessonId, userId)
         }).send(res)
     }
 
@@ -141,18 +185,20 @@ class ClassroomController {
 
     getQuizzes = async (req: Request, res: Response) => {
         const classroomId = parseInt(req.params.id)
+        const userId = req.user!.id
         return new SuccessResponse({
             message: 'Get quizzes successfully',
-            metaData: await classroomService.getQuizzes(classroomId)
+            metaData: await classroomService.getQuizzes(classroomId, userId)
         }).send(res)
     }
 
     getQuizById = async (req: Request, res: Response) => {
         const classroomId = parseInt(req.params.id)
         const quizId = parseInt(req.params.quizId)
+        const userId = req.user!.id
         return new SuccessResponse({
             message: 'Get quiz successfully',
-            metaData: await classroomService.getQuizById(classroomId, quizId)
+            metaData: await classroomService.getQuizById(classroomId, quizId, userId)
         }).send(res)
     }
 
@@ -171,6 +217,17 @@ class ClassroomController {
         return new SuccessResponse({
             message: 'Delete quiz successfully',
             metaData: await classroomService.deleteQuiz(classroomId, quizId)
+        }).send(res)
+    }
+
+    submitQuizAttempt = async (req: Request, res: Response) => {
+        const userId = req.user!.id
+        const classroomId = parseInt(req.params.id)
+        const quizId = parseInt(req.params.quizId)
+        const { answers } = req.body
+        return new SuccessResponse({
+            message: 'Quiz attempt submitted successfully',
+            metaData: await classroomService.submitQuizAttempt(userId, classroomId, quizId, answers || {})
         }).send(res)
     }
 

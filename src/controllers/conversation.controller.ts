@@ -10,10 +10,15 @@ export class ConversationController {
 
     getContexts = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const contexts = await this.conversationService.getActiveContexts();
+            const page = req.parseQueryPagination?.page || 1;
+            const limit = req.parseQueryPagination?.limit || 10;
+            const search = req.query.search as string;
+            const sort = req.sortParsed;
+
+            const response = await this.conversationService.getActiveContexts(page, limit, search, sort);
             new OK({
                 message: "Get conversation contexts successfully",
-                metaData: contexts
+                metaData: response
             }).send(res);
         } catch (error) {
             next(error);
@@ -84,10 +89,15 @@ export class ConversationController {
     getUserSessions = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const user = req.user!;
-            const sessions = await this.conversationService.getUserSessions(user);
+            const page = req.parseQueryPagination?.page || 1;
+            const limit = req.parseQueryPagination?.limit || 10;
+            const search = req.query.search as string;
+            const sort = req.sortParsed;
+
+            const response = await this.conversationService.getUserSessions(user, page, limit, search, sort);
             new OK({
                 message: "Get user conversation sessions successfully",
-                metaData: sessions
+                metaData: response
             }).send(res);
         } catch (error) {
             next(error);

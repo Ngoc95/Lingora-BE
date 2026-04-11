@@ -6,6 +6,9 @@ import { ConversationMessage, ChatSender } from "~/entities/conversationMessage.
 import { ConversationSuggestionTemplate } from "~/entities/conversationSuggestionTemplate.entity";
 import { User } from "~/entities/user.entity";
 import { ConversationStatus } from "~/enums/conversationStatus.enum";
+import { ILike, FindOptionsWhere } from "typeorm";
+import validator from "validator";
+import { BadRequestError, NotFoundRequestError } from "~/core/error.response";
 
 export class ConversationService {
     private static instance: ConversationService;
@@ -20,12 +23,36 @@ export class ConversationService {
         return ConversationService.instance;
     }
 
-    async getActiveContexts() {
+    async getActiveContexts(page: number = 1, limit: number = 10, search?: string, sort?: Record<string, "ASC" | "DESC">) {
         const repo = await this.db.getRepository(ConversationContext);
-        return await repo.find({
-            where: { isActive: true },
-            order: { sortOrder: 'ASC' }
+        const skip = (page - 1) * limit;
+
+        let where: FindOptionsWhere<ConversationContext> | FindOptionsWhere<ConversationContext>[] = { isActive: true };
+
+        if (search) {
+            const normalized = validator.trim(search).toLowerCase();
+            // Since we only have 'name' and 'description' to search potentially
+            where = [
+                { isActive: true, name: ILike(`%${normalized}%`) },
+                { isActive: true, description: ILike(`%${normalized}%`) }
+            ];
+        }
+
+        const sortOptions = sort && Object.keys(sort).length > 0 ? sort : { sortOrder: 'ASC' as const };
+
+        const [contexts, total] = await repo.findAndCount({
+            where,
+            order: sortOptions,
+            skip,
+            take: limit
         });
+
+        return {
+            currentPage: page,
+            totalPages: Math.ceil(total / limit),
+            total,
+            contexts
+        };
     }
 
     async getContextTemplates(contextId: number) {
@@ -41,10 +68,8 @@ export class ConversationService {
         const sessionRepo = await this.db.getRepository(ConversationSession);
         const messageRepo = await this.db.getRepository(ConversationMessage);
 
-        const context = await contextRepo.findOne({ where: { id: contextId, isActive: true } });
-        if (!context) {
-            throw new Error(`Context ${contextId} not found or inactive`);
-        }
+        const context = await contextRepo.findOneBy({ id: contextId, isActive: true });
+        if (!context) throw new NotFoundRequestError("Conversation Context not found or inactive");
 
         let session = sessionRepo.create({
             user,
@@ -58,11 +83,19 @@ export class ConversationService {
 
         session = await sessionRepo.save(session);
 
+        const templateRepo = await this.db.getRepository(ConversationSuggestionTemplate);
+        const templates = await templateRepo.find({
+            where: { context: { id: contextId }, phase: 'opening' },
+            order: { sortOrder: 'ASC' }
+        });
+        const promptTemplates = templates.map(t => t.suggestionText);
+
         // Generate opening message from AI
         const aiOpeningResult = await aiService.startConversation({
             system_prompt: context.systemPrompt,
             context: context.description,
-            difficulty: context.difficultyLevel
+            difficulty: context.difficultyLevel,
+            templates: promptTemplates
         });
 
         if (aiOpeningResult) {
@@ -95,8 +128,10 @@ export class ConversationService {
             relations: ['context', 'messages']
         });
 
-        if (!session) throw new Error("Session not found");
-        if (session.status !== ConversationStatus.ACTIVE) throw new Error("Session is no longer active");
+        if (!session) throw new NotFoundRequestError("Session not found");
+        if (session.status === ConversationStatus.COMPLETED) {
+            throw new BadRequestError({ message: "Cannot send message. Session is already completed." });
+        }
 
         const history = (session.messages || [])
             .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
@@ -105,13 +140,21 @@ export class ConversationService {
                 content: m.content
             }));
 
+        const templateRepo = await this.db.getRepository(ConversationSuggestionTemplate);
+        const templates = await templateRepo.find({
+            where: { context: { id: session.context.id }, phase: session.currentPhase },
+            order: { sortOrder: 'ASC' }
+        });
+        const promptTemplates = templates.map(t => t.suggestionText);
+
         const aiResult = await aiService.sendConversation({
             question,
             system_prompt: session.context.systemPrompt,
             context: session.context.description,
             difficulty: session.context.difficultyLevel,
             current_phase: session.currentPhase,
-            history
+            history,
+            templates: promptTemplates
         });
 
         if (!aiResult) {
@@ -132,7 +175,12 @@ export class ConversationService {
             sender: ChatSender.AI,
             content: aiResult.response,
             corrections: aiResult.correction?.has_error ? aiResult.correction : null,
-            suggestions: aiResult.suggestions
+            suggestions: aiResult.suggestions,
+            improvement: aiResult.improvement?.has_improvement ? aiResult.improvement : null,
+            vocabulary: aiResult.vocabulary_highlight ? {
+                highlight: aiResult.vocabulary_highlight,
+                meaning: aiResult.vocabulary_meaning
+            } : null
         });
         await messageRepo.save(aiMessage);
 
@@ -156,8 +204,8 @@ export class ConversationService {
             session.endedAt = new Date();
             await sessionRepo.save(session);
 
-            // Trigger async score calculation (do not await to respond fast)
-            this.calculateSessionScores(session);
+            // Await to ensure scores and feedback are computed before responding
+            await this.calculateSessionScores(session);
         } else {
             await sessionRepo.save(session);
         }
@@ -176,7 +224,7 @@ export class ConversationService {
             relations: ['context']
         });
 
-        if (!session) throw new Error("Session not found");
+        if (!session) throw new NotFoundRequestError("Session not found");
         if (session.status === ConversationStatus.COMPLETED) return session;
 
         session.status = ConversationStatus.COMPLETED;
@@ -210,26 +258,51 @@ export class ConversationService {
                 await sessionRepo.update(session.id, {
                     grammarScore: scores.grammar_score,
                     fluencyScore: scores.fluency_score,
-                    overallScore: scores.overall_score
+                    overallScore: scores.overall_score,
+                    feedback: scores.feedback
                 });
 
                 // Update in-memory session object so that the caller can return the latest scores immediately
                 session.grammarScore = scores.grammar_score;
                 session.fluencyScore = scores.fluency_score;
                 session.overallScore = scores.overall_score;
+                session.feedback = scores.feedback;
             }
         } catch (error) {
             console.error("Failed to calculate session scores:", error);
         }
     }
 
-    async getUserSessions(user: User) {
+    async getUserSessions(user: User, page: number = 1, limit: number = 10, search?: string, sort?: Record<string, "ASC" | "DESC">) {
         const repo = await this.db.getRepository(ConversationSession);
-        return await repo.find({
-            where: { user: { id: user.id } },
-            order: { createdAt: 'DESC' },
+        const skip = (page - 1) * limit;
+
+        let where: FindOptionsWhere<ConversationSession> | FindOptionsWhere<ConversationSession>[] = { user: { id: user.id } };
+
+        if (search) {
+            const normalized = validator.trim(search).toLowerCase();
+            where = [
+                { user: { id: user.id }, title: ILike(`%${normalized}%`) },
+                { user: { id: user.id }, context: { name: ILike(`%${normalized}%`) } }
+            ];
+        }
+
+        const sortOptions = sort && Object.keys(sort).length > 0 ? sort : { createdAt: 'DESC' as const };
+
+        const [sessions, total] = await repo.findAndCount({
+            where,
+            order: sortOptions,
+            skip,
+            take: limit,
             relations: ['context']
         });
+
+        return {
+            currentPage: page,
+            totalPages: Math.ceil(total / limit),
+            total,
+            sessions
+        };
     }
 
     async getSessionDetails(user: User, sessionId: string) {

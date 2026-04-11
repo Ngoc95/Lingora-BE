@@ -107,6 +107,7 @@ class OpeningRequest(BaseModel):
     system_prompt: str       # Lấy từ conversation_context.system_prompt (DB)
     context: str             # Tên context (vd: "Travel")
     difficulty: str = "BEGINNER"
+    templates: Optional[List[str]] = None  # Danh sách gợi ý từ DB
 
 @app.post("/chat/conversation/opening")
 def conversation_opening_endpoint(request: OpeningRequest):
@@ -126,6 +127,7 @@ def conversation_opening_endpoint(request: OpeningRequest):
         system_prompt=request.system_prompt,
         context=request.context,
         difficulty=request.difficulty,
+        templates=request.templates,
     )
     return result
 
@@ -138,6 +140,7 @@ class ConversationRequest(BaseModel):
     difficulty: str = "BEGINNER"                     # BEGINNER / INTERMEDIATE / ADVANCED
     current_phase: str = "opening"                   # opening / developing / closing
     history: Optional[List[HistoryMessage]] = None   # Lịch sử chat
+    templates: Optional[List[str]] = None            # Mục tiêu / Mẫu câu khuyến nghị
 
 @app.post("/chat/conversation")
 def conversation_endpoint(request: ConversationRequest):
@@ -174,10 +177,10 @@ def conversation_endpoint(request: ConversationRequest):
         difficulty=request.difficulty,
         current_phase=request.current_phase,
         history=history_dicts,
+        templates=request.templates,
     )
 
     return result
-
 
 # ============================================================================
 # SESSION SCORING — Chấm điểm tổng kết phiên

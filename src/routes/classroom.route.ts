@@ -64,6 +64,37 @@ classroomRouter.delete(
 )
 
 // ══════════════════════════════════════════════════
+// MEMBER MANAGEMENT
+// ══════════════════════════════════════════════════
+
+classroomRouter.post(
+    '/join',
+    // code validation could go here
+    wrapRequestHandler(classroomController.joinByCode)
+)
+
+classroomRouter.get(
+    '/:id/members',
+    checkIdParamMiddleware,
+    isClassroomMember,
+    wrapRequestHandler(classroomController.getMembers)
+)
+
+classroomRouter.patch(
+    '/:id/members/:memberId/approve',
+    checkIdParamMiddleware,
+    isClassroomTeacher,
+    wrapRequestHandler(classroomController.approveMember)
+)
+
+classroomRouter.delete(
+    '/:id/members/:memberId',
+    checkIdParamMiddleware,
+    isClassroomTeacher,
+    wrapRequestHandler(classroomController.kickMember)
+)
+
+// ══════════════════════════════════════════════════
 // LESSONS  /classrooms/:id/lessons
 // ══════════════════════════════════════════════════
 
@@ -163,6 +194,13 @@ classroomRouter.get(
     checkIdParamMiddleware,
     isClassroomMember,
     wrapRequestHandler(classroomController.getQuizById)
+)
+
+classroomRouter.post(
+    '/:id/quizzes/:quizId/attempt',
+    checkIdParamMiddleware,
+    isClassroomMember,
+    wrapRequestHandler(classroomController.submitQuizAttempt)
 )
 
 classroomRouter.patch(

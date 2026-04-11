@@ -8,7 +8,7 @@ import { BadRequestError } from '~/core/error.response'
 import { CreateStudySetBodyReq, FlashcardInputReq, QuizInputReq } from '~/dtos/req/studySet/createStudySetBody.req'
 import { UpdateStudySetBodyReq } from '~/dtos/req/studySet/updateStudySetBody.req'
 import { GetStudySetsQueryReq } from '~/dtos/req/studySet/getStudySetsQuery.req'
-import { In } from 'typeorm'
+import { Brackets, In } from 'typeorm'
 import validator from 'validator'
 import { createVNPayPaymentUrl } from '~/utils/vnpay'
 import { v4 as uuidv4 } from 'uuid'
@@ -154,9 +154,14 @@ class StudySetService {
             .skip(skip)
             .take(query.limit!)
 
-        // Chỉ lấy những study set có status = PUBLISHED và visibility = PUBLIC (bắt buộc cả 2)
-        qb.where('studySet.visibility = :visibility', { visibility: StudySetVisibility.PUBLIC })
-        qb.andWhere('studySet.status = :status', { status: StudySetStatus.PUBLISHED })
+        // Lấy những study set có status = PUBLISHED và visibility = PUBLIC (bắt buộc cả 2)
+        // HOẶC là study set của chính mình
+        qb.where(
+            new Brackets((qb) => {
+                qb.where('studySet.visibility = :visibility', { visibility: StudySetVisibility.PUBLIC })
+                    .andWhere('studySet.status = :status', { status: StudySetStatus.PUBLISHED })
+            })
+        ).orWhere('owner.id = :userId', { userId })
 
         if (query.minPrice !== undefined) {
             qb.andWhere('studySet.price >= :minPrice', { minPrice: query.minPrice })

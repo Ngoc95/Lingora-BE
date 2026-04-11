@@ -15,6 +15,7 @@ import { ConversationMessage } from "./conversationMessage.entity";
 
 @Entity({ name: 'conversation_sessions' })
 export class ConversationSession extends BaseEntity {
+    static allowSortList = ['createdAt', 'title', 'totalMessages', 'grammarScore', 'fluencyScore', 'overallScore'];
     @PrimaryGeneratedColumn('uuid')
     id!: string;
 
@@ -52,6 +53,9 @@ export class ConversationSession extends BaseEntity {
 
     @Column({ type: 'float', nullable: true })
     overallScore?: number | null;
+
+    @Column({ type: 'text', nullable: true })
+    feedback?: string | null;
 
     @OneToMany(() => ConversationMessage, message => message.session)
     messages?: ConversationMessage[];

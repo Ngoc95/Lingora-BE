@@ -36,6 +36,12 @@ export class ConversationMessage extends BaseEntity {
     @Column({ type: 'text', array: true, nullable: true })
     suggestions?: string[] | null;
 
+    @Column({ type: 'jsonb', nullable: true })
+    improvement?: object | null;
+
+    @Column({ type: 'jsonb', nullable: true })
+    vocabulary?: object | null;
+
     @CreateDateColumn()
     createdAt!: Date;
 }

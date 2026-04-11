@@ -87,6 +87,19 @@ class SuggestionResult(BaseModel):
     suggestions: List[str] = Field(
         description="2-3 câu gợi ý trả lời phù hợp với context và độ khó"
     )
+    vocabulary_highlight: str = Field(
+        default="",
+        description="1 từ/cụm từ HỮU ÍCH trong câu trả lời của AI mà learner nên học (để trống nếu không có)"
+    )
+    vocabulary_meaning: str = Field(
+        default="",
+        description="Nghĩa tiếng Việt ngắn gọn của vocabulary_highlight"
+    )
+    next_phase: str = Field(
+        default="",
+        description="Phase tiếp theo nếu cần chuyển (opening/developing/closing/completed), "
+                    "để trống nếu giữ nguyên phase hiện tại"
+    )
 
 
 class ImprovementResult(BaseModel):
@@ -172,6 +185,10 @@ response_generation_prompt = ChatPromptTemplate.from_messages([
      "- Set next_phase='closing' when learner says goodbye/thanks or after ~10 turns\n"
      "- Set next_phase='completed' after your farewell message\n"
      "- Leave next_phase empty ('') to stay in current phase\n\n"
+     "=== OBJECTIVES / EXPECTED LEARNER RESPONSES ===\n"
+     "Here are some target phrases the learner is expected to practice in this phase:\n"
+     "{templates}\n"
+     "If applicable, try to naturally steer the conversation or ask questions to encourage the learner to use these phrases or similar ones.\n\n"
      "=== CONVERSATION STYLE ===\n"
      "Speak like a REAL PERSON in casual spoken English:\n"
      "- Use casual words: 'yeah' not 'yes', 'pretty good' not 'very good',\n"
@@ -204,19 +221,22 @@ response_chain = response_generation_prompt | conversation_llm.with_structured_o
 suggestion_prompt = ChatPromptTemplate.from_messages([
     ("system",
      "You are a helpful English learning assistant.\n"
-     "Generate 2-3 natural reply suggestions for a {difficulty} level learner.\n"
+     "Generate natural reply suggestions and extract metadata for a {difficulty} level learner.\n"
      "Context: {context}\n"
      "Current conversation phase: {current_phase}\n\n"
-     "RULES:\n"
+     "RULES FOR SUGGESTIONS:\n"
+     "- ALL suggestions MUST be in ENGLISH only. NEVER write suggestions in Vietnamese or any other language.\n"
      "- Suggestions must be appropriate responses to what the AI just said\n"
-     "- Match the difficulty level:\n"
-     "  + BEGINNER: Simple words, short sentences (5-8 words)\n"
-     "  + INTERMEDIATE: More variety, slightly longer (8-12 words)\n"
-     "  + ADVANCED: Complex structures, idioms allowed\n"
-     "- Make each suggestion different in meaning/approach\n"
-     "- Suggestions should help the conversation move forward"),
+     "- Match the difficulty level: BEGINNER (5-8 words), INTERMEDIATE (8-12 words), ADVANCED (Complex)\n"
+     "RULES FOR VOCABULARY:\n"
+     "- Pick 1-3 useful words/phrases from the AI's response that the learner should learn.\n"
+     "RULES FOR NEXT PHASE:\n"
+     "- Set next_phase='developing' after 1-2 greeting exchanges\n"
+     "- Set next_phase='closing' when learner says goodbye/thanks or after ~10 turns\n"
+     "- Set next_phase='completed' after farewell message\n"
+     "- Leave next_phase empty ('') to stay in current phase"),
     ("human", "The AI conversation partner just said: \"{ai_response}\"\n\n"
-              "Generate reply suggestions for the learner:"),
+              "Generate reply suggestions for the learner, extract vocabulary, and determine the next phase:"),
 ])
 
 suggestion_chain = suggestion_prompt | conversation_llm.with_structured_output(SuggestionResult)
@@ -306,6 +326,7 @@ def get_conversation_answer(
     difficulty: str,
     current_phase: str,
     history: Optional[list] = None,
+    templates: Optional[list] = None,
 ) -> dict:
     """
     Xử lý 1 lượt hội thoại qua pipeline 3 chains.
@@ -337,6 +358,7 @@ def get_conversation_answer(
         "difficulty": difficulty,
         "current_phase": current_phase,
         "history": lc_history,
+        "templates": "\n".join([f"- {t}" for t in templates]) if templates else "No specific objectives.",
     }
 
     try:
@@ -412,9 +434,7 @@ def get_conversation_answer(
             "improvement": {"has_improvement": False, "original": "", "improved": "", "explanation": ""},
             "vocabulary_highlight": "",
             "vocabulary_meaning": "",
-            "next_phase": "",
         }
-
 
 # ============================================================================
 # 8. OPENING MESSAGE — AI chào đầu tiên khi tạo session
@@ -424,6 +444,7 @@ def generate_opening_message(
     system_prompt: str,
     context: str,
     difficulty: str,
+    templates: Optional[list] = None,
 ) -> dict:
     """
     AI tạo câu chào mở đầu khi user vừa chọn context và tạo session.
@@ -452,6 +473,7 @@ def generate_opening_message(
             "difficulty": difficulty,
             "current_phase": "opening",
             "history": [],
+            "templates": "\n".join([f"- {t}" for t in templates]) if templates else "No specific objectives.",
         })
 
         print(f"✅ Opening message: {greeting.response[:50]}...")

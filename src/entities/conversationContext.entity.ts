@@ -12,6 +12,7 @@ import { ConversationSuggestionTemplate } from "./conversationSuggestionTemplate
 
 @Entity({ name: 'conversation_contexts' })
 export class ConversationContext extends BaseEntity {
+    static allowSortList = ['sortOrder', 'name', 'difficultyLevel', 'createdAt'];
     @PrimaryGeneratedColumn()
     id!: number;
 

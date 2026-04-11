@@ -15,13 +15,35 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseURL}}/conversation/contexts",
+							"raw": "{{baseURL}}/conversation/contexts?page=1&limit=10&search=&sort=+sortOrder",
 							"host": [
 								"{{baseURL}}"
 							],
 							"path": [
 								"conversation",
 								"contexts"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Số trang (mặc định 1)"
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Số lượng mỗi trang (mặc định 10)"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"description": "Tìm kiếm theo name hoặc description"
+								},
+								{
+									"key": "sort",
+									"value": "+sortOrder",
+									"description": "Sắp xếp. Ví dụ: +name, -createdAt, +sortOrder"
+								}
 							]
 						},
 						"description": "Lấy danh sách các chủ đề giao tiếp (contexts) đang active."
@@ -160,13 +182,35 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseURL}}/conversation/sessions",
+							"raw": "{{baseURL}}/conversation/sessions?page=1&limit=10&search=&sort=-createdAt",
 							"host": [
 								"{{baseURL}}"
 							],
 							"path": [
 								"conversation",
 								"sessions"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Số trang (mặc định 1)"
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Số lượng mỗi trang (mặc định 10)"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"description": "Tìm kiếm theo title hoặc context name"
+								},
+								{
+									"key": "sort",
+									"value": "-createdAt",
+									"description": "Sắp xếp. Ví dụ: -createdAt, +title"
+								}
 							]
 						},
 						"description": "Lấy lịch sử tất cả các sessions của user đang đăng nhập."

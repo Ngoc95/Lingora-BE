@@ -5,5 +5,6 @@ export const EVENTS = {
   ORDER: 'Order',
   WARNING: 'Warning',
   CONTENT_DELETED: 'Content deleted',
-  WITHDRAWAL: 'Withdrawal'
+  WITHDRAWAL: 'Withdrawal',
+  CLASSROOM_APPROVED: 'Classroom approved'
 }

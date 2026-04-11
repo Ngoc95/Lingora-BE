@@ -5,10 +5,12 @@ import { Classroom } from "~/entities/classroom.entity"
 import { ClassroomMember } from "~/entities/classroomMember.entity"
 import { ClassroomLesson } from "~/entities/classroomLesson.entity"
 import { ClassroomQuiz } from "~/entities/classroomQuiz.entity"
+import { ClassroomQuizAttempt } from "~/entities/classroomQuizAttempt.entity"
 import { Quiz } from "~/entities/quiz.entity"
 import { Flashcard } from "~/entities/flashcard.entity"
 import { StudySet } from "~/entities/studySet.entity"
 import { ClassroomMemberStatus } from "~/enums/classroomMemberStatus.enum"
+import { sendMessage } from "~/sockets"
 import { StudySetVisibility } from "~/enums/studySetVisibility.enum"
 import { CreateClassroomBodyReq } from "~/dtos/req/classroom/createClassroomBody.req"
 import { UpdateClassroomBodyReq } from "~/dtos/req/classroom/updateClassroomBody.req"
@@ -16,12 +18,14 @@ import { GetAllClassroomsQueryReq } from "~/dtos/req/classroom/getAllClassroomsQ
 import { CreateLessonBodyReq } from "~/dtos/req/classroom/createLessonBody.req"
 import { UpdateLessonBodyReq } from "~/dtos/req/classroom/updateLessonBody.req"
 import { CreateLessonFlashcardBodyReq } from "~/dtos/req/classroom/createLessonFlashcardBody.req"
+import eventBus from "~/events-handler/eventBus"
+import { EVENTS } from "~/events-handler/constants"
 import { UpdateLessonFlashcardBodyReq } from "~/dtos/req/classroom/updateLessonFlashcardBody.req"
 import { CreateClassroomQuizBodyReq } from "~/dtos/req/classroom/createClassroomQuizBody.req"
 import { UpdateClassroomQuizBodyReq } from "~/dtos/req/classroom/updateClassroomQuizBody.req"
 import { CreateClassroomQuizQuestionBodyReq } from "~/dtos/req/classroom/createClassroomQuizQuestionBody.req"
 import { UpdateClassroomQuizQuestionBodyReq } from "~/dtos/req/classroom/updateClassroomQuizQuestionBody.req"
-import { Brackets } from "typeorm"
+import { Brackets, In } from "typeorm"
 
 class ClassroomService {
     private db = DatabaseService.getInstance()
@@ -72,7 +76,10 @@ class ClassroomService {
         page = 1,
         limit = 20,
         search,
+        status,
         isPublic,
+        teacherId,
+        membership,
         sort,
         userId,       // undefined = admin (xem tất cả)
     }: GetAllClassroomsQueryReq & { userId?: number }) => {
@@ -88,19 +95,36 @@ class ClassroomService {
             .skip(skip)
             .take(limit)
 
-        // === Giới hạn theo membership (nếu không phải admin) ===
-        if (userId !== undefined) {
-            qb.andWhere(
-                new Brackets((qb) => {
-                    qb.where('teacher.id = :userId', { userId })                // là GV của lớp
-                        .orWhere('member.user_id = :userId', { userId })        // là thành viên
-                })
-            )
+        // === Giới hạn theo membership (nếu không phải admin và có chỉ định membership) ===
+        if (userId !== undefined && membership) {
+            if (membership === 'TEACHER') {
+                qb.andWhere('teacher.id = :userId', { userId })
+            } else if (membership === 'STUDENT') {
+                qb.andWhere('member.user = :userId', { userId })
+                // ensure they are not also matching as a teacher unintentionally in this sub-query
+                qb.andWhere('teacher.id != :userId', { userId })
+            } else {
+                // ALL (Default logic: either teacher or member)
+                qb.andWhere(
+                    new Brackets((qb) => {
+                        qb.where('teacher.id = :userId', { userId })                // là GV của lớp
+                            .orWhere('member.user = :userId', { userId })           // là thành viên
+                    })
+                )
+            }
         }
 
         // === Filter ===
         if (isPublic !== undefined) {
             qb.andWhere('classroom.isPublic = :isPublic', { isPublic })
+        }
+
+        if (status) {
+            qb.andWhere('classroom.status = :status', { status })
+        }
+
+        if (teacherId) {
+            qb.andWhere('teacher.id = :teacherId', { teacherId })
         }
 
         // === Search ===
@@ -125,6 +149,32 @@ class ClassroomService {
         }
 
         const [classrooms, total] = await qb.getManyAndCount()
+
+        // Map myStatus (only if userId is provided)
+        if (userId !== undefined) {
+            const memberRepo = await this.db.getRepository(ClassroomMember)
+            const classroomIds = classrooms.map(c => c.id)
+            
+            if (classroomIds.length > 0) {
+                const myMemberships = await memberRepo.find({
+                    where: {
+                        classroom: { id: In(classroomIds) },
+                        user: { id: userId }
+                    },
+                    relations: ['classroom']
+                })
+                
+                const membershipMap = new Map(myMemberships.map(m => [m.classroom.id, m.status]))
+                classrooms.forEach((c: any) => {
+                    const isTeacher = c.teacher?.id === userId
+                    if (isTeacher) {
+                        c.myStatus = 'ACTIVE'
+                    } else {
+                        c.myStatus = membershipMap.get(c.id) || null
+                    }
+                })
+            }
+        }
 
         return {
             currentPage: page,
@@ -211,6 +261,162 @@ class ClassroomService {
     }
 
     // ─────────────────────────────────────────────────
+    // MEMBER MANAGEMENT
+    // ─────────────────────────────────────────────────
+
+    joinByCode = async (userId: number, code: string) => {
+        const classroomRepo = await this.db.getRepository(Classroom)
+        const memberRepo = await this.db.getRepository(ClassroomMember)
+
+        const classroom = await classroomRepo.findOne({ where: { code }, relations: ['teacher'] })
+        if (!classroom) throw new BadRequestError({ message: 'Classroom not found' })
+
+        if (classroom.teacher?.id === userId) {
+            throw new BadRequestError({ message: 'You are the teacher of this classroom' })
+        }
+
+        const existingMember = await memberRepo.findOne({
+            where: { classroom: { id: classroom.id }, user: { id: userId } }
+        })
+
+        if (existingMember) {
+            if (existingMember.status === ClassroomMemberStatus.ACTIVE) {
+                throw new BadRequestError({ message: 'You are already an active member' })
+            }
+            if (existingMember.status === ClassroomMemberStatus.PENDING) {
+                throw new BadRequestError({ message: 'Your join request is pending' })
+            }
+            existingMember.status = classroom.isPublic ? ClassroomMemberStatus.ACTIVE : ClassroomMemberStatus.PENDING
+            await memberRepo.save(existingMember)
+            return existingMember
+        }
+
+        const newMember = memberRepo.create({
+            classroom: { id: classroom.id } as any,
+            user: { id: userId } as any,
+            status: classroom.isPublic ? ClassroomMemberStatus.ACTIVE : ClassroomMemberStatus.PENDING
+        })
+        await memberRepo.save(newMember)
+        return newMember
+    }
+
+    getMembers = async (classroomId: number, status?: string) => {
+        const memberRepo = await this.db.getRepository(ClassroomMember)
+        const qb = memberRepo.createQueryBuilder('member')
+            .leftJoinAndSelect('member.user', 'user')
+            .where('member.classroom.id = :classroomId', { classroomId })
+
+        if (status) {
+            qb.andWhere('member.status = :status', { status })
+        } else {
+            qb.andWhere('member.status IN (:...statuses)', { statuses: [ClassroomMemberStatus.ACTIVE, ClassroomMemberStatus.PENDING] })
+        }
+        
+        qb.orderBy('member.joinedAt', 'DESC')
+        return qb.getMany()
+    }
+
+    approveMember = async (classroomId: number, memberId: number, teacherId: number) => {
+        const classroomRepo = await this.db.getRepository(Classroom)
+        const memberRepo = await this.db.getRepository(ClassroomMember)
+
+        const classroom = await classroomRepo.findOne({ where: { id: classroomId }, relations: ['teacher'] })
+        if (!classroom) throw new BadRequestError({ message: 'Classroom not found' })
+
+        if (classroom.teacher?.id !== teacherId) {
+            // allow bypass for admin or handle via roles? For now just teacher check
+            throw new ForbiddenRequestError('Only the teacher can approve members')
+        }
+
+        const member = await memberRepo.findOne({ 
+            where: { id: memberId, classroom: { id: classroomId } },
+            relations: ['user'] 
+        })
+        if (!member) throw new BadRequestError({ message: 'Member not found' })
+        if (member.status !== ClassroomMemberStatus.PENDING) {
+            throw new BadRequestError({ message: 'Member is not pending approval' })
+        }
+
+        member.status = ClassroomMemberStatus.ACTIVE
+        await memberRepo.save(member)
+
+        eventBus.emit(EVENTS.CLASSROOM_APPROVED, { 
+            classroom, 
+            member 
+        })
+
+        return member
+    }
+
+    kickMember = async (classroomId: number, memberId: number, teacherId: number) => {
+        const classroomRepo = await this.db.getRepository(Classroom)
+        const memberRepo = await this.db.getRepository(ClassroomMember)
+
+        const classroom = await classroomRepo.findOne({ where: { id: classroomId }, relations: ['teacher'] })
+        if (!classroom) throw new BadRequestError({ message: 'Classroom not found' })
+
+        if (classroom.teacher?.id !== teacherId) {
+            throw new ForbiddenRequestError('Only the teacher can remove members')
+        }
+
+        const member = await memberRepo.findOne({ where: { id: memberId, classroom: { id: classroomId } } })
+        if (!member) throw new BadRequestError({ message: 'Member not found' })
+
+        member.status = ClassroomMemberStatus.REMOVED
+        await memberRepo.save(member)
+        return { success: true }
+    }
+
+    submitQuizAttempt = async (userId: number, classroomId: number, quizId: number, answers: Record<string, string>) => {
+        const quizRepo = await this.db.getRepository(ClassroomQuiz)
+        const attemptRepo = await this.db.getRepository(ClassroomQuizAttempt)
+
+        const quiz = await quizRepo.findOne({
+            where: { id: quizId, classroom: { id: classroomId } },
+            relations: ['questions']
+        })
+        if (!quiz) throw new BadRequestError({ message: 'Quiz not found' })
+
+        let correctCount = 0
+        const total = quiz.questions?.length || 0
+
+        quiz.questions?.forEach(q => {
+            const userChoice = answers[q.id.toString()]
+            if (userChoice && userChoice.trim().toLowerCase() === q.correctAnswer.trim().toLowerCase()) {
+                correctCount++
+            }
+        })
+
+        const score = total > 0 ? parseFloat((correctCount / total).toFixed(2)) : 0
+
+        const previousAttempts = await attemptRepo.count({
+            where: { user: { id: userId }, quiz: { id: quizId } }
+        })
+        if (previousAttempts >= quiz.maxAttempts) {
+            throw new BadRequestError({ message: 'Maximum attempts reached for this quiz' })
+        }
+
+        const attempt = attemptRepo.create({
+            quiz: { id: quizId } as any,
+            user: { id: userId } as any,
+            attemptNumber: previousAttempts + 1,
+            score,
+            answers,
+            startedAt: new Date(),
+            submittedAt: new Date()
+        })
+        await attemptRepo.save(attempt)
+
+        return { 
+            attempt: {
+                ...attempt,
+                correctCount
+            }, 
+            isPassing: score >= quiz.passingScore 
+        }
+    }
+
+    // ─────────────────────────────────────────────────
     // LESSON
     // ─────────────────────────────────────────────────
 
@@ -225,19 +431,37 @@ class ClassroomService {
         return lesson
     }
 
-    getLessons = async (classroomId: number) => {
+    getLessons = async (classroomId: number, userId?: number) => {
+        const classroomRepo = await this.db.getRepository(Classroom)
+        const classroom = await classroomRepo.findOne({ where: { id: classroomId }, relations: ['teacher'] })
+        const isTeacher = classroom?.teacher?.id === userId
+        
         const lessonRepo = await this.db.getRepository(ClassroomLesson)
+        const where: any = { classroom: { id: classroomId } }
+        if (!isTeacher) {
+            where.isPublished = true
+        }
+        
         return lessonRepo.find({
-            where: { classroom: { id: classroomId } },
+            where,
             relations: ['attachments'],
             order: { sortOrder: 'ASC', createdAt: 'ASC' },
         })
     }
 
-    getLessonById = async (classroomId: number, lessonId: number) => {
+    getLessonById = async (classroomId: number, lessonId: number, userId?: number) => {
+        const classroomRepo = await this.db.getRepository(Classroom)
+        const classroom = await classroomRepo.findOne({ where: { id: classroomId }, relations: ['teacher'] })
+        const isTeacher = classroom?.teacher?.id === userId
+
         const lessonRepo = await this.db.getRepository(ClassroomLesson)
+        const where: any = { id: lessonId, classroom: { id: classroomId } }
+        if (!isTeacher) {
+            where.isPublished = true
+        }
+
         const lesson = await lessonRepo.findOne({
-            where: { id: lessonId, classroom: { id: classroomId } },
+            where,
             relations: ['attachments', 'quizzes', 'flashcards'],
         })
         if (!lesson) throw new BadRequestError({ message: 'Lesson not found' })
@@ -275,6 +499,11 @@ class ClassroomService {
         const classroom = await classroomRepo.findOne({ where: { id: classroomId } })
         if (!classroom) throw new BadRequestError({ message: 'Classroom not found' })
 
+        // Clamp passingScore between 0 and 1
+        if (data.passingScore !== undefined) {
+            data.passingScore = Math.max(0, Math.min(1, data.passingScore))
+        }
+
         const quizRepo = await this.db.getRepository(ClassroomQuiz)
         const quiz = quizRepo.create({
             ...data,
@@ -285,22 +514,50 @@ class ClassroomService {
         return quiz
     }
 
-    getQuizzes = async (classroomId: number) => {
+    getQuizzes = async (classroomId: number, userId?: number) => {
+        const classroomRepo = await this.db.getRepository(Classroom)
+        const classroom = await classroomRepo.findOne({ where: { id: classroomId }, relations: ['teacher'] })
+        const isTeacher = classroom?.teacher?.id === userId
+
         const quizRepo = await this.db.getRepository(ClassroomQuiz)
+        const where: any = { classroom: { id: classroomId } }
+        if (!isTeacher) {
+            where.isPublished = true
+        }
+
         return quizRepo.find({
-            where: { classroom: { id: classroomId } },
+            where,
             relations: ['lesson'],
             order: { createdAt: 'ASC' },
         })
     }
 
-    getQuizById = async (classroomId: number, quizId: number) => {
+    getQuizById = async (classroomId: number, quizId: number, userId?: number) => {
+        const classroomRepo = await this.db.getRepository(Classroom)
+        const classroom = await classroomRepo.findOne({ where: { id: classroomId }, relations: ['teacher'] })
+        const isTeacher = classroom?.teacher?.id === userId
+
         const quizRepo = await this.db.getRepository(ClassroomQuiz)
+        const where: any = { id: quizId, classroom: { id: classroomId } }
+        if (!isTeacher) {
+            where.isPublished = true
+        }
+
         const quiz = await quizRepo.findOne({
-            where: { id: quizId, classroom: { id: classroomId } },
+            where,
             relations: ['lesson', 'questions'],
         })
         if (!quiz) throw new BadRequestError({ message: 'Quiz not found' })
+
+        // Count attempts for student
+        if (userId !== undefined && !isTeacher) {
+            const attemptRepo = await this.db.getRepository(ClassroomQuizAttempt)
+            const userAttempts = await attemptRepo.count({
+                where: { user: { id: userId }, quiz: { id: quizId } }
+            });
+            (quiz as any).userAttempts = userAttempts
+        }
+
         return quiz
     }
 
@@ -310,6 +567,11 @@ class ClassroomService {
             where: { id: quizId, classroom: { id: classroomId } },
         })
         if (!quiz) throw new BadRequestError({ message: 'Quiz not found' })
+
+        // Clamp passingScore between 0 and 1
+        if (data.passingScore !== undefined) {
+            data.passingScore = Math.max(0, Math.min(1, data.passingScore))
+        }
 
         const { lessonId, ...rest } = data
         Object.assign(quiz, rest)
@@ -403,7 +665,7 @@ class ClassroomService {
         quiz.sourceStudySetId = studySetId
         await quizRepo.save(quiz)
 
-        return { imported: copied.length }
+        return this.getQuizById(classroomId, quizId, teacherId)
     }
 
     importFlashcardsFromStudySet = async (classroomId: number, lessonId: number, studySetId: number, teacherId: number) => {
@@ -450,7 +712,7 @@ class ClassroomService {
         lesson.sourceStudySetId = studySetId
         await lessonRepo.save(lesson)
 
-        return { imported: copied.length }
+        return this.getLessonById(classroomId, lessonId, teacherId)
     }
 
     // ─── Lesson Flashcards (manual CRUD) ─────────────

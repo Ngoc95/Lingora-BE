@@ -125,6 +125,7 @@ class AiService {
     system_prompt: string;
     context: string;
     difficulty: string;
+    templates?: string[];
   }): Promise<{
     response: string;
     suggestions: string[];
@@ -145,6 +146,7 @@ class AiService {
     difficulty: string;
     current_phase: string;
     history?: { sender: string; content: string }[];
+    templates?: string[];
   }): Promise<{
     response: string;
     correction: { has_error: boolean; errors: any[] };
