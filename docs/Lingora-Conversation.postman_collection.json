@@ -1,0 +1,300 @@
+{
+	"info": {
+		"_postman_id": "a918b959-19ec-4581-9b0d-b7fba45c553d",
+		"name": "Lingora Conversation API",
+		"description": "API collection for testing the new Conversation module (Phase 3).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Contexts & Templates",
+			"item": [
+				{
+					"name": "1. Get All Contexts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/conversation/contexts?page=1&limit=10&search=&sort=+sortOrder",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"conversation",
+								"contexts"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Số trang (mặc định 1)"
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Số lượng mỗi trang (mặc định 10)"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"description": "Tìm kiếm theo name hoặc description"
+								},
+								{
+									"key": "sort",
+									"value": "+sortOrder",
+									"description": "Sắp xếp. Ví dụ: +name, -createdAt, +sortOrder"
+								}
+							]
+						},
+						"description": "Lấy danh sách các chủ đề giao tiếp (contexts) đang active."
+					},
+					"response": []
+				},
+				{
+					"name": "2. Get Context Templates",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/conversation/contexts/1/templates",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"conversation",
+								"contexts",
+								"1",
+								"templates"
+							]
+						},
+						"description": "Lấy danh sách các câu gợi ý (templates) cho một context cụ thể. Thay `1` bằng `contextId` thực tế."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Sessions (Main Flow)",
+			"item": [
+				{
+					"name": "3. Create Session",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    if (jsonData.metaData && jsonData.metaData.id) {\r",
+									"        pm.collectionVariables.set(\"sessionId\", jsonData.metaData.id);\r",
+									"    }\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"contextId\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/conversation/sessions",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"conversation",
+								"sessions"
+							]
+						},
+						"description": "Tạo một session hội thoại mới. Thay đổi `contextId` tương ứng. Tự động lưu `sessionId` vào biến collection sau khi thành công để các request sau xài."
+					},
+					"response": []
+				},
+				{
+					"name": "4. Send Message to AI",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"Hi, how are you today?\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/conversation/sessions/{{sessionId}}/messages",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"conversation",
+								"sessions",
+								"{{sessionId}}",
+								"messages"
+							]
+						},
+						"description": "Nhắn tin với chatbot. Cần tạo session trước để có `sessionId`."
+					},
+					"response": []
+				},
+				{
+					"name": "5. End Session",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/conversation/sessions/{{sessionId}}/end",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"conversation",
+								"sessions",
+								"{{sessionId}}",
+								"end"
+							]
+						},
+						"description": "Kết thúc session và kích hoạt tính điểm (chấm điểm Grammar, Fluency)."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "History & Management",
+			"item": [
+				{
+					"name": "6. Get User Sessions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/conversation/sessions?page=1&limit=10&search=&sort=-createdAt",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"conversation",
+								"sessions"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Số trang (mặc định 1)"
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Số lượng mỗi trang (mặc định 10)"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"description": "Tìm kiếm theo title hoặc context name"
+								},
+								{
+									"key": "sort",
+									"value": "-createdAt",
+									"description": "Sắp xếp. Ví dụ: -createdAt, +title"
+								}
+							]
+						},
+						"description": "Lấy lịch sử tất cả các sessions của user đang đăng nhập."
+					},
+					"response": []
+				},
+				{
+					"name": "7. Get Session Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/conversation/sessions/{{sessionId}}",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"conversation",
+								"sessions",
+								"{{sessionId}}"
+							]
+						},
+						"description": "Lấy chi tiết một session cụ thể cùng với toàn bộ tin nhắn."
+					},
+					"response": []
+				},
+				{
+					"name": "8. Delete Session",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/conversation/sessions/{{sessionId}}",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"conversation",
+								"sessions",
+								"{{sessionId}}"
+							]
+						},
+						"description": "Xoá một cuộc hội thoại."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{accessToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "sessionId",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

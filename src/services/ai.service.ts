@@ -121,6 +121,69 @@ class AiService {
       return null;
     }
   }
+  async startConversation(payload: {
+    system_prompt: string;
+    context: string;
+    difficulty: string;
+    templates?: string[];
+  }): Promise<{
+    response: string;
+    suggestions: string[];
+  } | null> {
+    try {
+      const { data } = await this.client.post("/chat/conversation/opening", payload);
+      return data;
+    } catch (error) {
+      console.error("AI Conversation Opening Error:", error);
+      return null;
+    }
+  }
+
+  async sendConversation(payload: {
+    question: string;
+    system_prompt: string;
+    context: string;
+    difficulty: string;
+    current_phase: string;
+    history?: { sender: string; content: string }[];
+    templates?: string[];
+  }): Promise<{
+    response: string;
+    correction: { has_error: boolean; errors: any[] };
+    suggestions: string[];
+    improvement: { has_improvement: boolean; original: string; improved: string; explanation: string };
+    vocabulary_highlight?: string;
+    vocabulary_meaning?: string;
+    next_phase: string;
+  } | null> {
+    try {
+      const { data } = await this.client.post("/chat/conversation", payload);
+      return data;
+    } catch (error) {
+      console.error("AI Conversation Error:", error);
+      return null;
+    }
+  }
+
+  async scoreSession(payload: {
+    context: string;
+    total_messages: number;
+    error_count: number;
+    transcript: string;
+  }): Promise<{
+    grammar_score: number;
+    fluency_score: number;
+    overall_score: number;
+    feedback: string;
+  } | null> {
+    try {
+      const { data } = await this.client.post("/score/conversation-session", payload);
+      return data;
+    } catch (error) {
+      console.error("AI Session Scoring Error:", error);
+      return null;
+    }
+  }
 }
 
 export const aiService = new AiService();

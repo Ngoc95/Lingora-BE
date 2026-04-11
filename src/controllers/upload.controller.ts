@@ -30,6 +30,16 @@ class UploadController {
             metaData: await uploadService.uploadAudio(req.file) as object
         }).send(res)
     }
+    
+    uploadFile = async (req: Request, res: Response) => {
+        if (!req.file) {
+            throw new Error('File not found')
+        }
+        return new CREATED({
+            message: 'Upload file successfully',
+            metaData: await uploadService.uploadFile(req.file) as object
+        }).send(res)
+    }
 }
 
 export const uploadController = new UploadController()

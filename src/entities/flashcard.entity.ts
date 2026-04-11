@@ -8,17 +8,35 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 import { StudySet } from './studySet.entity'
+import { ClassroomLesson } from './classroomLesson.entity'
+
+// Flashcard có thể thuộc 1 trong 2:
+// - studySet: bộ flashcard thông thường
+// - classroomLesson: copy vào bài học lớp (studySet = null)
 
 @Entity()
 export class Flashcard extends BaseEntity {
   @PrimaryGeneratedColumn()
   id!: number
 
+  /**
+   * Thuộc study set — nullable khi flashcard là copy trong classroom lesson.
+   */
   @ManyToOne(() => StudySet, (studySet) => studySet.flashcards, {
     onDelete: 'CASCADE',
-    nullable: false,
+    nullable: true,
   })
-  studySet!: StudySet
+  studySet?: StudySet | null
+
+  /**
+   * Thuộc bài học lớp — nullable khi flashcard thuộc study set.
+   * Xóa lesson → cascade xóa flashcard.
+   */
+  @ManyToOne(() => ClassroomLesson, (l) => l.flashcards, {
+    onDelete: 'CASCADE',
+    nullable: true,
+  })
+  classroomLesson?: ClassroomLesson | null
 
   @Column({ type: 'text' })
   frontText!: string
@@ -34,6 +52,13 @@ export class Flashcard extends BaseEntity {
 
   @Column({ type: 'text', nullable: true })
   imageUrl?: string
+
+  /**
+   * ID flashcard gốc trong study set nếu được copy vào lesson.
+   * Chỉ lưu để tham chiếu, không ràng buộc FK.
+   */
+  @Column({ type: 'int', nullable: true })
+  sourceFlashcardId?: number
 
   @CreateDateColumn()
   createdAt!: Date
@@ -61,4 +86,3 @@ export class Flashcard extends BaseEntity {
     if (imageUrl !== undefined) this.imageUrl = imageUrl
   }
 }
-

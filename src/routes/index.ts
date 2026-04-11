@@ -19,6 +19,8 @@ import uploadRouter from "./upload.route";
 import notificationRouter from "./notification.route";
 import reportRouter from "./report.route";
 import dashboardRouter from "./dashboard.route";
+import classroomRouter from "./classroom.route";
+import conversationRouter from "./conversation.route";
 
 const router = Router();
 
@@ -36,11 +38,13 @@ router.use("/comments", commentRouter);
 router.use("/likes", likeRouter);
 router.use("/withdrawals", withdrawalRouter);
 router.use("/chat", chatRouter);
+router.use("/conversation", conversationRouter);
 router.use("/translate", translateRouter);
 router.use("/uploads", uploadRouter);
 router.use("/", examRouter);
 router.use("/notifications", notificationRouter);
 router.use("/reports", reportRouter);
 router.use("/admin/dashboard", dashboardRouter);
+router.use("/classrooms", classroomRouter);
 
 export default router;

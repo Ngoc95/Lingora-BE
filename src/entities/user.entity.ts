@@ -24,6 +24,8 @@ import { RevenueSplit } from "./revenueSplit.entity";
 import { WithdrawalRequest } from "./withdrawalRequest.entity";
 import { ChatSession } from "./chatSession.entity";
 import { ExamAttempt } from "./examAttempt.entity";
+import { ClassroomMember } from './classroomMember.entity'
+import { ConversationSession } from "./conversationSession.entity";
 
 @Entity()
 export class User extends BaseEntity {
@@ -136,6 +138,9 @@ export class User extends BaseEntity {
     @OneToMany(() => ExamAttempt, (attempt) => attempt.user)
     examAttempts?: ExamAttempt[]
 
+    @OneToMany(() => ClassroomMember, (classroomMember) => classroomMember.user)
+    classrooms?: ClassroomMember[]
+
     // Streak tracking
     @Column({ type: 'int', default: 0 })
     currentStreak!: number
@@ -145,6 +150,9 @@ export class User extends BaseEntity {
 
     @Column({ type: 'date', nullable: true })
     lastActivityDate?: Date
+
+    @OneToMany(() => ConversationSession, (session) => session.user)
+    conversationSessions?: ConversationSession[]
 
     @CreateDateColumn()
     createdAt!: Date;

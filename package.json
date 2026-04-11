@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon",
-    "build": "rimraf ./dist && tsc && cp -r src/views dist/",
+    "build": "rimraf ./dist && tsc && npx shx cp -r src/views dist/",
     "start": "node dist/index.js",
+    "seed": "tsx src/seeds/run-seed.ts",
     "migration:generate": "npx typeorm migration:generate src/migrations/MigrationName -d src/config/data-source.ts",
     "migration:run": "npx typeorm migration:run -d src/config/data-source.ts",
     "migration:revert": "npx typeorm migration:revert -d src/config/data-source.ts"

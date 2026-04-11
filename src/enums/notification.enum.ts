@@ -8,7 +8,8 @@ export enum NotificationType {
   WITHDRAWAL_PROCESSING = 'Withdrawal processing',
   WITHDRAWAL_COMPLETED = 'Withdrawal completed',
   WITHDRAWAL_REJECTED = 'Withdrawal rejected',
-  WITHDRAWAL_FAILED = 'Withdrawal failed'
+  WITHDRAWAL_FAILED = 'Withdrawal failed',
+  CLASSROOM_APPROVED = 'Classroom approved'
 }
 
 export enum NotificationTarget {

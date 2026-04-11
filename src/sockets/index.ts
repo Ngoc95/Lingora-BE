@@ -1,6 +1,8 @@
 import { Server } from 'socket.io'
 import { Server as HTTPServer } from 'http'
 import { env } from '~/config/env'
+import { verifyToken } from '~/utils/jwt'
+import { registerClassroomChatHandlers } from './classroomChat.socket'
 
 let io: Server
 const connectedUsers = new Map<string, string>()
@@ -11,20 +13,32 @@ export const initSocket = (server: HTTPServer) => {
         allowEIO3: true
     })
 
-    io.on('connection', (socket) => {
-        console.log('Client connected:', socket.id)
+    // Verify JWT tại thời điểm connect — reject ngay nếu token không hợp lệ
+    // Client truyền: io('...', { auth: { token: '<accessToken>' } })
+    io.use((socket, next) => {
+        const token = socket.handshake.auth?.token as string | undefined
+        if (!token) return next(new Error('Unauthorized: missing token'))
+        try {
+            const payload = verifyToken(token, env.JWT_ACCESS_SECRET) as { userId: number }
+            socket.data.userId = payload.userId
+            next()
+        } catch {
+            next(new Error('Unauthorized: invalid token'))
+        }
+    })
 
-        socket.on('register', (userId: string) => {
-            connectedUsers.set(userId, socket.id)
-            console.log(`UserId: ${userId}, socketId: ${socket.id}`)
-            console.log(connectedUsers)
-        })
+    io.on('connection', (socket) => {
+        const userId = (socket.data.userId as number).toString()
+        connectedUsers.set(userId, socket.id)
+        console.log(`Client connected: socketId=${socket.id}, userId=${userId}`)
 
         socket.on('disconnect', () => {
-            for (const [uid, sid] of connectedUsers.entries()) {
-                if (sid === socket.id) connectedUsers.delete(uid)
-            }
+            connectedUsers.delete(userId)
+            console.log(`Client disconnected: userId=${userId}`)
         })
+
+        // Classroom chat
+        registerClassroomChatHandlers(io, socket)
     })
 
     return io

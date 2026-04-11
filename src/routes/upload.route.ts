@@ -6,6 +6,10 @@ import multer from 'multer'
 
 const uploadRouter = Router()
 const upload = multer({ storage: multer.memoryStorage() })
+const uploadFile = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 20 * 1024 * 1024 }, // 20 MB
+})
 
 uploadRouter.use(accessTokenValidation)
 
@@ -41,6 +45,19 @@ uploadRouter.post(
     '/audio',
     upload.single('file'),
     wrapRequestHandler(uploadController.uploadAudio)
+)
+
+/**
+ * @description Upload file (PDF, DOCX, ZIP, ...) dùng cho classroom chat attachment
+ * @method POST
+ * @path /upload/file
+ * @body form-data { file: any }
+ * @returns { url, name, size, mimeType }
+ */
+uploadRouter.post(
+    '/file',
+    uploadFile.single('file'),
+    wrapRequestHandler(uploadController.uploadFile)
 )
 
 export default uploadRouter
