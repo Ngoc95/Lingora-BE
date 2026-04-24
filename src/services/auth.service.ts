@@ -62,6 +62,10 @@ export class AuthService {
             signRefreshToken(user.id)
         ])
         await tokenRepo.save({ refreshToken, user })
+
+        // Award daily-login XP (capped to once per day by DAILY_XP_CAPS.DAILY_LOGIN).
+        eventBus.emit(EVENTS.DAILY_LOGIN, { userId: user.id })
+
         return {
             user: {
                 ...unGetData({ fields: ['password'], object: user }),

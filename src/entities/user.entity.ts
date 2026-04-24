@@ -7,6 +7,7 @@ import {
     JoinTable,
     BaseEntity,
     OneToMany,
+    OneToOne,
     DeleteDateColumn
 } from "typeorm";
 import { Role } from "./role.entity";
@@ -26,6 +27,8 @@ import { ChatSession } from "./chatSession.entity";
 import { ExamAttempt } from "./examAttempt.entity";
 import { ClassroomMember } from './classroomMember.entity'
 import { ConversationSession } from "./conversationSession.entity";
+import { UserRankingStats } from "./userRankingStats.entity";
+import { UserClassroomRankingStats } from "./userClassroomRankingStats.entity";
 
 @Entity()
 export class User extends BaseEntity {
@@ -153,6 +156,13 @@ export class User extends BaseEntity {
 
     @OneToMany(() => ConversationSession, (session) => session.user)
     conversationSessions?: ConversationSession[]
+
+    // Ranking module
+    @OneToOne(() => UserRankingStats, (stats) => stats.user)
+    rankingStats?: UserRankingStats
+
+    @OneToMany(() => UserClassroomRankingStats, (stats) => stats.user)
+    classroomRankingStats?: UserClassroomRankingStats[]
 
     @CreateDateColumn()
     createdAt!: Date;

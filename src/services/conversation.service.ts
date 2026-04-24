@@ -9,6 +9,8 @@ import { ConversationStatus } from "~/enums/conversationStatus.enum";
 import { ILike, FindOptionsWhere } from "typeorm";
 import validator from "validator";
 import { BadRequestError, NotFoundRequestError } from "~/core/error.response";
+import eventBus from "~/events-handler/eventBus";
+import { EVENTS } from "~/events-handler/constants";
 
 export class ConversationService {
     private static instance: ConversationService;
@@ -206,6 +208,13 @@ export class ConversationService {
 
             // Await to ensure scores and feedback are computed before responding
             await this.calculateSessionScores(session);
+
+            eventBus.emit(EVENTS.CONVERSATION_ENDED, {
+                userId: user.id,
+                referencedId: null,
+                description: session.id,
+                messageCount: session.totalMessages
+            });
         } else {
             await sessionRepo.save(session);
         }
@@ -233,6 +242,14 @@ export class ConversationService {
         await sessionRepo.save(session);
         
         await this.calculateSessionScores(session);
+
+        eventBus.emit(EVENTS.CONVERSATION_ENDED, {
+            userId: user.id,
+            referencedId: null,
+            description: session.id,
+            messageCount: session.totalMessages
+        });
+
         return session;
     }
 

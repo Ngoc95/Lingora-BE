@@ -36,6 +36,8 @@ import {
   computeBandFromTable,
 } from "~/constants/exam";
 import { streakService } from "./streak.service";
+import eventBus from "~/events-handler/eventBus";
+import { EVENTS } from "~/events-handler/constants";
 
 const DEFAULT_LIMIT = 10;
 
@@ -481,6 +483,14 @@ class ExamService {
     attempt.submittedAt = new Date();
 
     await attemptRepo.save(attempt);
+
+    // Record streak + award XP for completing an exam.
+    await streakService.recordActivity(userId);
+    eventBus.emit(EVENTS.EXAM_COMPLETED, {
+      userId,
+      referencedId: attempt.id,
+      score: (scoreSummary as any)?.totalScore ?? undefined
+    });
 
     return {
       attemptId: attempt.id,

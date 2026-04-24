@@ -13,6 +13,8 @@ import { DEFAULT_LIMIT, DEFAULT_PAGE } from '~/constants/pagination'
 import { getCefrByLevel } from '~/utils/mappers/cefrLevel.mapper'
 import { Topic } from '~/entities/topic.entity'
 import { streakService } from './streak.service'
+import eventBus from '~/events-handler/eventBus'
+import { EVENTS } from '~/events-handler/constants'
 
 class WordProgressService {
     private db = DatabaseService.getInstance()
@@ -21,7 +23,7 @@ class WordProgressService {
     async createManyWordProgress(userId: number, { wordIds }: CreateWordProgressBodyReq) {
         const dataSource = this.db.dataSource
 
-        return await dataSource.transaction(async (manager) => {
+        const result = await dataSource.transaction(async (manager) => {
             const user = await manager.getRepository(User).findOneBy({ id: userId })
             if (!user) throw new BadRequestError({ message: 'User not found' })
 
@@ -79,13 +81,26 @@ class WordProgressService {
                 wordProgresses: created,
             }
         })
+
+        // Emit XP events outside the transaction — listeners open their own
+        // connection and we don't want ranking failures to roll back progress.
+        for (const progress of result.wordProgresses) {
+            eventBus.emit(EVENTS.FLASHCARD_LEARNED, {
+                userId,
+                referencedId: (progress as any).word?.id ?? null
+            })
+        }
+
+        return result
     }
 
     // UPDATE MANY (with TRANSACTION) 
     async updateManyWordProgress(userId: number, { wordProgress }: UpdateWordProgressBodyReq) {
         const dataSource = this.db.dataSource
 
-        return await dataSource.transaction(async (manager) => {
+        const masteredWordIds: number[] = []
+
+        const result = await dataSource.transaction(async (manager) => {
             const user = await manager.getRepository(User).findOneBy({ id: userId })
             if (!user) throw new BadRequestError({ message: 'User not found' })
 
@@ -119,6 +134,7 @@ class WordProgressService {
                         nextReviewDay: dayjs(reviewedDate).add(1, 'day').toDate(),
                     })
                 } else {
+                    const previousStatus = progress.status
                     let newLevel = progress.srsLevel
                     let newStatus = progress.status
 
@@ -135,6 +151,12 @@ class WordProgressService {
                     progress.srsLevel = newLevel
                     progress.status = newStatus
                     progress.nextReviewDay = dayjs(reviewedDate).add(nextIntervalDays, 'day').toDate()
+
+                    // Detect LEARNING/REVIEWING → MASTERED transition so we
+                    // can award WORD_MASTERED XP once per word.
+                    if (newStatus === WordStatus.MASTERED && previousStatus !== WordStatus.MASTERED) {
+                        masteredWordIds.push(word.id)
+                    }
                 }
 
                 const saved = await progressRepo.save(progress)
@@ -159,6 +181,13 @@ class WordProgressService {
                 wordProgresses: updatedResults,
             }
         })
+
+        // Emit XP events after the transaction commits.
+        for (const wordId of masteredWordIds) {
+            eventBus.emit(EVENTS.WORD_MASTERED, { userId, referencedId: wordId })
+        }
+
+        return result
     }
 
     async getWordsForStudy(user: User, topicId: number, count: number) {

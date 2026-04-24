@@ -1,0 +1,27 @@
+export enum XpActionType {
+  FLASHCARD_LEARNED = 'FLASHCARD_LEARNED',
+  WORD_MASTERED = 'WORD_MASTERED',
+  QUIZ_COMPLETED = 'QUIZ_COMPLETED',
+  EXAM_COMPLETED = 'EXAM_COMPLETED',
+  LESSON_COMPLETED = 'LESSON_COMPLETED',
+  CLASSROOM_QUIZ = 'CLASSROOM_QUIZ',
+  CLASSROOM_CHAT = 'CLASSROOM_CHAT',
+  CONVERSATION_ENDED = 'CONVERSATION_ENDED',
+  DAILY_LOGIN = 'DAILY_LOGIN',
+  STREAK_BONUS = 'STREAK_BONUS',
+  POST_CREATED = 'POST_CREATED',
+  ADMIN_ADJUSTMENT = 'ADMIN_ADJUSTMENT'
+}
+
+export enum XpReferenceType {
+  FLASHCARD = 'flashcard',
+  WORD = 'word',
+  QUIZ = 'quiz',
+  EXAM_ATTEMPT = 'exam_attempt',
+  LESSON = 'classroom_lesson',
+  CLASSROOM_QUIZ_ATTEMPT = 'classroom_quiz_attempt',
+  CLASSROOM_CHAT_MESSAGE = 'classroom_chat_message',
+  CONVERSATION_SESSION = 'conversation_session',
+  POST = 'post',
+  SYSTEM = 'system'
+}

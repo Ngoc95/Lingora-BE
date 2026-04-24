@@ -25,6 +25,7 @@ import { UpdateClassroomQuizBodyReq } from "~/dtos/req/classroom/updateClassroom
 import { CreateClassroomQuizQuestionBodyReq } from "~/dtos/req/classroom/createClassroomQuizQuestionBody.req"
 import { UpdateClassroomQuizQuestionBodyReq } from "~/dtos/req/classroom/updateClassroomQuizQuestionBody.req"
 import { Brackets, In } from "typeorm"
+import { rankingService } from "./ranking.service"
 
 class ClassroomService {
     private db = DatabaseService.getInstance()
@@ -288,6 +289,9 @@ class ClassroomService {
             }
             existingMember.status = classroom.isPublic ? ClassroomMemberStatus.ACTIVE : ClassroomMemberStatus.PENDING
             await memberRepo.save(existingMember)
+            if (existingMember.status === ClassroomMemberStatus.ACTIVE) {
+                await rankingService.ensureClassroomStatsRow(userId, classroom.id)
+            }
             return existingMember
         }
 
@@ -297,6 +301,9 @@ class ClassroomService {
             status: classroom.isPublic ? ClassroomMemberStatus.ACTIVE : ClassroomMemberStatus.PENDING
         })
         await memberRepo.save(newMember)
+        if (newMember.status === ClassroomMemberStatus.ACTIVE) {
+            await rankingService.ensureClassroomStatsRow(userId, classroom.id)
+        }
         return newMember
     }
 
@@ -340,6 +347,8 @@ class ClassroomService {
         member.status = ClassroomMemberStatus.ACTIVE
         await memberRepo.save(member)
 
+        await rankingService.ensureClassroomStatsRow(member.user.id, classroom.id)
+
         eventBus.emit(EVENTS.CLASSROOM_APPROVED, { 
             classroom, 
             member 
@@ -375,7 +384,7 @@ class ClassroomService {
     }
 
     submitQuizAttempt = async (userId: number, classroomId: number, quizId: number, answers: Record<string, string>) => {
-        return await this.db.dataSource.transaction(async (transactionalEntityManager) => {
+        const result = await this.db.dataSource.transaction(async (transactionalEntityManager) => {
             const quizRepo = transactionalEntityManager.getRepository(ClassroomQuiz)
             const attemptRepo = transactionalEntityManager.getRepository(ClassroomQuizAttempt)
 
@@ -427,6 +436,18 @@ class ClassroomService {
                 isPassing: score >= quiz.passingScore 
             }
         })
+
+        // Fire ranking event after the transaction commits so XP is only
+        // awarded for successfully persisted attempts.
+        eventBus.emit(EVENTS.CLASSROOM_QUIZ_SUBMITTED, {
+            userId,
+            classroomId,
+            referencedId: result.attempt.id,
+            score: result.attempt.score,
+            isPass: result.isPassing
+        })
+
+        return result
     }
 
     // ─────────────────────────────────────────────────

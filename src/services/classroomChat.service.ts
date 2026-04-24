@@ -3,6 +3,8 @@ import { ClassroomMessage } from '~/entities/classroomMessage.entity'
 import { ClassroomMember } from '~/entities/classroomMember.entity'
 import { Classroom } from '~/entities/classroom.entity'
 import { ClassroomMessageType } from '~/enums/classroomMessageType.enum'
+import eventBus from '~/events-handler/eventBus'
+import { EVENTS } from '~/events-handler/constants'
 
 class ClassroomChatService {
     private db = DatabaseService.getInstance()
@@ -85,6 +87,14 @@ class ClassroomChatService {
             .leftJoinAndSelect('msg.repliedTo', 'repliedTo')
             .where('msg.id = :id', { id: msg.id })
             .getOne()
+
+        // Award XP for being active in classroom chat. Capped daily to
+        // prevent spam (see DAILY_XP_CAPS.CLASSROOM_CHAT).
+        eventBus.emit(EVENTS.CLASSROOM_CHAT_SENT, {
+            userId: senderId,
+            classroomId,
+            referencedId: msg.id
+        })
 
         return saved!
     }
