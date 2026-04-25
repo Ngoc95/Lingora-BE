@@ -39,7 +39,9 @@ ac.grant(RoleName.LEARNER)
   .readOwn(Resource.CLASSROOM)
   .createOwn(Resource.CLASSROOM)
   .updateOwn(Resource.CLASSROOM)
-  .deleteOwn(Resource.CLASSROOM);
+  .deleteOwn(Resource.CLASSROOM)
+  .readAny(Resource.RANKING)
+  .readOwn(Resource.RANKING);
 
 // ========================
 // ADMIN (Quản trị viên)
@@ -79,6 +81,7 @@ ac.grant(RoleName.ADMIN)
   .deleteAny(Resource.EXAM)
   .createAny(Resource.CLASSROOM)
   .updateAny(Resource.CLASSROOM)
-  .deleteAny(Resource.CLASSROOM);
+  .deleteAny(Resource.CLASSROOM)
+  .updateAny(Resource.RANKING);
 
 export default ac;

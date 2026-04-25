@@ -17,6 +17,8 @@ import { Report } from '~/entities/report.entity'
 import { ReportType } from '~/enums/reportType.enum'
 import { ReportStatus } from '~/enums/reportStatus.enum'
 import { aiService } from '~/services/ai.service'
+import eventBus from '~/events-handler/eventBus'
+import { EVENTS } from '~/events-handler/constants'
 
 class PostService {
     getPostById = async (userId: number, id: number) => {
@@ -279,7 +281,15 @@ class PostService {
         post.thumbnails = thumbnails
         post.topic = topic
 
-        return await post.save()
+        const saved = await post.save()
+
+        // Award XP for creating a post (daily-capped by DAILY_XP_CAPS.POST_CREATED).
+        eventBus.emit(EVENTS.POST_CREATED, {
+            userId,
+            referencedId: saved.id as number
+        })
+
+        return saved
     }
 
     updatePost = async (userId: number, postId: number, { title, content, tags, thumbnails, topic, status }: UpdatePostBodyReq) => {

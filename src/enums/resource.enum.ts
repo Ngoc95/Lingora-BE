@@ -13,4 +13,5 @@ export enum Resource {
   REPORT = 'REPORT',
   WITHDRAWAL = 'WITHDRAWAL',
   CLASSROOM = 'CLASSROOM',
+  RANKING = 'RANKING',
 }

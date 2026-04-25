@@ -21,6 +21,7 @@ import reportRouter from "./report.route";
 import dashboardRouter from "./dashboard.route";
 import classroomRouter from "./classroom.route";
 import conversationRouter from "./conversation.route";
+import rankingRouter from "./ranking.route";
 
 const router = Router();
 
@@ -46,5 +47,6 @@ router.use("/notifications", notificationRouter);
 router.use("/reports", reportRouter);
 router.use("/admin/dashboard", dashboardRouter);
 router.use("/classrooms", classroomRouter);
+router.use("/rankings", rankingRouter);
 
 export default router;

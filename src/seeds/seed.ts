@@ -7,6 +7,7 @@ import { seedConversationContexts } from "./conversationContext.seed";
 import { seedClassroomData } from "./classroom.seed";
 
 import { seedPostAndStudySetForUser001 } from "./post_studyset.seed";
+import { seedRankingData } from "./ranking.seed";
 
 export async function seedInitialData() {
   await seedRole();
@@ -18,6 +19,9 @@ export async function seedInitialData() {
 
   await seedConversationContexts();
   await seedClassroomData();
+
+  // Ranking must run last — depends on users + classrooms being present.
+  await seedRankingData();
 
   console.log("🌱 Initial data setup complete!");
 }

@@ -6,6 +6,7 @@ import { DatabaseService } from './services/database.service'
 import { seedInitialData } from './seeds/seed'
 import app from './app'
 import { initSocket } from './sockets'
+import { startRankingScheduler } from './jobs/rankingScheduler'
 
 const PORT = process.env.PORT || 4000
 
@@ -17,6 +18,8 @@ async function startServer() {
 
     const server = app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`))
     initSocket(server)
+
+    startRankingScheduler()
 }
 
 startServer()
