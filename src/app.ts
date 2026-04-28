@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import router from "./routes";
 import { errorHandler, notFoundHandler } from "./utils/handler";
 import { morganMiddleware } from "./middlewares/morgan.middlewares";
+import { setupSwagger } from "./config/swagger";
 // Import event listeners to register them
 import "./event-listeners";
 
@@ -14,8 +15,8 @@ const app = express();
 // log by morgan
 app.use(morganMiddleware)
 
-// protected by helmet
-app.use(helmet());
+// protected by helmet — disable CSP because this is a JSON API server (CSP applies to HTML pages)
+app.use(helmet({ contentSecurityPolicy: false }));
 
 // convert request to json
 app.use(express.json());
@@ -28,7 +29,8 @@ app.use(cookieParser());
 const allowedOrigins = [
   process.env.FRONTEND_URL || "http://localhost:3000",
   "https://lingora-web-app.vercel.app",
-  "http://localhost:5173"
+  "http://localhost:5173",
+  "http://localhost:4000",  // Swagger UI
 ];
 
 app.use(cors({
@@ -49,6 +51,9 @@ app.use(cors({
   },
   credentials: true
 }));
+
+// Swagger API docs (before routes so /api-docs doesn't conflict)
+setupSwagger(app);
 
 // API routes
 app.use(router);
