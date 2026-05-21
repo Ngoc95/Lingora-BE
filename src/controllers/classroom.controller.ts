@@ -233,6 +233,42 @@ class ClassroomController {
             metaData: await classroomChatService.getChatHistory(classroomId, limit, beforeId)
         }).send(res)
     }
+
+    // ─────────────────────────────────────────────────
+    // LESSON ATTACHMENTS
+    // ─────────────────────────────────────────────────
+
+    addAttachment = async (req: Request, res: Response) => {
+        const lessonId = parseInt(req.params.lessonId)
+        return new CREATED({
+            message: 'Add attachment successfully',
+            metaData: await classroomService.addAttachment(lessonId, req.body)
+        }).send(res)
+    }
+
+    getAttachments = async (req: Request, res: Response) => {
+        const lessonId = parseInt(req.params.lessonId)
+        return new SuccessResponse({
+            message: 'Get attachments successfully',
+            metaData: await classroomService.getAttachments(lessonId)
+        }).send(res)
+    }
+
+    updateAttachment = async (req: Request, res: Response) => {
+        const attachmentId = parseInt(req.params.attachmentId)
+        return new SuccessResponse({
+            message: 'Update attachment successfully',
+            metaData: await classroomService.updateAttachment(attachmentId, req.body)
+        }).send(res)
+    }
+
+    deleteAttachment = async (req: Request, res: Response) => {
+        const attachmentId = parseInt(req.params.attachmentId)
+        return new SuccessResponse({
+            message: 'Delete attachment successfully',
+            metaData: await classroomService.deleteAttachment(attachmentId)
+        }).send(res)
+    }
 }
 
 export const classroomController = new ClassroomController()

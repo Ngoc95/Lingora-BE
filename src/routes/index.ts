@@ -40,7 +40,7 @@ router.use("/withdrawals", withdrawalRouter);
 router.use("/chat", chatRouter);
 router.use("/conversation", conversationRouter);
 router.use("/translate", translateRouter);
-router.use("/uploads", uploadRouter);
+router.use("/upload", uploadRouter);
 router.use("/", examRouter);
 router.use("/notifications", notificationRouter);
 router.use("/reports", reportRouter);

@@ -4,6 +4,7 @@ import validator from "validator"
 import { Classroom } from "~/entities/classroom.entity"
 import { ClassroomMember } from "~/entities/classroomMember.entity"
 import { ClassroomLesson } from "~/entities/classroomLesson.entity"
+import { ClassroomLessonAttachment } from "~/entities/classroomLessonAttachment.entity"
 import { ClassroomQuiz } from "~/entities/classroomQuiz.entity"
 import { Quiz } from "~/entities/quiz.entity"
 import { Flashcard } from "~/entities/flashcard.entity"
@@ -21,6 +22,8 @@ import { CreateClassroomQuizBodyReq } from "~/dtos/req/classroom/createClassroom
 import { UpdateClassroomQuizBodyReq } from "~/dtos/req/classroom/updateClassroomQuizBody.req"
 import { CreateClassroomQuizQuestionBodyReq } from "~/dtos/req/classroom/createClassroomQuizQuestionBody.req"
 import { UpdateClassroomQuizQuestionBodyReq } from "~/dtos/req/classroom/updateClassroomQuizQuestionBody.req"
+import { AddAttachmentBodyReq } from "~/dtos/req/classroom/addAttachmentBody.req"
+import { UpdateAttachmentBodyReq } from "~/dtos/req/classroom/updateAttachmentBody.req"
 import { Brackets } from "typeorm"
 
 class ClassroomService {
@@ -450,7 +453,11 @@ class ClassroomService {
         lesson.sourceStudySetId = studySetId
         await lessonRepo.save(lesson)
 
-        return { imported: copied.length }
+        // Reload đầy đủ relations để trả về lesson detail (FE cần attachments + flashcards)
+        return lessonRepo.findOne({
+            where: { id: lessonId, classroom: { id: classroomId } },
+            relations: ['attachments', 'flashcards'],
+        })
     }
 
     // ─── Lesson Flashcards (manual CRUD) ─────────────
@@ -479,6 +486,52 @@ class ClassroomService {
         const flashcard = await flashcardRepo.findOne({ where: { id: flashcardId } })
         if (!flashcard) throw new BadRequestError({ message: 'Flashcard not found' })
         await flashcardRepo.remove(flashcard)
+        return { success: true }
+    }
+
+    // ─────────────────────────────────────────────────
+    // LESSON ATTACHMENTS
+    // ─────────────────────────────────────────────────
+
+    addAttachment = async (lessonId: number, data: AddAttachmentBodyReq) => {
+        const attachmentRepo = await this.db.getRepository(ClassroomLessonAttachment)
+
+        // Tự động gán sortOrder = số attachment hiện tại nếu client không truyền
+        const sortOrder = data.sortOrder ?? await attachmentRepo.count({ where: { lesson: { id: lessonId } } })
+
+        const attachment = attachmentRepo.create({
+            ...data,
+            sortOrder,
+            lesson: { id: lessonId } as any,
+        })
+        await attachmentRepo.save(attachment)
+        return attachment
+    }
+
+    getAttachments = async (lessonId: number) => {
+        const attachmentRepo = await this.db.getRepository(ClassroomLessonAttachment)
+        return attachmentRepo.find({
+            where: { lesson: { id: lessonId } },
+            order: { sortOrder: 'ASC', createdAt: 'ASC' },
+        })
+    }
+
+    updateAttachment = async (attachmentId: number, data: UpdateAttachmentBodyReq) => {
+        const attachmentRepo = await this.db.getRepository(ClassroomLessonAttachment)
+        const attachment = await attachmentRepo.findOne({ where: { id: attachmentId } })
+        if (!attachment) throw new BadRequestError({ message: 'Attachment not found' })
+
+        Object.assign(attachment, data)
+        await attachmentRepo.save(attachment)
+        return attachment
+    }
+
+    deleteAttachment = async (attachmentId: number) => {
+        const attachmentRepo = await this.db.getRepository(ClassroomLessonAttachment)
+        const attachment = await attachmentRepo.findOne({ where: { id: attachmentId } })
+        if (!attachment) throw new BadRequestError({ message: 'Attachment not found' })
+
+        await attachmentRepo.remove(attachment)
         return { success: true }
     }
 }
