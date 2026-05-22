@@ -18,6 +18,7 @@ import {
 } from "~/middlewares/classroom/classroomQuiz.middlewares";
 import { joinClassroomValidation } from "~/middlewares/classroom/joinClassroom.middlewares";
 import { submitQuizAttemptValidation } from "~/middlewares/classroom/submitQuizAttempt.middlewares";
+import { addAttachmentValidation, updateAttachmentValidation } from "~/middlewares/classroom/attachment.middlewares";
 import { wrapRequestHandler } from "~/utils/handler";
 
 const classroomRouter = Router();
@@ -260,6 +261,44 @@ classroomRouter.delete(
     checkIdParamMiddleware,
     isClassroomTeacher,
     wrapRequestHandler(classroomController.deleteQuestion)
+)
+
+// ══════════════════════════════════════════════════
+// LESSON ATTACHMENTS  /classrooms/:id/lessons/:lessonId/attachments
+// ══════════════════════════════════════════════════
+
+// Thêm attachment vào lesson (teacher)
+classroomRouter.post(
+    '/:id/lessons/:lessonId/attachments',
+    checkIdParamMiddleware,
+    isClassroomTeacher,
+    addAttachmentValidation,
+    wrapRequestHandler(classroomController.addAttachment)
+)
+
+// Lấy danh sách attachments của lesson (member)
+classroomRouter.get(
+    '/:id/lessons/:lessonId/attachments',
+    checkIdParamMiddleware,
+    isClassroomMember,
+    wrapRequestHandler(classroomController.getAttachments)
+)
+
+// Cập nhật attachment (teacher)
+classroomRouter.patch(
+    '/:id/lessons/:lessonId/attachments/:attachmentId',
+    checkIdParamMiddleware,
+    isClassroomTeacher,
+    updateAttachmentValidation,
+    wrapRequestHandler(classroomController.updateAttachment)
+)
+
+// Xoá attachment (teacher)
+classroomRouter.delete(
+    '/:id/lessons/:lessonId/attachments/:attachmentId',
+    checkIdParamMiddleware,
+    isClassroomTeacher,
+    wrapRequestHandler(classroomController.deleteAttachment)
 )
 
 // ══════════════════════════════════════════════════

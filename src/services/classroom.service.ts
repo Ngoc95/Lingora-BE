@@ -4,6 +4,7 @@ import validator from "validator"
 import { Classroom } from "~/entities/classroom.entity"
 import { ClassroomMember } from "~/entities/classroomMember.entity"
 import { ClassroomLesson } from "~/entities/classroomLesson.entity"
+import { ClassroomLessonAttachment } from "~/entities/classroomLessonAttachment.entity"
 import { ClassroomQuiz } from "~/entities/classroomQuiz.entity"
 import { ClassroomQuizAttempt } from "~/entities/classroomQuizAttempt.entity"
 import { Quiz } from "~/entities/quiz.entity"
@@ -26,6 +27,8 @@ import { CreateClassroomQuizQuestionBodyReq } from "~/dtos/req/classroom/createC
 import { UpdateClassroomQuizQuestionBodyReq } from "~/dtos/req/classroom/updateClassroomQuizQuestionBody.req"
 import { Brackets, In } from "typeorm"
 import { rankingService } from "./ranking.service"
+import { AddAttachmentBodyReq } from "~/dtos/req/classroom/addAttachmentBody.req"
+import { UpdateAttachmentBodyReq } from "~/dtos/req/classroom/updateAttachmentBody.req"
 
 class ClassroomService {
     private db = DatabaseService.getInstance()
@@ -156,7 +159,7 @@ class ClassroomService {
         if (userId !== undefined) {
             const memberRepo = await this.db.getRepository(ClassroomMember)
             const classroomIds = classrooms.map(c => c.id)
-            
+
             if (classroomIds.length > 0) {
                 const myMemberships = await memberRepo.find({
                     where: {
@@ -165,7 +168,7 @@ class ClassroomService {
                     },
                     relations: ['classroom']
                 })
-                
+
                 const membershipMap = new Map(myMemberships.map(m => [m.classroom.id, m.status]))
                 classrooms.forEach((c) => {
                     const classroom = c as Classroom & { myStatus?: string | null }
@@ -318,7 +321,7 @@ class ClassroomService {
         } else {
             qb.andWhere('member.status IN (:...statuses)', { statuses: [ClassroomMemberStatus.ACTIVE, ClassroomMemberStatus.PENDING] })
         }
-        
+
         qb.orderBy('member.joinedAt', 'DESC')
         return qb.getMany()
     }
@@ -335,9 +338,9 @@ class ClassroomService {
             throw new ForbiddenRequestError('Only the teacher can approve members')
         }
 
-        const member = await memberRepo.findOne({ 
+        const member = await memberRepo.findOne({
             where: { id: memberId, classroom: { id: classroomId } },
-            relations: ['user'] 
+            relations: ['user']
         })
         if (!member) throw new BadRequestError({ message: 'Member not found' })
         if (member.status !== ClassroomMemberStatus.PENDING) {
@@ -349,9 +352,9 @@ class ClassroomService {
 
         await rankingService.ensureClassroomStatsRow(member.user.id, classroom.id)
 
-        eventBus.emit(EVENTS.CLASSROOM_APPROVED, { 
-            classroom, 
-            member 
+        eventBus.emit(EVENTS.CLASSROOM_APPROVED, {
+            classroom,
+            member
         })
 
         return member
@@ -368,7 +371,7 @@ class ClassroomService {
             throw new ForbiddenRequestError('Only the teacher can remove members')
         }
 
-        const member = await memberRepo.findOne({ 
+        const member = await memberRepo.findOne({
             where: { id: memberId, classroom: { id: classroomId } },
             relations: ['user']
         })
@@ -400,7 +403,7 @@ class ClassroomService {
             const previousAttempts = await attemptRepo.count({
                 where: { user: { id: userId }, quiz: { id: quizId } }
             })
-            
+
             if (previousAttempts >= quiz.maxAttempts) {
                 throw new BadRequestError({ message: 'Maximum attempts reached for this quiz' })
             }
@@ -428,12 +431,12 @@ class ClassroomService {
             })
             await attemptRepo.save(attempt)
 
-            return { 
+            return {
                 attempt: {
                     ...attempt,
                     correctCount
-                }, 
-                isPassing: score >= quiz.passingScore 
+                },
+                isPassing: score >= quiz.passingScore
             }
         })
 
@@ -467,7 +470,7 @@ class ClassroomService {
 
     getLessons = async (classroomId: number, userId?: number) => {
         const lessonRepo = await this.db.getRepository(ClassroomLesson)
-        
+
         const qb = lessonRepo.createQueryBuilder('lesson')
             .leftJoin('lesson.classroom', 'classroom')
             .leftJoin('classroom.teacher', 'teacher')
@@ -477,21 +480,21 @@ class ClassroomService {
         if (userId !== undefined) {
             qb.andWhere(new Brackets(qb => {
                 qb.where('lesson.isPublished = true')
-                  .orWhere('teacher.id = :userId', { userId })
+                    .orWhere('teacher.id = :userId', { userId })
             }))
         } else {
             qb.andWhere('lesson.isPublished = true')
         }
-        
+
         qb.orderBy('lesson.sortOrder', 'ASC')
-          .addOrderBy('lesson.createdAt', 'ASC')
+            .addOrderBy('lesson.createdAt', 'ASC')
 
         return qb.getMany()
     }
 
     getLessonById = async (classroomId: number, lessonId: number, userId?: number) => {
         const lessonRepo = await this.db.getRepository(ClassroomLesson)
-        
+
         const qb = lessonRepo.createQueryBuilder('lesson')
             .leftJoin('lesson.classroom', 'classroom')
             .leftJoin('classroom.teacher', 'teacher')
@@ -504,7 +507,7 @@ class ClassroomService {
         if (userId !== undefined) {
             qb.andWhere(new Brackets(qb => {
                 qb.where('lesson.isPublished = true')
-                  .orWhere('teacher.id = :userId', { userId })
+                    .orWhere('teacher.id = :userId', { userId })
             }))
         } else {
             qb.andWhere('lesson.isPublished = true')
@@ -540,7 +543,7 @@ class ClassroomService {
     // ─────────────────────────────────────────────────
     // CLASSROOM QUIZ (bài kiểm tra chứa nhiều câu hỏi (quiz))
     // ─────────────────────────────────────────────────
-    
+
     createQuiz = async (classroomId: number, data: CreateClassroomQuizBodyReq) => {
         const classroomRepo = await this.db.getRepository(Classroom)
         const classroom = await classroomRepo.findOne({ where: { id: classroomId } })
@@ -565,7 +568,7 @@ class ClassroomService {
 
     getQuizzes = async (classroomId: number, userId?: number) => {
         const quizRepo = await this.db.getRepository(ClassroomQuiz)
-        
+
         const qb = quizRepo.createQueryBuilder('quiz')
             .leftJoin('quiz.classroom', 'classroom')
             .leftJoin('classroom.teacher', 'teacher')
@@ -575,7 +578,7 @@ class ClassroomService {
         if (userId !== undefined) {
             qb.andWhere(new Brackets(qb => {
                 qb.where('quiz.isPublished = true')
-                  .orWhere('teacher.id = :userId', { userId })
+                    .orWhere('teacher.id = :userId', { userId })
             }))
         } else {
             qb.andWhere('quiz.isPublished = true')
@@ -599,7 +602,7 @@ class ClassroomService {
         if (userId !== undefined) {
             qb.andWhere(new Brackets(qb => {
                 qb.where('quiz.isPublished = true')
-                  .orWhere('teacher.id = :userId', { userId })
+                    .orWhere('teacher.id = :userId', { userId })
             }))
         } else {
             qb.andWhere('quiz.isPublished = true')
@@ -607,7 +610,7 @@ class ClassroomService {
 
         const result = await qb.getOne()
         if (!result) throw new BadRequestError({ message: 'Quiz not found' })
-        
+
         const isUserTeacher = userId !== undefined && (result as any).classroom?.teacher?.id === userId
 
         if (userId !== undefined && !isUserTeacher) {
@@ -649,7 +652,7 @@ class ClassroomService {
 
         // Validate passingScore between 0 and 1
         if (data.passingScore !== undefined) {
-             if (data.passingScore < 0 || data.passingScore > 1) {
+            if (data.passingScore < 0 || data.passingScore > 1) {
                 throw new BadRequestError({ message: 'Passing score must be between 0 and 1' })
             }
         }
@@ -793,7 +796,11 @@ class ClassroomService {
         lesson.sourceStudySetId = studySetId
         await lessonRepo.save(lesson)
 
-        return this.getLessonById(classroomId, lessonId, teacherId)
+        // Reload đầy đủ relations để trả về lesson detail (FE cần attachments + flashcards)
+        return lessonRepo.findOne({
+            where: { id: lessonId, classroom: { id: classroomId } },
+            relations: ['attachments', 'flashcards'],
+        })
     }
 
     // ─── Lesson Flashcards (manual CRUD) ─────────────
@@ -822,6 +829,52 @@ class ClassroomService {
         const flashcard = await flashcardRepo.findOne({ where: { id: flashcardId } })
         if (!flashcard) throw new BadRequestError({ message: 'Flashcard not found' })
         await flashcardRepo.remove(flashcard)
+        return { success: true }
+    }
+
+    // ─────────────────────────────────────────────────
+    // LESSON ATTACHMENTS
+    // ─────────────────────────────────────────────────
+
+    addAttachment = async (lessonId: number, data: AddAttachmentBodyReq) => {
+        const attachmentRepo = await this.db.getRepository(ClassroomLessonAttachment)
+
+        // Tự động gán sortOrder = số attachment hiện tại nếu client không truyền
+        const sortOrder = data.sortOrder ?? await attachmentRepo.count({ where: { lesson: { id: lessonId } } })
+
+        const attachment = attachmentRepo.create({
+            ...data,
+            sortOrder,
+            lesson: { id: lessonId } as any,
+        })
+        await attachmentRepo.save(attachment)
+        return attachment
+    }
+
+    getAttachments = async (lessonId: number) => {
+        const attachmentRepo = await this.db.getRepository(ClassroomLessonAttachment)
+        return attachmentRepo.find({
+            where: { lesson: { id: lessonId } },
+            order: { sortOrder: 'ASC', createdAt: 'ASC' },
+        })
+    }
+
+    updateAttachment = async (attachmentId: number, data: UpdateAttachmentBodyReq) => {
+        const attachmentRepo = await this.db.getRepository(ClassroomLessonAttachment)
+        const attachment = await attachmentRepo.findOne({ where: { id: attachmentId } })
+        if (!attachment) throw new BadRequestError({ message: 'Attachment not found' })
+
+        Object.assign(attachment, data)
+        await attachmentRepo.save(attachment)
+        return attachment
+    }
+
+    deleteAttachment = async (attachmentId: number) => {
+        const attachmentRepo = await this.db.getRepository(ClassroomLessonAttachment)
+        const attachment = await attachmentRepo.findOne({ where: { id: attachmentId } })
+        if (!attachment) throw new BadRequestError({ message: 'Attachment not found' })
+
+        await attachmentRepo.remove(attachment)
         return { success: true }
     }
 }

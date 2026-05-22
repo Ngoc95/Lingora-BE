@@ -8,23 +8,29 @@ cloudinary.config({
 })
 
 class UploadService {
-    signUploadRequest = async (folderName: string = 'lingora') => {
+    signUploadRequest = async (folderName: string = 'lingora', uploadPreset?: string) => {
         const timestamp = Math.round(new Date().getTime() / 1000)
 
-        const signature = cloudinary.utils.api_sign_request(
-            {
-                timestamp: timestamp,
-                folder: folderName
-            },
-            env.CLOUDINARY_API_SECRET
-        )
+        const params: Record<string, string | number> = {
+            timestamp,
+            folder: folderName,
+        }
+
+        // Nếu có uploadPreset, đưa vào params TRƯỚC khi ký
+        // (Cloudinary yêu cầu upload_preset phải nằm trong signature với signed upload)
+        if (uploadPreset) {
+            params.upload_preset = uploadPreset
+        }
+
+        const signature = cloudinary.utils.api_sign_request(params, env.CLOUDINARY_API_SECRET)
 
         return {
             signature,
             timestamp,
             cloudName: env.CLOUDINARY_CLOUD_NAME,
             apiKey: env.CLOUDINARY_API_KEY,
-            folder: folderName
+            folder: folderName,
+            ...(uploadPreset ? { uploadPreset } : {}),
         }
     }
 

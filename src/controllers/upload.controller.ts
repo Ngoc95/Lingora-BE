@@ -4,10 +4,13 @@ import { OK, CREATED } from '~/core/success.response'
 
 class UploadController {
     getSignedUrl = async (req: Request, res: Response) => {
-        const { folder } = req.query
+        const { folder, uploadPreset } = req.query
         return new OK({
             message: 'Get signed url successfully',
-            metaData: await uploadService.signUploadRequest(folder as string)
+            metaData: await uploadService.signUploadRequest(
+                folder as string,
+                uploadPreset as string | undefined
+            )
         }).send(res)
     }
 

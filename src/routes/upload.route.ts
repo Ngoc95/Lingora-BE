@@ -19,6 +19,7 @@ uploadRouter.use(accessTokenValidation)
  * @path : /upload/signed-url
  * @query : {
  *   folder: string (optional, default: 'lingora')
+ *   uploadPreset: string (optional, dùng cho video signed upload)
  * }
  */
 uploadRouter.get('/signed-url', wrapRequestHandler(uploadController.getSignedUrl))
