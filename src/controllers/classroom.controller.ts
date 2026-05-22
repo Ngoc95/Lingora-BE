@@ -220,6 +220,15 @@ class ClassroomController {
         }).send(res)
     }
 
+    getQuizAttempts = async (req: Request, res: Response) => {
+        const classroomId = parseInt(req.params.id)
+        const quizId = parseInt(req.params.quizId)
+        return new SuccessResponse({
+            message: 'Get quiz attempts successfully',
+            metaData: await classroomService.getQuizAttempts(classroomId, quizId)
+        }).send(res)
+    }
+
     submitQuizAttempt = async (req: Request, res: Response) => {
         const userId = req.user!.id
         const classroomId = parseInt(req.params.id)

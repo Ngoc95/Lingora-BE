@@ -206,6 +206,13 @@ classroomRouter.post(
     wrapRequestHandler(classroomController.submitQuizAttempt)
 )
 
+classroomRouter.get(
+    '/:id/quizzes/:quizId/attempts',
+    checkIdParamMiddleware,
+    isClassroomTeacher,
+    wrapRequestHandler(classroomController.getQuizAttempts)
+)
+
 classroomRouter.patch(
     '/:id/quizzes/:quizId',
     checkIdParamMiddleware,

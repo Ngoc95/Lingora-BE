@@ -63,7 +63,7 @@ eventBus.on(EVENTS.EXAM_COMPLETED, async (payload: ExamCompletedPayload) => {
         payload,
         XpActionType.EXAM_COMPLETED,
         XpReferenceType.EXAM_ATTEMPT,
-        payload.score !== undefined ? `Exam attempt score=${payload.score}` : undefined
+        payload.score !== undefined ? `Điểm: ${payload.score}` : undefined
     )
 })
 
@@ -78,7 +78,7 @@ eventBus.on(EVENTS.CLASSROOM_QUIZ_SUBMITTED, async (payload: ClassroomQuizPayloa
         payload,
         XpActionType.CLASSROOM_QUIZ,
         XpReferenceType.CLASSROOM_QUIZ_ATTEMPT,
-        payload.score !== undefined ? `Classroom quiz score=${payload.score}` : undefined
+        payload.score !== undefined ? `Điểm: ${payload.score}` : undefined
     )
 })
 
@@ -93,7 +93,7 @@ eventBus.on(EVENTS.CONVERSATION_ENDED, async (payload: ConversationEndedPayload)
         payload,
         XpActionType.CONVERSATION_ENDED,
         XpReferenceType.CONVERSATION_SESSION,
-        payload.messageCount !== undefined ? `Messages=${payload.messageCount}` : undefined
+        payload.messageCount !== undefined ? `${payload.messageCount} tin nhắn` : undefined
     )
 })
 

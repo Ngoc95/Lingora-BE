@@ -90,8 +90,10 @@ class ClassroomService {
             .createQueryBuilder('classroom')
             .leftJoin('classroom.teacher', 'teacher')
             .addSelect(['teacher.id', 'teacher.username', 'teacher.email', 'teacher.avatar'])
-            .leftJoin('classroom.members', 'member')
-            .loadRelationCountAndMap('classroom.totalMembers', 'classroom.members')
+            .leftJoin('classroom.members', 'member', 'member.status = :activeStatus', { activeStatus: ClassroomMemberStatus.ACTIVE })
+            .loadRelationCountAndMap('classroom.totalMembers', 'classroom.members', 'cm', (qb) =>
+                qb.where('cm.status = :cntStatus', { cntStatus: ClassroomMemberStatus.ACTIVE })
+            )
             .skip(skip)
             .take(limit)
 
@@ -101,14 +103,14 @@ class ClassroomService {
                 qb.andWhere('teacher.id = :userId', { userId })
             } else if (membership === 'STUDENT') {
                 qb.andWhere('member.user = :userId', { userId })
-                // ensure they are not also matching as a teacher unintentionally in this sub-query
+                qb.andWhere('member.status = :memberActiveStatus', { memberActiveStatus: ClassroomMemberStatus.ACTIVE })
                 qb.andWhere('teacher.id != :userId', { userId })
             } else {
-                // ALL (Default logic: either teacher or member)
+                // ALL (Default logic: either teacher or active member)
                 qb.andWhere(
                     new Brackets((qb) => {
-                        qb.where('teacher.id = :userId', { userId })                // là GV của lớp
-                            .orWhere('member.user = :userId', { userId })           // là thành viên
+                        qb.where('teacher.id = :userId', { userId })
+                            .orWhere('member.user = :userId AND member.status = :memberActiveStatus', { userId, memberActiveStatus: ClassroomMemberStatus.ACTIVE })
                     })
                 )
             }
@@ -197,13 +199,11 @@ class ClassroomService {
 
         if (!classroom) throw new BadRequestError({ message: 'Classroom not found' })
 
-        // Kiểm tra quyền xem: phải là teacher hoặc thành viên (admin không truyền userId)
+        // Kiểm tra quyền xem: phải là teacher hoặc thành viên ACTIVE (admin không truyền userId)
         if (userId !== undefined) {
             const memberRepo = await this.db.getRepository(ClassroomMember)
             const isMember = await memberRepo.findOne({
-                where: [
-                    { classroom: { id }, user: { id: userId } },
-                ]
+                where: { classroom: { id }, user: { id: userId }, status: ClassroomMemberStatus.ACTIVE }
             })
             const isTeacher = classroom.teacher?.id === userId
             if (!isMember && !isTeacher) {
@@ -211,10 +211,10 @@ class ClassroomService {
             }
         }
 
-        // Count members
+        // Count active members only
         const memberRepo = await this.db.getRepository(ClassroomMember)
         const memberCount = await memberRepo.count({
-            where: { classroom: { id } }
+            where: { classroom: { id }, status: ClassroomMemberStatus.ACTIVE }
         })
 
         return {
@@ -292,7 +292,7 @@ class ClassroomService {
             if (existingMember.status === ClassroomMemberStatus.ACTIVE) {
                 await rankingService.ensureClassroomStatsRow(userId, classroom.id)
             }
-            return existingMember
+            return classroom
         }
 
         const newMember = memberRepo.create({
@@ -304,7 +304,7 @@ class ClassroomService {
         if (newMember.status === ClassroomMemberStatus.ACTIVE) {
             await rankingService.ensureClassroomStatsRow(userId, classroom.id)
         }
-        return newMember
+        return classroom
     }
 
     getMembers = async (classroomId: number, status?: string) => {
@@ -619,6 +619,25 @@ class ClassroomService {
         }
 
         return result
+    }
+
+    getQuizAttempts = async (classroomId: number, quizId: number) => {
+        const quizRepo = await this.db.getRepository(ClassroomQuiz)
+        const quiz = await quizRepo.findOne({
+            where: { id: quizId, classroom: { id: classroomId } },
+        })
+        if (!quiz) throw new BadRequestError({ message: 'Quiz not found' })
+
+        const attemptRepo = await this.db.getRepository(ClassroomQuizAttempt)
+        const attempts = await attemptRepo.createQueryBuilder('attempt')
+            .leftJoin('attempt.user', 'user')
+            .addSelect(['user.id', 'user.username', 'user.avatar'])
+            .leftJoin('attempt.quiz', 'quiz')
+            .where('quiz.id = :quizId', { quizId })
+            .orderBy('attempt.submittedAt', 'DESC')
+            .getMany()
+
+        return attempts
     }
 
     updateQuiz = async (classroomId: number, quizId: number, data: UpdateClassroomQuizBodyReq) => {
