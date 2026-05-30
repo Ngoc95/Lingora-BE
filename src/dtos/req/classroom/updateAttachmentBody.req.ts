@@ -11,4 +11,5 @@ export interface UpdateAttachmentBodyReq {
     durationSeconds?: number
     title?: string
     sortOrder?: number
+    subtitlesJson?: string
 }

@@ -59,6 +59,10 @@ export class ClassroomLessonAttachment extends BaseEntity {
     @Column({ type: 'int', default: 0 })
     sortOrder!: number
 
+    /** Dữ liệu phụ đề dưới dạng chuỗi JSON stringified */
+    @Column({ type: 'text', nullable: true })
+    subtitlesJson?: string
+
     @CreateDateColumn()
     createdAt!: Date
 }

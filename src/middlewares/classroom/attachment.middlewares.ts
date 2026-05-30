@@ -85,6 +85,10 @@ export const addAttachmentValidation = validate(
                 optional: true,
                 isInt: { options: { min: 0 }, errorMessage: 'sortOrder must be a non-negative integer' },
                 toInt: true
+            },
+            subtitlesJson: {
+                optional: true,
+                trim: true
             }
         },
         ['body']
@@ -151,6 +155,10 @@ export const updateAttachmentValidation = validate(
                 optional: true,
                 isInt: { options: { min: 0 }, errorMessage: 'sortOrder must be a non-negative integer' },
                 toInt: true
+            },
+            subtitlesJson: {
+                optional: true,
+                trim: true
             }
         },
         ['body']

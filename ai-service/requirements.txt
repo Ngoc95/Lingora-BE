@@ -17,3 +17,4 @@ langchain-text-splitters
 openai
 chromadb
 pypdf
+google-generativeai

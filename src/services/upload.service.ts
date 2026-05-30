@@ -35,18 +35,20 @@ class UploadService {
     }
 
     uploadImage = async (file: Express.Multer.File, folderName: string = 'lingora/images') => {
-        // This method is for server-side upload if needed
-        // But for signed request flow, client uploads directly
-        // Keeping this as utility if server needs to upload
-        return new Promise((resolve, reject) => {
+        return new Promise<{ url: string; name: string; size: number; mimeType: string }>((resolve, reject) => {
             const uploadStream = cloudinary.uploader.upload_stream(
                 {
                     folder: folderName,
                     resource_type: 'image'
                 },
                 (error, result) => {
-                    if (error) return reject(error)
-                    resolve(result)
+                    if (error || !result) return reject(error)
+                    resolve({
+                        url: result.secure_url,
+                        name: file.originalname,
+                        size: file.size,
+                        mimeType: file.mimetype,
+                    })
                 }
             )
             uploadStream.end(file.buffer)
@@ -54,15 +56,20 @@ class UploadService {
     }
 
     uploadAudio = async (file: Express.Multer.File, folderName: string = 'lingora/audios') => {
-        return new Promise((resolve, reject) => {
+        return new Promise<{ url: string; name: string; size: number; mimeType: string }>((resolve, reject) => {
             const uploadStream = cloudinary.uploader.upload_stream(
                 {
                     folder: folderName,
                     resource_type: 'video' // Cloudinary treats audio as video
                 },
                 (error, result) => {
-                    if (error) return reject(error)
-                    resolve(result)
+                    if (error || !result) return reject(error)
+                    resolve({
+                        url: result.secure_url,
+                        name: file.originalname,
+                        size: file.size,
+                        mimeType: file.mimetype,
+                    })
                 }
             )
             uploadStream.end(file.buffer)
@@ -71,12 +78,26 @@ class UploadService {
     
     uploadFile = async (file: Express.Multer.File, folderName: string = 'lingora/files') => {
         return new Promise<{ url: string; name: string; size: number; mimeType: string }>((resolve, reject) => {
+            const originalName = file.originalname || 'file';
+            const lastDotIndex = originalName.lastIndexOf('.');
+            const ext = lastDotIndex !== -1 ? originalName.substring(lastDotIndex) : '';
+            const baseName = lastDotIndex !== -1 ? originalName.substring(0, lastDotIndex) : originalName;
+
+            // Chuẩn hóa và làm sạch tên file để làm publicId an toàn trong URL
+            const safeBaseName = baseName
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '') // Loại bỏ dấu Tiếng Việt
+                .replace(/[^a-zA-Z0-9_-]/g, '_')  // Thay thế ký tự đặc biệt bằng _
+                .substring(0, 80);
+
+            const uniqueSuffix = Math.round(new Date().getTime() / 1000) + '_' + Math.round(Math.random() * 1000);
+            const publicId = `${safeBaseName}_${uniqueSuffix}${ext}`;
+
             const uploadStream = cloudinary.uploader.upload_stream(
                 {
                     folder: folderName,
+                    public_id: publicId,
                     resource_type: 'raw',
-                    use_filename: true,
-                    unique_filename: true,
                 },
                 (error, result) => {
                     if (error || !result) return reject(error)

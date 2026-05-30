@@ -5,14 +5,18 @@ import { ChatMessageSender } from "~/enums/chatMessageSender.enum";
 
 class AiService {
   private client: AxiosInstance;
+  private transcribeClient: AxiosInstance;
 
   constructor() {
     this.client = axios.create({
       baseURL: env.AI_SERVICE_URL,
       timeout: env.AI_SERVICE_TIMEOUT_MS,
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
+    });
+    this.transcribeClient = axios.create({
+      baseURL: env.AI_SERVICE_URL,
+      timeout: env.TRANSCRIBE_TIMEOUT_MS,
+      headers: { "Content-Type": "application/json" },
     });
   }
 
@@ -181,6 +185,23 @@ class AiService {
       return data;
     } catch (error) {
       console.error("AI Session Scoring Error:", error);
+      return null;
+    }
+  }
+
+  async transcribeMedia(mediaUrl: string): Promise<Array<{
+    index: number;
+    startTime: number;
+    endTime: number;
+    text: string;
+  }> | null> {
+    try {
+      const { data } = await this.transcribeClient.post("/transcribe", {
+        media_url: mediaUrl,
+      });
+      return data.subtitles;
+    } catch (error) {
+      console.error("AI Media Transcription Error:", error);
       return null;
     }
   }

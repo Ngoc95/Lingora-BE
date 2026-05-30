@@ -1,3 +1,16 @@
+import sys
+import io
+
+# Reconfigure stdout and stderr to use UTF-8, specifically to handle Emojis on Windows
+if sys.platform.startswith('win'):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+        sys.stderr.reconfigure(encoding='utf-8')
+    except AttributeError:
+        # Fallback for older python versions
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
@@ -91,6 +104,20 @@ def score_speaking_endpoint(request: GradeSpeakingRequest):
         "corrected_version": result.corrected_version,
         "transcript": transcript
     }
+
+class TranscribeRequest(BaseModel):
+    media_url: str
+
+@app.post("/transcribe")
+def transcribe_endpoint(request: TranscribeRequest):
+    from src.transcribe import transcribe_media_gemini
+    if not request.media_url.strip():
+        raise HTTPException(status_code=400, detail="media_url cannot be empty")
+    try:
+        subtitles = transcribe_media_gemini(request.media_url)
+        return {"subtitles": subtitles}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 class ModerationRequest(BaseModel):
     text: str

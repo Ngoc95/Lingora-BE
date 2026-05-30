@@ -26,6 +26,7 @@ export const env = {
 
   AI_SERVICE_URL: process.env.AI_SERVICE_URL || "http://localhost:8000",
   AI_SERVICE_TIMEOUT_MS: Number(process.env.AI_SERVICE_TIMEOUT_MS) || 15000,
+  TRANSCRIBE_TIMEOUT_MS: Number(process.env.TRANSCRIBE_TIMEOUT_MS) || 600000,
 
   BASE_URL: process.env.BASE_URL || "http://localhost:4000",
   FRONTEND_URL: process.env.FRONTEND_URL || "http://localhost:5173",

@@ -1,9 +1,10 @@
 import { Request, Response } from 'express'
 import { CREATED, SuccessResponse } from '~/core/success.response'
-import { ForbiddenRequestError } from '~/core/error.response'
+import { ForbiddenRequestError, BadRequestError } from '~/core/error.response'
 import { RoleName } from '~/enums/role.enum'
 import { classroomService } from '~/services/classroom.service'
 import { classroomChatService } from '~/services/classroomChat.service'
+import { aiService } from '~/services/ai.service'
 
 class ClassroomController {
     create = async (req: Request, res: Response) => {
@@ -280,9 +281,11 @@ class ClassroomController {
         const lessonId = parseInt(req.params.lessonId)
         const teacherId = req.user!.id
         const { studySetId } = req.body
+        const result = await classroomService.importFlashcardsFromStudySet(classroomId, lessonId, studySetId, teacherId)
+        if (!result) throw new BadRequestError({ message: 'Lesson not found or failed to import flashcards' })
         return new SuccessResponse({
             message: 'Import flashcards successfully',
-            metaData: await classroomService.importFlashcardsFromStudySet(classroomId, lessonId, studySetId, teacherId)
+            metaData: result
         }).send(res)
     }
 
@@ -309,6 +312,19 @@ class ClassroomController {
         return new CREATED({
             message: 'Add attachment successfully',
             metaData: await classroomService.addAttachment(lessonId, req.body)
+        }).send(res)
+    }
+
+    transcribeAttachment = async (req: Request, res: Response) => {
+        const { mediaUrl } = req.body
+        if (!mediaUrl) throw new BadRequestError({ message: 'mediaUrl is required' })
+
+        const subtitles = await aiService.transcribeMedia(mediaUrl)
+        if (!subtitles) throw new BadRequestError({ message: 'Failed to transcribe media via AI' })
+
+        return new SuccessResponse({
+            message: 'Transcribed attachment successfully',
+            metaData: { subtitles }
         }).send(res)
     }
 

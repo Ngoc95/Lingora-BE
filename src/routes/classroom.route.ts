@@ -276,6 +276,14 @@ classroomRouter.post(
     wrapRequestHandler(classroomController.addAttachment)
 )
 
+// Tự động tạo phụ đề bằng AI cho file đính kèm (teacher)
+classroomRouter.post(
+    '/:id/lessons/:lessonId/attachments/transcribe',
+    checkIdParamMiddleware,
+    isClassroomTeacher,
+    wrapRequestHandler(classroomController.transcribeAttachment)
+)
+
 // Lấy danh sách attachments của lesson (member)
 classroomRouter.get(
     '/:id/lessons/:lessonId/attachments',
