@@ -280,7 +280,8 @@ class ClassroomService {
         }
 
         const existingMember = await memberRepo.findOne({
-            where: { classroom: { id: classroom.id }, user: { id: userId } }
+            where: { classroom: { id: classroom.id }, user: { id: userId } },
+            relations: ['user']
         })
 
         if (existingMember) {
@@ -294,6 +295,9 @@ class ClassroomService {
             await memberRepo.save(existingMember)
             if (existingMember.status === ClassroomMemberStatus.ACTIVE) {
                 await rankingService.ensureClassroomStatsRow(userId, classroom.id)
+                eventBus.emit(EVENTS.CLASSROOM_MEMBER_JOINED, { classroom, member: existingMember })
+            } else {
+                eventBus.emit(EVENTS.CLASSROOM_JOIN_REQUEST, { classroom, member: existingMember })
             }
             return classroom
         }
@@ -304,8 +308,16 @@ class ClassroomService {
             status: classroom.isPublic ? ClassroomMemberStatus.ACTIVE : ClassroomMemberStatus.PENDING
         })
         await memberRepo.save(newMember)
+        // Load user relation để listener có thể dùng
+        const memberWithUser = await memberRepo.findOne({
+            where: { id: newMember.id },
+            relations: ['user']
+        })
         if (newMember.status === ClassroomMemberStatus.ACTIVE) {
             await rankingService.ensureClassroomStatsRow(userId, classroom.id)
+            eventBus.emit(EVENTS.CLASSROOM_MEMBER_JOINED, { classroom, member: memberWithUser })
+        } else {
+            eventBus.emit(EVENTS.CLASSROOM_JOIN_REQUEST, { classroom, member: memberWithUser })
         }
         return classroom
     }
@@ -459,12 +471,25 @@ class ClassroomService {
 
     createLesson = async (classroomId: number, data: CreateLessonBodyReq) => {
         const classroomRepo = await this.db.getRepository(Classroom)
-        const classroom = await classroomRepo.findOne({ where: { id: classroomId } })
+        const classroom = await classroomRepo.findOne({ where: { id: classroomId }, relations: ['teacher'] })
         if (!classroom) throw new BadRequestError({ message: 'Classroom not found' })
 
         const lessonRepo = await this.db.getRepository(ClassroomLesson)
         const lesson = lessonRepo.create({ ...data, classroom })
         await lessonRepo.save(lesson)
+
+        // Nếu lesson được publish ngay, thông báo cho toàn bộ học sinh active
+        if (data.isPublished) {
+            const memberRepo = await this.db.getRepository(ClassroomMember)
+            const activeMembers = await memberRepo.find({
+                where: { classroom: { id: classroomId }, status: ClassroomMemberStatus.ACTIVE },
+                relations: ['user']
+            })
+            if (activeMembers.length > 0) {
+                eventBus.emit(EVENTS.CLASSROOM_NEW_LESSON, { classroom, lesson, members: activeMembers })
+            }
+        }
+
         return lesson
     }
 

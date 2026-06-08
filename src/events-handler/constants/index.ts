@@ -6,7 +6,12 @@ export const EVENTS = {
   WARNING: 'Warning',
   CONTENT_DELETED: 'Content deleted',
   WITHDRAWAL: 'Withdrawal',
+
+  // Classroom events
   CLASSROOM_APPROVED: 'Classroom approved',
+  CLASSROOM_JOIN_REQUEST: 'Classroom join request',
+  CLASSROOM_MEMBER_JOINED: 'Classroom member joined',
+  CLASSROOM_NEW_LESSON: 'Classroom new lesson',
 
   // ─── Ranking / XP-awarding events ──────────────────────────────
   FLASHCARD_LEARNED: 'Flashcard learned',
